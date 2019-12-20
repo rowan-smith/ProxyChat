@@ -24,6 +24,11 @@ public class ChatCommand extends Command {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        if (!(sender instanceof ProxiedPlayer)) {
+            sender.sendMessage(new TextComponent(ChatColor.RED + "You cannot use this command from console!"));
+            return;
+        }
+
         ProxiedPlayer proxiedPlayer = ((ProxiedPlayer) sender);
 
         if (args.length < 1) {

@@ -12,15 +12,11 @@ public class PlayerChatEvent implements Listener {
 
     @EventHandler
     public void onChat(ChatEvent e) {
-        ProxiedPlayer player = (ProxiedPlayer) e.getSender();
-
         if (e.getMessage().startsWith("/")) {
             return;
         }
 
-        if (!(e.getSender() instanceof ProxiedPlayer)) {
-            return;
-        }
+        ProxiedPlayer player = (ProxiedPlayer) e.getSender();
 
         for (ChatCommand command : BungeecordChat.commands) {
             if (command.toggledPlayers.contains(player)) {
