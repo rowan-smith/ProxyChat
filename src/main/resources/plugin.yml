@@ -1,0 +1,4 @@
+name: BungeeChat
+version: ${project.version}
+main: dev.rono.bungeechat.BungeeChat
+author: Rono
