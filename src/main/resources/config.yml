@@ -1,11 +1,11 @@
 ############################################################
 # +------------------------------------------------------+ #
-# |                     Bungee Chat                      | #
+# |                   Bungeecord Chat                    | #
 # +------------------------------------------------------+ #
 ############################################################
 
 # Prefix used in front of all messages
-prefix: "&2BungeeChat » "
+prefix: "&2BungeecordChat » "
 
 # Global override of format inside commands.
 global-layout: "&5[%chat-prefix%] %server% %player% » &d%message%"
@@ -25,7 +25,7 @@ chat-disabled-message: "&cYou cannot send a message while %chat% is ignored!"
 # Reload information
 reload:
   command: "bcreload"
-  permission: "bungeechat.reload"
+  permission: "bungeecordchat.reload"
   reload-message: "&aConfiguration reloaded!"
 
 # These are the channels you can create.
@@ -34,7 +34,7 @@ chats:
   1:
     command-name: "adminchat"
     # set permission as "" for everyone to be able to use it.
-    permission: "bungeechat.adminchat"
+    permission: "bungeecordchat.adminchat"
     alias: "AC"
     invalid-args: "&c/%alias% <message | toggle | ignore>"
     chat-prefix: "%alias%"
@@ -43,7 +43,7 @@ chats:
     ignorable: true
   2:
     command-name: "staffchat"
-    permission: "bungeechat.staffchat"
+    permission: "bungeecordchat.staffchat"
     alias: "SC"
     invalid-args: "&c/%alias% <message | toggle | ignore>"
     chat-prefix: "%alias%"

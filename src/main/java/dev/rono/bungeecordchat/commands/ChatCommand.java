@@ -1,6 +1,6 @@
-package dev.rono.bungeechat.commands;
+package dev.rono.bungeecordchat.commands;
 
-import dev.rono.bungeechat.BungeeChat;
+import dev.rono.bungeecordchat.BungeecordChat;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -46,14 +46,14 @@ public class ChatCommand extends Command {
         }
 
         TextComponent message;
-        if (BungeeChat.config.getBoolean("use-global-layout")) {
-            message = handleText(proxiedPlayer, BungeeChat.config.getString("global-layout"), args, true);
+        if (BungeecordChat.config.getBoolean("use-global-layout")) {
+            message = handleText(proxiedPlayer, BungeecordChat.config.getString("global-layout"), args, true);
         } else {
             message = handleText(proxiedPlayer, chatConfig.getString("format"), args, true);
         }
 
         if (ignoredPlayers.contains(proxiedPlayer)) {
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeeChat.config.getString("chat-disabled-message"), args));
+            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("chat-disabled-message"), args));
             return;
         }
 
@@ -68,38 +68,38 @@ public class ChatCommand extends Command {
     private void handleToggle(ProxiedPlayer proxiedPlayer, String[] args) {
         if (!toggledPlayers.contains(proxiedPlayer)) {
             toggledPlayers.add(proxiedPlayer);
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeeChat.config.getString("toggle-enable-message"), args));
+            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("toggle-enable-message"), args));
         } else {
             toggledPlayers.remove(proxiedPlayer);
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeeChat.config.getString("toggle-disable-message"), args));
+            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("toggle-disable-message"), args));
         }
     }
 
     private void handleIgnore(ProxiedPlayer proxiedPlayer, String[] args) {
         if (!ignoredPlayers.contains(proxiedPlayer)) {
             ignoredPlayers.add(proxiedPlayer);
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeeChat.config.getString("ignore-enable-message"), args));
+            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("ignore-enable-message"), args));
         } else {
             ignoredPlayers.remove(proxiedPlayer);
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeeChat.config.getString("ignore-disable-message"), args));
+            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("ignore-disable-message"), args));
         }
     }
 
     private TextComponent handleText(ProxiedPlayer proxiedPlayer, String message, String[] args, Boolean ignorePrefix) {
         if (!ignorePrefix)
-            message = BungeeChat.config.getString("prefix") + message;
+            message = BungeecordChat.config.getString("prefix") + message;
         return getTextComponent(proxiedPlayer, message, args);
     }
 
     private TextComponent handleText(ProxiedPlayer proxiedPlayer, String message, String[] args) {
-        message = BungeeChat.config.getString("prefix") + message;
+        message = BungeecordChat.config.getString("prefix") + message;
         return getTextComponent(proxiedPlayer, message, args);
     }
 
     private TextComponent getTextComponent(ProxiedPlayer proxiedPlayer, String message, String[] args) {
         message = message
                 .replace("%player%", proxiedPlayer.getName())
-                .replace("%prefix%", BungeeChat.config.getString("prefix"))
+                .replace("%prefix%", BungeecordChat.config.getString("prefix"))
                 .replace("%server%", proxiedPlayer.getServer().getInfo().getName())
                 .replace("%chat-prefix%", chatConfig.getString("chat-prefix"))
                 .replace("%message%", String.join(" ", args))

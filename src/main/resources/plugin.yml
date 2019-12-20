@@ -1,4 +1,4 @@
-name: BungeeChat
+name: BungeecordChat
 version: ${project.version}
-main: dev.rono.bungeechat.BungeeChat
+main: dev.rono.bungeecordchat.BungeecordChat
 author: Rono
