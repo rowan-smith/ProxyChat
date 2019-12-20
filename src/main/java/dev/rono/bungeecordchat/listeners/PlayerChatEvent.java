@@ -18,6 +18,10 @@ public class PlayerChatEvent implements Listener {
             return;
         }
 
+        if (!(e.getSender() instanceof ProxiedPlayer)) {
+            return;
+        }
+
         for (ChatCommand command : BungeecordChat.commands) {
             if (command.toggledPlayers.contains(player)) {
                 command.execute((CommandSender) e.getSender(), e.getMessage().split(" "));

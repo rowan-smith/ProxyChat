@@ -26,7 +26,7 @@ public final class BungeecordChat extends Plugin {
         registerConfiguration();
         registerCommands();
         registerListeners();
-        new Metrics(this);
+        new MetricsLite(this);
     }
 
     public static void registerCommands() {
