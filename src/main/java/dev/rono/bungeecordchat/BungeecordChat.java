@@ -37,7 +37,7 @@ public final class BungeecordChat extends Plugin {
 
             String commandName = chatConfig.getString("command-name");
             String commandPermission = chatConfig.getString("permission");
-            String commandAlias = chatConfig.getString("alias");
+            String commandAlias = chatConfig.getString("command-alias");
 
             ChatCommand command = new ChatCommand(chatConfig, commandName, commandPermission, commandAlias);
             instance.getProxy().getPluginManager().registerCommand(instance, command);

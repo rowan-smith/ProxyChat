@@ -8,19 +8,19 @@
 prefix: "&2BungeecordChat » "
 
 # Global override of format inside commands.
-global-layout: "&5[%chat-prefix%] %server% %player% » &d%message%"
+global-layout: "&5[%command-name%] %server% %player% » &d%message%"
 use-global-layout: false
 
 # This is what is shown when you toggle a command.
-toggle-enable-message: "&aYou have toggled &2on &a%chat%"
-toggle-disable-message: "&aYou have toggled &4off &a%chat%"
+toggle-enable-message: "&aYou have toggled &2on &a%chat-name%"
+toggle-disable-message: "&aYou have toggled &4off &a%chat-name%"
 
 # This is what is shown when is ignore messages from a chat.
-ignore-enable-message: "&cYou have ignored %chat%!"
-ignore-disable-message: "&aYou have un-ignored %chat%!"
+ignore-enable-message: "&cYou have ignored %chat-name%!"
+ignore-disable-message: "&aYou have un-ignored %chat-name%!"
 
-# This is what is shown when you try chat in a channel when ignroed.
-chat-disabled-message: "&cYou cannot send a message while %chat% is ignored!"
+# This is what is shown when you try chat in a channel when ignored.
+chat-disabled-message: "&cYou cannot send a message while %chat-name% is ignored!"
 
 # Reload information
 reload:
@@ -32,31 +32,30 @@ reload:
 # You can create as many channel as you want.
 chats:
   1:
-    command-name: "adminchat"
-    # set permission as "" for everyone to be able to use it.
-    permission: "bungeecordchat.adminchat"
-    alias: "AC"
-    invalid-args: "&c/%alias% <message | toggle | ignore>"
-    chat-prefix: "%alias%"
-    format: "&4[%chat-prefix%] [%server%] [%player%] » %message%"
+    chat-name: "Staff Chat"
+    command-name: "staffchat"
+    permission: "bungeecordchat.staff"
+    command-alias: "SC"
+    invalid-args: "&c/%command-name% <message | toggle | ignore>"
+    format: "&8[&c%command-alias%&8] [&c%server%&8] &c%player% &8» &7%message%"
     toggleable: true
     ignorable: true
   2:
-    command-name: "staffchat"
-    permission: "bungeecordchat.staffchat"
-    alias: "SC"
-    invalid-args: "&c/%alias% <message | toggle | ignore>"
-    chat-prefix: "%alias%"
-    format: "&9[%chat-prefix%] [%server%] [%player%] » %message%"
+    chat-name: "Global Chat"
+    command-name: "global"
+    permission: "bungeecordchat.global"
+    command-alias: "G"
+    invalid-args: "&c/%command-name% <message | toggle | ignore>"
+    format: "&8[&9%command-alias%&8] [&9%server%&8] &9%player% &8» &7%message%"
     toggleable: true
     ignorable: true
   3:
+    chat-name: "Shout"
     command-name: "shout"
-    permission: ""
-    alias: "shout"
-    invalid-args: "&c/%alias% <message | toggle | ignore>"
-    chat-prefix: "%alias%"
-    format: "&e[SHOUT] [%server%] [%player%] » %message%"
+    permission: "bungeecordchat.shout"
+    command-alias: "S"
+    invalid-args: "&c/%command-name% <message | toggle | ignore>"
+    format: "&8[&e%command-alias%&8] [&e%server%&8] &e%player% &8» &7%message%"
     toggleable: true
     ignorable: true
 

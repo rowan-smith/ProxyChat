@@ -106,10 +106,10 @@ public class ChatCommand extends Command {
                 .replace("%player%", proxiedPlayer.getName())
                 .replace("%prefix%", BungeecordChat.config.getString("prefix"))
                 .replace("%server%", proxiedPlayer.getServer().getInfo().getName())
-                .replace("%chat-prefix%", chatConfig.getString("chat-prefix"))
                 .replace("%message%", String.join(" ", args))
-                .replace("%alias%", chatConfig.getString("alias").toLowerCase())
-                .replace("%chat%", chatConfig.getString("command-name"));
+                .replace("%command-name%", chatConfig.getString("command-name"))
+                .replace("%command-alias%", chatConfig.getString("command-alias"))
+                .replace("%chat%", chatConfig.getString("chat-name"));
         return new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message)));
     }
 }
