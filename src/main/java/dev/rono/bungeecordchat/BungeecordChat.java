@@ -92,6 +92,6 @@ public final class BungeecordChat extends Plugin {
     public static TextComponent getConfigTextValue(String value) {
         String prefix = config.getString("prefix");
         String message = config.getString(value);
-        return new TextComponent(ChatColor.translateAlternateColorCodes('&', prefix + message));
+        return new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', prefix + message)));
     }
 }

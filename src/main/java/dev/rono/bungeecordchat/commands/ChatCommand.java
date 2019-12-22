@@ -110,6 +110,6 @@ public class ChatCommand extends Command {
                 .replace("%message%", String.join(" ", args))
                 .replace("%alias%", chatConfig.getString("alias").toLowerCase())
                 .replace("%chat%", chatConfig.getString("command-name"));
-        return new TextComponent(ChatColor.translateAlternateColorCodes('&', message));
+        return new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message)));
     }
 }
