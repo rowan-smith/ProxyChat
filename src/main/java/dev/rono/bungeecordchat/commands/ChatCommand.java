@@ -11,6 +11,7 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 import net.md_5.bungee.config.Configuration;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class ChatCommand extends Command implements TabExecutor {
 
@@ -23,7 +24,11 @@ public class ChatCommand extends Command implements TabExecutor {
     public Boolean ignorable;
     private ArrayList<ProxiedPlayer> ignoredPlayers = new ArrayList<>();
 
-    public  String chatFormat;
+    private ArrayList<ProxiedPlayer> playerOnDelay = new ArrayList<>();
+    private Integer commandDelay;
+    private String commandDelayOverridePermission;
+
+    public String chatFormat;
     public String chatName;
     public String invalidArguments;
 
@@ -49,6 +54,9 @@ public class ChatCommand extends Command implements TabExecutor {
         this.commandAlias = chatConfig.getString("command-alias");
 
         this.useColorInChatPermission = chatConfig.getString("use-color-in-chat-permission");
+
+        this.commandDelay = chatConfig.getInt("command-delay");
+        this.commandDelayOverridePermission = chatConfig.getString("command-delay-override-permission");
     }
 
     @Override
@@ -59,6 +67,11 @@ public class ChatCommand extends Command implements TabExecutor {
         }
 
         ProxiedPlayer proxiedPlayer = ((ProxiedPlayer) sender);
+
+        if (this.playerOnDelay.contains(proxiedPlayer)) {
+            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("command-cooldown-message"), args));
+            return;
+        }
 
         if (args.length < 1) {
             proxiedPlayer.sendMessage(handleText(proxiedPlayer, this.invalidArguments, args));
@@ -89,6 +102,11 @@ public class ChatCommand extends Command implements TabExecutor {
         if (ignoredPlayers.contains(proxiedPlayer)) {
             proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("chat-disabled-message"), args));
             return;
+        }
+
+        if (!proxiedPlayer.hasPermission(this.commandDelayOverridePermission)) {
+            this.playerOnDelay.add(proxiedPlayer);
+            BungeecordChat.instance.getProxy().getScheduler().schedule(BungeecordChat.instance, () -> this.playerOnDelay.remove(proxiedPlayer), this.commandDelay, TimeUnit.MILLISECONDS);
         }
 
         for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
