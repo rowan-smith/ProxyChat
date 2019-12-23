@@ -13,13 +13,37 @@ import java.util.ArrayList;
 
 public class ChatCommand extends Command {
 
-    private Configuration chatConfig;
+    public Boolean useCommandPrefix;
+    public String commandPrefix;
+
+    public Boolean toggleable;
     public ArrayList<ProxiedPlayer> toggledPlayers = new ArrayList<>();
+
+    public Boolean ignorable;
     private ArrayList<ProxiedPlayer> ignoredPlayers = new ArrayList<>();
 
-    public ChatCommand(Configuration chatConfig, String name, String permission, String... aliases) {
-        super(name, permission, aliases);
-        this.chatConfig = chatConfig;
+    public  String chatFormat;
+    public String chatName;
+    public String invalidArguments;
+
+    private String commandAlias;
+
+    public ChatCommand(Configuration chatConfig) {
+        super(chatConfig.getString("command-name"),
+                chatConfig.getString("permission"),
+                chatConfig.getString("command-alias"));
+
+        this.useCommandPrefix = chatConfig.getBoolean("use-command-prefix");
+        this.commandPrefix = chatConfig.getString("command-prefix");
+
+        this.toggleable = chatConfig.getBoolean("toggleable");
+        this.ignorable = chatConfig.getBoolean("ignorable");
+
+        this.chatName = chatConfig.getString("chat-name");
+        this.chatFormat = chatConfig.getString("format");
+        this.invalidArguments = chatConfig.getString("invalid-args");
+
+        this.commandAlias = chatConfig.getString("command-alias");
     }
 
     @Override
@@ -32,18 +56,18 @@ public class ChatCommand extends Command {
         ProxiedPlayer proxiedPlayer = ((ProxiedPlayer) sender);
 
         if (args.length < 1) {
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, chatConfig.getString("invalid-args"), args));
+            proxiedPlayer.sendMessage(handleText(proxiedPlayer, this.invalidArguments, args));
             return;
         }
 
-        if (chatConfig.getBoolean("toggleable")) {
+        if (this.toggleable) {
             if (args[0].equalsIgnoreCase("toggle")) {
                 handleToggle(proxiedPlayer, args);
                 return;
             }
         }
 
-        if (chatConfig.getBoolean("ignorable")) {
+        if (this.ignorable) {
             if (args[0].equalsIgnoreCase("ignore")) {
                 handleIgnore(proxiedPlayer, args);
                 return;
@@ -54,7 +78,7 @@ public class ChatCommand extends Command {
         if (BungeecordChat.config.getBoolean("use-global-layout")) {
             message = handleText(proxiedPlayer, BungeecordChat.config.getString("global-layout"), args, true);
         } else {
-            message = handleText(proxiedPlayer, chatConfig.getString("format"), args, true);
+            message = handleText(proxiedPlayer, this.chatFormat, args, true);
         }
 
         if (ignoredPlayers.contains(proxiedPlayer)) {
@@ -107,9 +131,9 @@ public class ChatCommand extends Command {
                 .replace("%prefix%", BungeecordChat.config.getString("prefix"))
                 .replace("%server%", proxiedPlayer.getServer().getInfo().getName())
                 .replace("%message%", String.join(" ", args))
-                .replace("%command-name%", chatConfig.getString("command-name"))
-                .replace("%command-alias%", chatConfig.getString("command-alias"))
-                .replace("%chat-name%", chatConfig.getString("chat-name"));
+                .replace("%command-name%", this.getName())
+                .replace("%command-alias%", this.commandAlias)
+                .replace("%chat-name%", this.chatName);
         return new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message)));
     }
 }

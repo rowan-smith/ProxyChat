@@ -36,15 +36,19 @@ chats:
     command-name: "staffchat"
     permission: "bungeecordchat.staff"
     command-alias: "SC"
+    command-prefix: "!"
+    use-command-prefix: false
     invalid-args: "&c/%command-name% <message | toggle | ignore>"
     format: "&8[&c%command-alias%&8] [&c%server%&8] &c%player% &8» &7%message%"
     toggleable: true
-    ignorable: true
+    ignorable: false
   2:
     chat-name: "Global Chat"
     command-name: "global"
     permission: "bungeecordchat.global"
     command-alias: "G"
+    command-prefix: "@"
+    use-command-prefix: true
     invalid-args: "&c/%command-name% <message | toggle | ignore>"
     format: "&8[&9%command-alias%&8] [&9%server%&8] &9%player% &8» &7%message%"
     toggleable: true
@@ -54,10 +58,12 @@ chats:
     command-name: "shout"
     permission: "bungeecordchat.shout"
     command-alias: "S"
+    command-prefix: "#"
+    use-command-prefix: false
     invalid-args: "&c/%command-name% <message | toggle | ignore>"
     format: "&8[&e%command-alias%&8] [&e%server%&8] &e%player% &8» &7%message%"
-    toggleable: true
-    ignorable: true
+    toggleable: false
+    ignorable: false
 
 
 version: 1
