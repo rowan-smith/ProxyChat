@@ -38,8 +38,9 @@ chats:
     command-alias: "SC"
     command-prefix: "!"
     use-command-prefix: false
-    invalid-args: "&c/%command-name% <message | toggle | ignore>"
+    invalid-args: "&c/%command-name% <message>"
     format: "&8[&c%command-alias%&8] [&c%server%&8] &c%player% &8» &7%message%"
+    use-color-in-chat-permission: "bungeecordchat.staff.color"
     toggleable: true
     ignorable: false
   2:
@@ -49,8 +50,9 @@ chats:
     command-alias: "G"
     command-prefix: "@"
     use-command-prefix: true
-    invalid-args: "&c/%command-name% <message | toggle | ignore>"
+    invalid-args: "&c/%command-name% <message> or %command-prefix%<message>"
     format: "&8[&9%command-alias%&8] [&9%server%&8] &9%player% &8» &7%message%"
+    use-color-in-chat-permission: "bungeecordchat.global.color"
     toggleable: true
     ignorable: true
   3:
@@ -60,8 +62,9 @@ chats:
     command-alias: "S"
     command-prefix: "#"
     use-command-prefix: false
-    invalid-args: "&c/%command-name% <message | toggle | ignore>"
+    invalid-args: "&c/%command-name% <message>"
     format: "&8[&e%command-alias%&8] [&e%server%&8] &e%player% &8» &7%message%"
+    use-color-in-chat-permission: "bungeecordchat.shout.color"
     toggleable: false
     ignorable: false
 

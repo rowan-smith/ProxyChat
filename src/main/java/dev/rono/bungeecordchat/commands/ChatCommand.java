@@ -7,11 +7,12 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
+import net.md_5.bungee.api.plugin.TabExecutor;
 import net.md_5.bungee.config.Configuration;
 
 import java.util.ArrayList;
 
-public class ChatCommand extends Command {
+public class ChatCommand extends Command implements TabExecutor {
 
     public Boolean useCommandPrefix;
     public String commandPrefix;
@@ -27,6 +28,8 @@ public class ChatCommand extends Command {
     public String invalidArguments;
 
     private String commandAlias;
+
+    private String useColorInChatPermission;
 
     public ChatCommand(Configuration chatConfig) {
         super(chatConfig.getString("command-name"),
@@ -44,6 +47,8 @@ public class ChatCommand extends Command {
         this.invalidArguments = chatConfig.getString("invalid-args");
 
         this.commandAlias = chatConfig.getString("command-alias");
+
+        this.useColorInChatPermission = chatConfig.getString("use-color-in-chat-permission");
     }
 
     @Override
@@ -130,10 +135,33 @@ public class ChatCommand extends Command {
                 .replace("%player%", proxiedPlayer.getName())
                 .replace("%prefix%", BungeecordChat.config.getString("prefix"))
                 .replace("%server%", proxiedPlayer.getServer().getInfo().getName())
-                .replace("%message%", String.join(" ", args))
                 .replace("%command-name%", this.getName())
                 .replace("%command-alias%", this.commandAlias)
+                .replace("%command-prefix%", this.commandPrefix)
                 .replace("%chat-name%", this.chatName);
+
+        if (!proxiedPlayer.hasPermission(this.useColorInChatPermission))
+            message = message.replace("%message%", ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', String.join(" ", args))));
+        else
+            message = message.replace("%message%", String.join(" ", args));
+
         return new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message)));
+    }
+
+    @Override
+    public Iterable<String> onTabComplete(CommandSender commandSender, String[] strings) {
+        ArrayList<String> tabComplete = new ArrayList<>();
+
+        if (strings.length == 1) {
+            if (toggleable) {
+                tabComplete.add("toggle");
+            }
+
+            if (ignorable) {
+                tabComplete.add("ignore");
+            }
+        }
+
+        return tabComplete;
     }
 }
