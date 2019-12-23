@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public final class BungeecordChat extends Plugin {
 
-    public static BungeecordChat instance;
+    private static BungeecordChat instance;
     public static Configuration config;
     public static ArrayList<ChatCommand> commands = new ArrayList<>();
 
