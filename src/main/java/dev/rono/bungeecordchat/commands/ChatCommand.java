@@ -1,6 +1,7 @@
 package dev.rono.bungeecordchat.commands;
 
 import dev.rono.bungeecordchat.BungeecordChat;
+import dev.rono.bungeecordchat.utils.ToggleUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -18,13 +19,10 @@ public class ChatCommand extends Command implements TabExecutor {
     public Boolean useCommandPrefix;
     public String commandPrefix;
 
-    public Boolean toggleable;
-    public ArrayList<ProxiedPlayer> toggledPlayers = new ArrayList<>();
+    public Boolean isToggleable;
 
-    public Boolean ignorable;
-    private ArrayList<ProxiedPlayer> ignoredPlayers = new ArrayList<>();
+    public Boolean isIgnorable;
 
-    private ArrayList<ProxiedPlayer> playerOnDelay = new ArrayList<>();
     private Integer commandDelay;
     private String commandDelayOverridePermission;
 
@@ -36,6 +34,8 @@ public class ChatCommand extends Command implements TabExecutor {
 
     private String useColorInChatPermission;
 
+    public ToggleUtils toggleUtils = new ToggleUtils();
+
     public ChatCommand(Configuration chatConfig) {
         super(chatConfig.getString("command-name"),
                 chatConfig.getString("permission"),
@@ -44,8 +44,8 @@ public class ChatCommand extends Command implements TabExecutor {
         this.useCommandPrefix = chatConfig.getBoolean("use-command-prefix");
         this.commandPrefix = chatConfig.getString("command-prefix");
 
-        this.toggleable = chatConfig.getBoolean("toggleable");
-        this.ignorable = chatConfig.getBoolean("ignorable");
+        this.isToggleable = chatConfig.getBoolean("toggleable");
+        this.isIgnorable = chatConfig.getBoolean("ignorable");
 
         this.chatName = chatConfig.getString("chat-name");
         this.chatFormat = chatConfig.getString("format");
@@ -68,30 +68,35 @@ public class ChatCommand extends Command implements TabExecutor {
 
         ProxiedPlayer proxiedPlayer = ((ProxiedPlayer) sender);
 
-        if (this.playerOnDelay.contains(proxiedPlayer)) {
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("command-cooldown-message"), args));
-            return;
-        }
-
         if (args.length < 1) {
             proxiedPlayer.sendMessage(handleText(proxiedPlayer, this.invalidArguments, args));
             return;
         }
 
-        if (this.toggleable) {
+        if (this.isToggleable)
             if (args[0].equalsIgnoreCase("toggle")) {
-                handleToggle(proxiedPlayer, args);
+                if (this.toggleUtils.toggleChat(proxiedPlayer))
+                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("toggle-enable-message"), args));
+                else
+                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("toggle-disable-message"), args));
                 return;
             }
-        }
 
-        if (this.ignorable) {
+        if (this.isIgnorable)
             if (args[0].equalsIgnoreCase("ignore")) {
-                handleIgnore(proxiedPlayer, args);
+                if (this.toggleUtils.toggleIgnore(proxiedPlayer))
+                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("ignore-enable-message"), args));
+                else
+                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("ignore-disable-message"), args));
                 return;
             }
+
+        if (this.toggleUtils.isDelayed(proxiedPlayer)) {
+            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("command-cooldown-message"), args));
+            return;
         }
 
+        // TODO REMOVE GLOBAL CHAT
         TextComponent message;
         if (BungeecordChat.config.getBoolean("use-global-layout")) {
             message = handleText(proxiedPlayer, BungeecordChat.config.getString("global-layout"), args, true);
@@ -99,41 +104,20 @@ public class ChatCommand extends Command implements TabExecutor {
             message = handleText(proxiedPlayer, this.chatFormat, args, true);
         }
 
-        if (ignoredPlayers.contains(proxiedPlayer)) {
+        if (this.toggleUtils.isIgnored(proxiedPlayer)) {
             proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("chat-disabled-message"), args));
             return;
         }
 
         if (!proxiedPlayer.hasPermission(this.commandDelayOverridePermission)) {
-            this.playerOnDelay.add(proxiedPlayer);
-            BungeecordChat.instance.getProxy().getScheduler().schedule(BungeecordChat.instance, () -> this.playerOnDelay.remove(proxiedPlayer), this.commandDelay, TimeUnit.MILLISECONDS);
+            this.toggleUtils.toggleDelay(proxiedPlayer);
+            BungeecordChat.instance.getProxy().getScheduler().schedule(BungeecordChat.instance, () -> this.toggleUtils.toggleDelay(proxiedPlayer), this.commandDelay, TimeUnit.MILLISECONDS);
         }
 
         for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
-            if (player.hasPermission(getPermission()) || getPermission().isEmpty()) {
-                if (!ignoredPlayers.contains(player))
+            if (player.hasPermission(getPermission()) || getPermission().isEmpty())
+                if (!this.toggleUtils.isIgnored(player))
                     player.sendMessage(message);
-            }
-        }
-    }
-
-    private void handleToggle(ProxiedPlayer proxiedPlayer, String[] args) {
-        if (!toggledPlayers.contains(proxiedPlayer)) {
-            toggledPlayers.add(proxiedPlayer);
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("toggle-enable-message"), args));
-        } else {
-            toggledPlayers.remove(proxiedPlayer);
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("toggle-disable-message"), args));
-        }
-    }
-
-    private void handleIgnore(ProxiedPlayer proxiedPlayer, String[] args) {
-        if (!ignoredPlayers.contains(proxiedPlayer)) {
-            ignoredPlayers.add(proxiedPlayer);
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("ignore-enable-message"), args));
-        } else {
-            ignoredPlayers.remove(proxiedPlayer);
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("ignore-disable-message"), args));
         }
     }
 
@@ -171,11 +155,11 @@ public class ChatCommand extends Command implements TabExecutor {
         ArrayList<String> tabComplete = new ArrayList<>();
 
         if (strings.length == 1) {
-            if (toggleable) {
+            if (isToggleable) {
                 tabComplete.add("toggle");
             }
 
-            if (ignorable) {
+            if (isIgnorable) {
                 tabComplete.add("ignore");
             }
         }
