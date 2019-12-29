@@ -31,8 +31,12 @@ reload:
   permission: "bungeecordchat.reload"
   reload-message: "&aConfiguration reloaded!"
 
-# These are the channels you can create.
-# You can create as many channel as you want.
+
+############################################################
+# +------------------------------------------------------+ #
+# |                        Chats                         | #
+# +------------------------------------------------------+ #
+############################################################
 chats:
   1:
     # This is the name of the chat, used in messages.
