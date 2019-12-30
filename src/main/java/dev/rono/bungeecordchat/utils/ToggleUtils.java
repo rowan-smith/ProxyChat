@@ -1,7 +1,8 @@
 package dev.rono.bungeecordchat.utils;
 
-import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -10,45 +11,53 @@ public class ToggleUtils {
 
     private Set<UUID> chatIgnored = new HashSet<>();
     private Set<UUID> chatToggled = new HashSet<>();
-    private Set<UUID> chatDelayed = new HashSet<>();
+    private HashMap<UUID, ScheduledTask> delay = new HashMap<>();
 
-    public Boolean toggleIgnore(ProxiedPlayer player) {
+    public Boolean toggleIgnore(UUID player) {
         if (this.isIgnored(player)) {
-            this.chatIgnored.remove(player.getUniqueId());
+            this.chatIgnored.remove(player);
             return false;
         } else {
-            this.chatIgnored.add(player.getUniqueId());
+            this.chatIgnored.add(player);
             return true;
         }
     }
 
-    public Boolean toggleChat(ProxiedPlayer player) {
+    public Boolean toggleChat(UUID player) {
         if (this.isToggled(player)) {
-            this.chatToggled.remove(player.getUniqueId());
+            this.chatToggled.remove(player);
             return false;
         } else {
-            this.chatToggled.add(player.getUniqueId());
+            this.chatToggled.add(player);
             return true;
         }
     }
 
-    public void toggleDelay(ProxiedPlayer player) {
-        if (this.isDelayed(player)) {
-            this.chatDelayed.remove(player.getUniqueId());
-        } else {
-            this.chatDelayed.add(player.getUniqueId());
+    public void toggleDelayOn(UUID player, ScheduledTask task) {
+        if (!this.isDelayed(player)) {
+            this.delay.put(player, task);
         }
     }
 
-    public Boolean isIgnored(ProxiedPlayer player) {
-        return this.chatIgnored.contains(player.getUniqueId());
+    public void toggleDelayOff(UUID player) {
+        if (this.isDelayed(player)) {
+            this.delay.remove(player);
+        }
     }
 
-    public Boolean isToggled(ProxiedPlayer player) {
-        return this.chatToggled.contains(player.getUniqueId());
+    public Boolean isIgnored(UUID player) {
+        return this.chatIgnored.contains(player);
     }
 
-    public Boolean isDelayed(ProxiedPlayer player) {
-        return this.chatDelayed.contains(player.getUniqueId());
+    public Boolean isToggled(UUID player) {
+        return this.chatToggled.contains(player);
+    }
+
+    public Boolean isDelayed(UUID player) {
+        return delay.containsKey(player);
+    }
+
+    public CooldownRunnable getDelayedTask(UUID player) {
+        return (CooldownRunnable) this.delay.get(player).getTask();
     }
 }

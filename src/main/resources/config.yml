@@ -19,7 +19,7 @@ ignore-disable-message: "&aYou have un-ignored %chat-name%!"
 chat-disabled-message: "&cYou cannot send a message while %chat-name% is ignored!"
 
 # This is what message is shown when you use a command too quickly.
-command-cooldown-message: "&cThis command is on cooldown!"
+command-cooldown-message: "&cChat on cooldown for &e%chat-cooldown% &csecond(s)!"
 
 # Reload information
 reload:

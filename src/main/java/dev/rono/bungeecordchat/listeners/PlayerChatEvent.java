@@ -24,7 +24,7 @@ public class PlayerChatEvent implements Listener {
                 command.execute((CommandSender) e.getSender(), message.split(" "));
                 e.setCancelled(true);
 
-            } else if (command.toggleUtils.isToggled(player)) {
+            } else if (command.toggleUtils.isToggled(player.getUniqueId())) {
                 command.execute((CommandSender) e.getSender(), e.getMessage().split(" "));
                 e.setCancelled(true);
             }

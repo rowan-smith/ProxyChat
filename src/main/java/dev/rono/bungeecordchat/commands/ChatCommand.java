@@ -1,6 +1,7 @@
 package dev.rono.bungeecordchat.commands;
 
 import dev.rono.bungeecordchat.BungeecordChat;
+import dev.rono.bungeecordchat.utils.CooldownRunnable;
 import dev.rono.bungeecordchat.utils.ToggleUtils;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
@@ -9,6 +10,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.config.Configuration;
 
 import java.util.HashSet;
@@ -76,7 +78,7 @@ public class ChatCommand extends Command implements TabExecutor {
 
         if (this.isToggleable)
             if (args[0].equalsIgnoreCase("toggle")) {
-                if (this.toggleUtils.toggleChat(proxiedPlayer))
+                if (this.toggleUtils.toggleChat(proxiedPlayer.getUniqueId()))
                     proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("toggle-enable-message"), args));
                 else
                     proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("toggle-disable-message"), args));
@@ -85,33 +87,35 @@ public class ChatCommand extends Command implements TabExecutor {
 
         if (this.isIgnorable)
             if (args[0].equalsIgnoreCase("ignore")) {
-                if (this.toggleUtils.toggleIgnore(proxiedPlayer))
+                if (this.toggleUtils.toggleIgnore(proxiedPlayer.getUniqueId()))
                     proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("ignore-enable-message"), args));
                 else
                     proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("ignore-disable-message"), args));
                 return;
             }
 
-        if (this.toggleUtils.isDelayed(proxiedPlayer)) {
+        if (this.toggleUtils.isDelayed(proxiedPlayer.getUniqueId())) {
             proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("command-cooldown-message"), args));
             return;
         }
 
         TextComponent message = handleText(proxiedPlayer, this.chatFormat, args, true);
 
-        if (this.toggleUtils.isIgnored(proxiedPlayer)) {
+        if (this.toggleUtils.isIgnored(proxiedPlayer.getUniqueId())) {
             proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("chat-disabled-message"), args));
             return;
         }
 
         if (!proxiedPlayer.hasPermission(this.commandDelayOverridePermission)) {
-            this.toggleUtils.toggleDelay(proxiedPlayer);
-            BungeecordChat.instance.getProxy().getScheduler().schedule(BungeecordChat.instance, () -> this.toggleUtils.toggleDelay(proxiedPlayer), this.commandDelay, TimeUnit.MILLISECONDS);
+            ScheduledTask task = BungeecordChat.instance.getProxy().getScheduler().schedule(BungeecordChat.instance, (
+                    new CooldownRunnable(proxiedPlayer, this.toggleUtils, Long.valueOf(this.commandDelay))
+                    ), this.commandDelay, TimeUnit.MILLISECONDS);
+            this.toggleUtils.toggleDelayOn(proxiedPlayer.getUniqueId(), task);
         }
 
         for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
             if (player.hasPermission(getPermission()) || getPermission().isEmpty())
-                if (!this.toggleUtils.isIgnored(player))
+                if (!this.toggleUtils.isIgnored(player.getUniqueId()))
                     player.sendMessage(message);
         }
     }
@@ -136,6 +140,10 @@ public class ChatCommand extends Command implements TabExecutor {
                 .replace("%command-alias%", this.commandAlias)
                 .replace("%command-prefix%", this.commandPrefix)
                 .replace("%chat-name%", this.chatName);
+
+        if (this.toggleUtils.isDelayed(proxiedPlayer.getUniqueId())) {
+            message = message.replace("%chat-cooldown%", this.toggleUtils.getDelayedTask(proxiedPlayer.getUniqueId()).getTime());
+        }
 
         if (!proxiedPlayer.hasPermission(this.useColorInChatPermission))
             message = message.replace("%message%", ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', String.join(" ", args))));
