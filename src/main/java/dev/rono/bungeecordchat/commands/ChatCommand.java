@@ -11,7 +11,8 @@ import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 import net.md_5.bungee.config.Configuration;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class ChatCommand extends Command implements TabExecutor {
@@ -96,13 +97,7 @@ public class ChatCommand extends Command implements TabExecutor {
             return;
         }
 
-        // TODO REMOVE GLOBAL CHAT
-        TextComponent message;
-        if (BungeecordChat.config.getBoolean("use-global-layout")) {
-            message = handleText(proxiedPlayer, BungeecordChat.config.getString("global-layout"), args, true);
-        } else {
-            message = handleText(proxiedPlayer, this.chatFormat, args, true);
-        }
+        TextComponent message = handleText(proxiedPlayer, this.chatFormat, args, true);
 
         if (this.toggleUtils.isIgnored(proxiedPlayer)) {
             proxiedPlayer.sendMessage(handleText(proxiedPlayer, BungeecordChat.config.getString("chat-disabled-message"), args));
@@ -152,7 +147,7 @@ public class ChatCommand extends Command implements TabExecutor {
 
     @Override
     public Iterable<String> onTabComplete(CommandSender commandSender, String[] strings) {
-        ArrayList<String> tabComplete = new ArrayList<>();
+        Set<String> tabComplete = new HashSet<>();
 
         if (strings.length == 1) {
             if (isToggleable) {

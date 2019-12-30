@@ -7,10 +7,6 @@
 # Prefix used in front of all messages
 prefix: "&2BungeecordChat » "
 
-# Global override of format inside commands.
-global-layout: "&5[%command-name%] %server% %player% » &d%message%"
-use-global-layout: false
-
 # This is what is shown when you toggle a command.
 toggle-enable-message: "&aYou have toggled &2on &a%chat-name%"
 toggle-disable-message: "&aYou have toggled &4off &a%chat-name%"
