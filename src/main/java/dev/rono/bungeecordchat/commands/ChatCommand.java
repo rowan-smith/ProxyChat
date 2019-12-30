@@ -33,6 +33,10 @@ public class ChatCommand extends Command implements TabExecutor {
     public String chatName;
     public String invalidArguments;
 
+    public String consoleChatFormat;
+    public Boolean isConsoleAllowed;
+    private Boolean isLoggedToConsole;
+
     private String commandAlias;
 
     private String useColorInChatPermission;
@@ -60,12 +64,28 @@ public class ChatCommand extends Command implements TabExecutor {
 
         this.commandDelay = chatConfig.getInt("command-delay");
         this.commandDelayOverridePermission = chatConfig.getString("command-delay-override-permission");
+
+        this.consoleChatFormat = chatConfig.getString("console-format");
+        this.isConsoleAllowed = chatConfig.getBoolean("console-chat-allowed");
+        this.isLoggedToConsole = chatConfig.getBoolean("log-chat-to-console");
     }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof ProxiedPlayer)) {
-            sender.sendMessage(new TextComponent(ChatColor.RED + "You cannot use this command from console!"));
+            if (this.isConsoleAllowed) {
+                String message = this.consoleChatFormat;
+                message = message
+                        .replace("%message%", String.join(" ", args))
+                        .replace("%player%", sender.getName())
+                        .replace("%command-name%", this.getName())
+                        .replace("%command-alias%", this.commandAlias)
+                        .replace("%command-prefix%", this.commandPrefix)
+                        .replace("%chat-name%", this.chatName);
+                sendAllMessage(new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message))));
+            } else {
+                sender.sendMessage(new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', BungeecordChat.config.getString("console-disabled-message")))));
+            }
             return;
         }
 
@@ -113,10 +133,18 @@ public class ChatCommand extends Command implements TabExecutor {
             this.toggleUtils.toggleDelayOn(proxiedPlayer.getUniqueId(), task);
         }
 
+        sendAllMessage(message);
+    }
+
+    private void sendAllMessage(TextComponent message) {
         for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
             if (player.hasPermission(getPermission()) || getPermission().isEmpty())
-                if (!this.toggleUtils.isIgnored(player.getUniqueId()))
+                if (!this.toggleUtils.isIgnored(player.getUniqueId())) {
                     player.sendMessage(message);
+                }
+        }
+        if (this.isLoggedToConsole) {
+            BungeecordChat.instance.getLogger().info(message.toLegacyText());
         }
     }
 
