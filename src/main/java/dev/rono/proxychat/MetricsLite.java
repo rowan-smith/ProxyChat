@@ -1,4 +1,4 @@
-package dev.rono.bungeecordchat;
+package dev.rono.proxychat;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

@@ -1,7 +1,7 @@
-package dev.rono.bungeecordchat.listeners;
+package dev.rono.proxychat.listeners;
 
-import dev.rono.bungeecordchat.BungeecordChat;
-import dev.rono.bungeecordchat.commands.ChatCommand;
+import dev.rono.proxychat.ProxyChat;
+import dev.rono.proxychat.commands.ChatCommand;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
@@ -16,7 +16,7 @@ public class PlayerChatEvent implements Listener {
             return;
         }
 
-        for (ChatCommand command : BungeecordChat.commands) {
+        for (ChatCommand command : ProxyChat.commands) {
             ProxiedPlayer player = (ProxiedPlayer) e.getSender();
 
             if (command.useCommandPrefix && e.getMessage().startsWith(command.commandPrefix)) {

@@ -1,4 +1,4 @@
-package dev.rono.bungeecordchat.utils;
+package dev.rono.proxychat.utils;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 

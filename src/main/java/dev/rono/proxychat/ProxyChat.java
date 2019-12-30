@@ -1,9 +1,9 @@
-package dev.rono.bungeecordchat;
+package dev.rono.proxychat;
 
 import com.google.common.io.ByteStreams;
-import dev.rono.bungeecordchat.commands.ChatCommand;
-import dev.rono.bungeecordchat.commands.ReloadCommand;
-import dev.rono.bungeecordchat.listeners.PlayerChatEvent;
+import dev.rono.proxychat.commands.ChatCommand;
+import dev.rono.proxychat.commands.ProxyChatCommand;
+import dev.rono.proxychat.listeners.PlayerChatEvent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -14,9 +14,9 @@ import net.md_5.bungee.config.YamlConfiguration;
 import java.io.*;
 import java.util.ArrayList;
 
-public final class BungeecordChat extends Plugin {
+public final class ProxyChat extends Plugin {
 
-    public static BungeecordChat instance;
+    public static ProxyChat instance;
     public static Configuration config;
     public static ArrayList<ChatCommand> commands = new ArrayList<>();
 
@@ -41,7 +41,7 @@ public final class BungeecordChat extends Plugin {
         }
 
         instance.getLogger().info(commands.size() + " commands loaded.");
-        instance.getProxy().getPluginManager().registerCommand(instance, new ReloadCommand());
+        instance.getProxy().getPluginManager().registerCommand(instance, new ProxyChatCommand());
 
     }
 

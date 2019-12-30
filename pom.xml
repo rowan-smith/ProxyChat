@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.rono</groupId>
-    <artifactId>BungeecordChat</artifactId>
+    <artifactId>ProxyChat</artifactId>
     <version>1.4.3</version>
     <packaging>jar</packaging>
 
-    <name>BungeecordChat</name>
+    <name>ProxyChat</name>
 
     <properties>
         <java.version>1.8</java.version>

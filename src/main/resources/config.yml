@@ -1,11 +1,11 @@
 ############################################################
 # +------------------------------------------------------+ #
-# |                   Bungeecord Chat                    | #
+# |                      Proxy Chat                      | #
 # +------------------------------------------------------+ #
 ############################################################
 
 # Prefix used in front of all messages
-prefix: "&2BungeecordChat » "
+prefix: "&2ProxyChat » "
 
 # This is what is shown when you toggle a command.
 toggle-enable-message: "&aYou have toggled &2on &a%chat-name%"
@@ -25,10 +25,8 @@ command-cooldown-message: "&cChat on cooldown for &e%chat-cooldown% &csecond(s)!
 console-disabled-message: "&cYou have to be a player to use this command!"
 
 # Reload information
-reload:
-  command: "bcreload"
-  permission: "bungeecordchat.reload"
-  reload-message: "&aConfiguration reloaded!"
+reload-permission: "proxychat.reload"
+reload-message: "&aConfiguration reloaded!"
 
 
 ############################################################
@@ -45,7 +43,7 @@ chats:
     command-name: "staffchat"
 
     # You need this permission to use the command above.
-    permission: "bungeecordchat.staff"
+    permission: "proxychat.staff"
 
     # You can also use this command.
     command-alias: "SC"
@@ -62,7 +60,7 @@ chats:
     comand-delay: 0
 
     # This overrides the command delay.
-    command-delay-override-permission: "bungeecordchat.staff.override"
+    command-delay-override-permission: "proxychat.staff.override"
 
     # This shows when you enter command wrong.
     invalid-args: "&c/%command-name% <message>"
@@ -75,7 +73,7 @@ chats:
     console-chat-allowed: true
 
     # Add this permission so users can use color codes in messages.
-    use-color-in-chat-permission: "bungeecordchat.staff.color"
+    use-color-in-chat-permission: "proxychat.staff.color"
 
     # Toggle the chat so you don't need commands!
     toggleable: true
@@ -85,37 +83,36 @@ chats:
   2:
     chat-name: "Global Chat"
     command-name: "global"
-    permission: "bungeecordchat.global"
+    permission: "proxychat.global"
     command-alias: "G"
     command-prefix: "@"
     log-chat-to-console: false
     command-delay: 5000
-    command-delay-override-permission: "bungeecordchat.global.override"
+    command-delay-override-permission: "proxychat.global.override"
     use-command-prefix: true
     invalid-args: "&c/%command-name% <message> or %command-prefix%<message>"
     format: "&8[&9%command-alias%&8] [&9%server%&8] &9%player% &8» &7%message%"
     console-format: "&8[&9%command-alias%&8] &9%player% &8» &7%message%"
     console-chat-allowed: false
-    use-color-in-chat-permission: "bungeecordchat.global.color"
+    use-color-in-chat-permission: "proxychat.global.color"
     toggleable: true
     ignorable: true
   3:
     chat-name: "Shout"
     command-name: "shout"
-    permission: "bungeecordchat.shout"
+    permission: "proxychat.shout"
     command-alias: "S"
     command-prefix: "#"
     log-chat-to-console: false
     command-delay: 10000
-    command-delay-override-permission: "bungeecordchat.shout.override"
+    command-delay-override-permission: "proxychat.shout.override"
     use-command-prefix: false
     invalid-args: "&c/%command-name% <message>"
     format: "&8[&e%command-alias%&8] [&e%server%&8] &e%player% &8» &7%message%"
     console-format: "&8[&e%command-alias%&8] &e%player% &8» &7%message%"
     console-chat-allowed: false
-    use-color-in-chat-permission: "bungeecordchat.shout.color"
+    use-color-in-chat-permission: "proxychat.shout.color"
     toggleable: false
     ignorable: false
-
 
 version: 1

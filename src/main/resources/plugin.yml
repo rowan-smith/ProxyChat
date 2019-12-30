@@ -1,4 +1,4 @@
-name: BungeecordChat
+name: ProxyChat
 version: ${project.version}
-main: dev.rono.bungeecordchat.BungeecordChat
+main: dev.rono.proxychat.ProxyChat
 author: Rono
