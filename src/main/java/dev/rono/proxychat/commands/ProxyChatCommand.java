@@ -1,6 +1,7 @@
 package dev.rono.proxychat.commands;
 
 import dev.rono.proxychat.ProxyChat;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
@@ -34,7 +35,7 @@ public class ProxyChatCommand extends Command implements TabExecutor {
         }
 
         if (args[0].equalsIgnoreCase("version")) {
-            sender.sendMessage(new TextComponent("Made by Rono"));
+            sender.sendMessage(new TextComponent(ChatColor.DARK_BLUE + "Made by Rono @ https://www.spigotmc.org/resources/73583/"));
         }
     }
 
