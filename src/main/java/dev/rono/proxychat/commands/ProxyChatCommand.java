@@ -43,7 +43,7 @@ public class ProxyChatCommand extends Command implements TabExecutor {
 
         Set<String> tabCommands = new HashSet<>();
 
-        if (commandSender.hasPermission(ProxyChat.config.getString("reload.permission"))) {
+        if (commandSender.hasPermission(ProxyChat.config.getString("reload-permission"))) {
             tabCommands.add("reload");
         }
 
