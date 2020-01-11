@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public final class ProxyChat extends Plugin {
 
-    public static ProxyChat instance;
+    private static ProxyChat instance;
     public static Configuration config;
     public static ArrayList<ChatCommand> commands = new ArrayList<>();
 
@@ -35,7 +35,7 @@ public final class ProxyChat extends Plugin {
         for (String key : chatList.getKeys()) {
             Configuration chatConfig = config.getSection("chats." + key);
 
-            ChatCommand command = new ChatCommand(chatConfig);
+            ChatCommand command = new ChatCommand(chatConfig, instance);
             instance.getProxy().getPluginManager().registerCommand(instance, command);
             commands.add(command);
         }

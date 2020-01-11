@@ -19,6 +19,8 @@ import java.util.concurrent.TimeUnit;
 
 public class ChatCommand extends Command implements TabExecutor {
 
+    private ProxyChat instance;
+
     public Boolean useCommandPrefix;
     public String commandPrefix;
 
@@ -43,7 +45,7 @@ public class ChatCommand extends Command implements TabExecutor {
 
     public ToggleUtils toggleUtils = new ToggleUtils();
 
-    public ChatCommand(Configuration chatConfig) {
+    public ChatCommand(Configuration chatConfig, ProxyChat plugin) {
         super(chatConfig.getString("command-name"),
                 chatConfig.getString("permission"),
                 chatConfig.getString("command-alias"));
@@ -68,6 +70,8 @@ public class ChatCommand extends Command implements TabExecutor {
         this.consoleChatFormat = chatConfig.getString("console-format");
         this.isConsoleAllowed = chatConfig.getBoolean("console-chat-allowed");
         this.isLoggedToConsole = chatConfig.getBoolean("log-chat-to-console");
+
+        this.instance = plugin;
     }
 
     @Override
@@ -127,7 +131,7 @@ public class ChatCommand extends Command implements TabExecutor {
         }
 
         if (!proxiedPlayer.hasPermission(this.commandDelayOverridePermission)) {
-            ScheduledTask task = ProxyChat.instance.getProxy().getScheduler().schedule(ProxyChat.instance, (
+            ScheduledTask task = this.instance.getProxy().getScheduler().schedule(this.instance, (
                     new CooldownRunnable(proxiedPlayer, this.toggleUtils, Long.valueOf(this.commandDelay))
                     ), this.commandDelay, TimeUnit.MILLISECONDS);
             this.toggleUtils.toggleDelayOn(proxiedPlayer.getUniqueId(), task);
@@ -144,7 +148,7 @@ public class ChatCommand extends Command implements TabExecutor {
                 }
         }
         if (this.isLoggedToConsole) {
-            ProxyChat.instance.getLogger().info(message.toLegacyText());
+            this.instance.getLogger().info(message.toLegacyText());
         }
     }
 
