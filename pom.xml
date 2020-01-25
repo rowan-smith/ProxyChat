@@ -40,7 +40,8 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-<!--                            <outputDirectory>C:\Users\rowan\Desktop\Server\Proxy\plugins</outputDirectory>-->
+                            <outputDirectory>../artifacts</outputDirectory>
+                            <finalName>${artifactId}-${version}</finalName>
                         </configuration>
                     </execution>
                 </executions>
