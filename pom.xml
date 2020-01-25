@@ -6,7 +6,7 @@
 
     <groupId>dev.rono</groupId>
     <artifactId>ProxyChat</artifactId>
-    <version>1.4.4</version>
+    <version>1.4.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>ProxyChat</name>
@@ -41,7 +41,7 @@
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <outputDirectory>../artifacts</outputDirectory>
-                            <finalName>${artifactId}-${version}</finalName>
+                            <finalName>${name}-${version}</finalName>
                         </configuration>
                     </execution>
                 </executions>
