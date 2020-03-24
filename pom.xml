@@ -40,8 +40,7 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <outputDirectory>../artifacts</outputDirectory>
-                            <finalName>${name}-${version}</finalName>
+                            <finalName>${project.name}</finalName>
                         </configuration>
                     </execution>
                 </executions>
