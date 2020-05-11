@@ -19,7 +19,7 @@ public class PlayerChatEvent implements Listener {
         for (ChatCommand command : ProxyChat.commands) {
             ProxiedPlayer player = (ProxiedPlayer) e.getSender();
 
-            if (command.useCommandPrefix && e.getMessage().startsWith(command.commandPrefix)) {
+            if (command.useCommandPrefix && e.getMessage().startsWith(command.commandPrefix) && player.hasPermission(command.getPermission())) {
                 String message = (String) e.getMessage().subSequence(1, e.getMessage().length());
                 command.execute((CommandSender) e.getSender(), message.split(" "));
                 e.setCancelled(true);
