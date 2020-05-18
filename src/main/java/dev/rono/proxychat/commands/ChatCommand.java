@@ -27,6 +27,7 @@ public class ChatCommand extends Command implements TabExecutor {
     public Boolean isToggleable;
 
     public Boolean isIgnorable;
+    public Boolean isLocal;
 
     private Integer commandDelay;
     private String commandDelayOverridePermission;
@@ -55,6 +56,7 @@ public class ChatCommand extends Command implements TabExecutor {
 
         this.isToggleable = chatConfig.getBoolean("toggleable");
         this.isIgnorable = chatConfig.getBoolean("ignorable");
+        this.isLocal = chatConfig.getBoolean("local");
 
         this.chatName = chatConfig.getString("chat-name");
         this.chatFormat = chatConfig.getString("format");
@@ -137,7 +139,10 @@ public class ChatCommand extends Command implements TabExecutor {
             this.toggleUtils.toggleDelayOn(proxiedPlayer.getUniqueId(), task);
         }
 
-        sendAllMessage(message);
+        if (this.isLocal)
+        	sendLocalMessage(proxiedPlayer, message);
+        else
+        	sendAllMessage(message);
     }
 
     private void sendAllMessage(TextComponent message) {
@@ -150,6 +155,16 @@ public class ChatCommand extends Command implements TabExecutor {
         if (this.isLoggedToConsole) {
             this.instance.getLogger().info(message.toLegacyText());
         }
+    }
+    
+    private void sendLocalMessage(ProxiedPlayer p, TextComponent message) {
+    	for (ProxiedPlayer player : p.getServer().getInfo().getPlayers())
+    		if (player.hasPermission(getPermission()) || getPermission().isEmpty())
+    			if (!this.toggleUtils.isIgnored(player.getUniqueId()))
+    				player.sendMessage(message);
+    	
+    	if (this.isLoggedToConsole)
+    		this.instance.getLogger().info(message.toLegacyText());
     }
 
     private TextComponent handleText(ProxiedPlayer proxiedPlayer, String message, String[] args, Boolean ignorePrefix) {
