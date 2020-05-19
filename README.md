@@ -36,6 +36,10 @@ Global Chat
 Shout:
 - Commands: /shout & /s
 - Permissions: proxychat.shout
+
+Local Chat
+- Commands: /local & /l
+- Permission: proxychat.local
 ```
 
 ### Resources
@@ -138,6 +142,9 @@ chats:
 
     # Ignore the chat so you can't send or receive messages!
     ignorable: false
+    
+    # Is this a local server chat
+    local: false
   2:
     chat-name: "Global Chat"
     command-name: "global"
@@ -155,6 +162,7 @@ chats:
     use-color-in-chat-permission: "proxychat.global.color"
     toggleable: true
     ignorable: true
+    local: false
   3:
     chat-name: "Shout"
     command-name: "shout"
@@ -172,6 +180,25 @@ chats:
     use-color-in-chat-permission: "proxychat.shout.color"
     toggleable: false
     ignorable: false
+    local: false
+  4:
+    chat-name: "Local"
+    command-name: "local"
+    permission: "proxychat.local"
+    command-alias: "L"
+    command-prefix: "$"
+    log-chat-to-console: false
+    command-delay: 0
+    command-delay-override-permission: "proxychat.local.override"
+    use-command-prefix: false
+    invalid-args: "&c/%command-name% <message>"
+    format: "&8[&a%command-alias%&8] [&a%server%&8] &a%player% &8» &7%message%"
+    console-format: "&8[&a%command-alias%&8] &a%player% &8» &7%message%"
+    console-chat-allowed: false
+    use-color-in-chat-permission: "proxychat.local.color"
+    toggleable: true
+    ignorable: true
+    local: true
 
 version: 1
 ```
