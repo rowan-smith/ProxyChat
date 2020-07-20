@@ -17,6 +17,7 @@
     </properties>
 
     <build>
+        <finalName>${project.name}</finalName>
         <defaultGoal>clean package</defaultGoal>
         <plugins>
             <plugin>
@@ -27,23 +28,6 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <finalName>${project.name}</finalName>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
         <resources>
@@ -69,7 +53,7 @@
         <dependency>
             <groupId>io.github.waterfallmc</groupId>
             <artifactId>waterfall-api</artifactId>
-            <version>1.15-SNAPSHOT</version>
+            <version>1.16-R0.4-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
