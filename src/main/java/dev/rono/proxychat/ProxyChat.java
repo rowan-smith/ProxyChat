@@ -12,7 +12,9 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 public final class ProxyChat extends Plugin {
 
@@ -55,29 +57,29 @@ public final class ProxyChat extends Plugin {
     }
 
     public static void registerConfiguration() {
-        if (!instance.getDataFolder().exists()) {
-            instance.getDataFolder().mkdir();
+        if (instance.getDataFolder().mkdir()) {
+            instance.getLogger().info("Created ProxyChat folder.");
         }
 
         File resourceFile = new File(instance.getDataFolder(), "config.yml");
 
         try {
-            if (!resourceFile.exists()) {
-                resourceFile.createNewFile();
+            if (resourceFile.createNewFile()) {
+                instance.getLogger().info("Creating new config.");
+
                 try (InputStream in = instance.getResourceAsStream("config.yml");
-                     OutputStream out = new FileOutputStream(resourceFile)) {
+                     OutputStream out = Files.newOutputStream(resourceFile.toPath())) {
                     ByteStreams.copy(in, out);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            instance.getLogger().log(Level.SEVERE, "Config file could not be created.", e);
         }
 
         try {
             config =  ConfigurationProvider.getProvider(YamlConfiguration.class).load(resourceFile);
         } catch (IOException e) {
-            instance.getProxy().getLogger().severe("Config file not found!");
-            e.printStackTrace();
+            instance.getLogger().log(Level.SEVERE, "Config file not found!", e);
         }
     }
 
