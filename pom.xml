@@ -6,7 +6,7 @@
 
     <groupId>dev.rono</groupId>
     <artifactId>ProxyChat</artifactId>
-    <version>1.4.4-SNAPSHOT</version>
+    <version>1.4.5</version>
     <packaging>jar</packaging>
 
     <name>ProxyChat</name>
@@ -17,7 +17,6 @@
     </properties>
 
     <build>
-        <finalName>${project.name}</finalName>
         <defaultGoal>clean package</defaultGoal>
         <plugins>
             <plugin>
