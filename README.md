@@ -23,23 +23,11 @@ A chat system for Bungeecord and Waterfall!
 
 ### Commands
 
-By default these commands are included in the config:
+By default, this example is included:
 ```
-Staff Chat
-- Commands: /staffchat & /sc
-- Permission: proxychat.staff
-
 Global Chat
 - Commands: /global & /g
 - Permission: proxychat.global
-
-Shout:
-- Commands: /shout & /s
-- Permissions: proxychat.shout
-
-Local Chat
-- Commands: /local & /l
-- Permission: proxychat.local
 ```
 
 ### Resources
@@ -57,7 +45,7 @@ Local Chat
 %message% - The message sent.
 ```
 
-#### Configuration:
+#### Configuration (config.yml):
 
 ```yaml
 ############################################################
@@ -73,7 +61,7 @@ prefix: "&2ProxyChat » "
 toggle-enable-message: "&aYou have toggled &2on &a%chat-name%"
 toggle-disable-message: "&aYou have toggled &4off &a%chat-name%"
 
-# This is what is shown when is ignore messages from a chat.
+# This is what is shown when is ignored messages from a chat.
 ignore-enable-message: "&cYou have ignored %chat-name%!"
 ignore-disable-message: "&aYou have un-ignored %chat-name%!"
 
@@ -90,117 +78,59 @@ console-disabled-message: "&cYou have to be a player to use this command!"
 reload-permission: "proxychat.reload"
 reload-message: "&aConfiguration reloaded!"
 
+version: 2
+```
 
-############################################################
-# +------------------------------------------------------+ #
-# |                        Chats                         | #
-# +------------------------------------------------------+ #
-############################################################
-chats:
-  1:
-    # This is the name of the chat, used in messages.
-    chat-name: "Staff Chat"
+#### Example Chat (global.yml):
 
-    # This is the name of the command.
-    command-name: "staffchat"
+```yaml
+# This is the name of the chat, used in messages.
+chat-name: "Global Chat"
 
-    # You need this permission to use the command above.
-    permission: "proxychat.staff"
+# This is the name of the command.
+command-name: "global"
 
-    # You can also use this command.
-    command-alias: "SC"
+# You need this permission to use the command above.
+permission: "proxychat.global"
 
-    # This is an alternative to using the command.
-    command-prefix: "!"
-    use-command-prefix: false
+# You can also use this command.
+command-alias: "G"
 
-    # Log the chat to console so you see chat in console
-    log-chat-to-console: true
+# This is an alternative to using the command.
+command-prefix: "@"
+use-command-prefix: true
 
-    # This is a delay on how quickly you can use the command!
-    # This is in milliseconds, 1 second = 1000 milliseconds
-    comand-delay: 0
+# Log the chat to console, so you see chat in console
+log-chat-to-console: false
 
-    # This overrides the command delay.
-    command-delay-override-permission: "proxychat.staff.override"
+# This is a delay on how quickly you can use the command!
+# This is in milliseconds, 1 second = 1000 milliseconds
+command-delay: 5000
 
-    # This shows when you enter command wrong.
-    invalid-args: "&c/%command-name% <message>"
+# This overrides the command delay.
+command-delay-override-permission: "proxychat.global.override"
 
-    # This is the format the chat will show in chat.
-    format: "&8[&c%command-alias%&8] [&c%server%&8] &c%player% &8» &7%message%"
+# This shows when you enter command wrong.
+invalid-args: "&c/%command-name% <message> or %command-prefix%<message>"
 
-    # This is the format when talking from console
-    console-format: "&8[&c%command-alias%&8] &c%player% &8» &7%message%"
-    console-chat-allowed: true
+# This is the format the chat will show in chat.
+format: "&8[&9%command-alias%&8] [&9%server%&8] &9%player% &8» &7%message%"
 
-    # Add this permission so users can use color codes in messages.
-    use-color-in-chat-permission: "proxychat.staff.color"
+# This is the format when talking from console
+console-format: "&8[&9%command-alias%&8] &9%player% &8» &7%message%"
+console-chat-allowed: false
 
-    # Toggle the chat so you don't need commands!
-    toggleable: true
+# Add this permission so users can use color codes in messages.
+use-color-in-chat-permission: "proxychat.global.color"
 
-    # Ignore the chat so you can't send or receive messages!
-    ignorable: false
-    
-    # Is this a local server chat
-    local: false
-  2:
-    chat-name: "Global Chat"
-    command-name: "global"
-    permission: "proxychat.global"
-    command-alias: "G"
-    command-prefix: "@"
-    log-chat-to-console: false
-    command-delay: 5000
-    command-delay-override-permission: "proxychat.global.override"
-    use-command-prefix: true
-    invalid-args: "&c/%command-name% <message> or %command-prefix%<message>"
-    format: "&8[&9%command-alias%&8] [&9%server%&8] &9%player% &8» &7%message%"
-    console-format: "&8[&9%command-alias%&8] &9%player% &8» &7%message%"
-    console-chat-allowed: false
-    use-color-in-chat-permission: "proxychat.global.color"
-    toggleable: true
-    ignorable: true
-    local: false
-  3:
-    chat-name: "Shout"
-    command-name: "shout"
-    permission: "proxychat.shout"
-    command-alias: "S"
-    command-prefix: "#"
-    log-chat-to-console: false
-    command-delay: 10000
-    command-delay-override-permission: "proxychat.shout.override"
-    use-command-prefix: false
-    invalid-args: "&c/%command-name% <message>"
-    format: "&8[&e%command-alias%&8] [&e%server%&8] &e%player% &8» &7%message%"
-    console-format: "&8[&e%command-alias%&8] &e%player% &8» &7%message%"
-    console-chat-allowed: false
-    use-color-in-chat-permission: "proxychat.shout.color"
-    toggleable: false
-    ignorable: false
-    local: false
-  4:
-    chat-name: "Local"
-    command-name: "local"
-    permission: "proxychat.local"
-    command-alias: "L"
-    command-prefix: "$"
-    log-chat-to-console: false
-    command-delay: 0
-    command-delay-override-permission: "proxychat.local.override"
-    use-command-prefix: false
-    invalid-args: "&c/%command-name% <message>"
-    format: "&8[&a%command-alias%&8] [&a%server%&8] &a%player% &8» &7%message%"
-    console-format: "&8[&a%command-alias%&8] &a%player% &8» &7%message%"
-    console-chat-allowed: false
-    use-color-in-chat-permission: "proxychat.local.color"
-    toggleable: true
-    ignorable: true
-    local: true
+# Toggle the chat so you don't need commands!
+toggleable: true
 
-version: 1
+# Ignore the chat, so you can't send or receive messages!
+ignorable: true
+
+# Is this a local server chat
+local: false
 ```
 
 ### Issues

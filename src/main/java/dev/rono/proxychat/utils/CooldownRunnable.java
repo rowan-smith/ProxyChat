@@ -11,7 +11,7 @@ public class CooldownRunnable implements Runnable {
 
     public UUID player;
     public ToggleUtils utils;
-    private Long delay;
+    private final Long delay;
 
     public Long startTime = System.currentTimeMillis();
 

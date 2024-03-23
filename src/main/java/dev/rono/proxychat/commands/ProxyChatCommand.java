@@ -1,6 +1,7 @@
 package dev.rono.proxychat.commands;
 
 import dev.rono.proxychat.ProxyChat;
+import lombok.var;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -25,7 +26,7 @@ public class ProxyChatCommand extends Command implements TabExecutor {
         }
 
         if (args[0].equalsIgnoreCase("reload")) {
-            if (sender.hasPermission(ProxyChat.config.getString("reload-permission"))) {
+            if (sender.hasPermission(ProxyChat.getConfig().getString("reload-permission"))) {
                 ProxyChat.registerConfiguration();
                 ProxyChat.unregisterCommands();
                 ProxyChat.registerCommands();
@@ -36,8 +37,8 @@ public class ProxyChatCommand extends Command implements TabExecutor {
         }
 
         if (args[0].equalsIgnoreCase("version")) {
-            TextComponent message = new TextComponent(ChatColor.DARK_BLUE + "Made by Rono @ ");
-            TextComponent link = new TextComponent("https://www.spigotmc.org/resources/73583/");
+            var message = new TextComponent(ChatColor.DARK_BLUE + "Made by Rono @ ");
+            var link = new TextComponent("https://www.spigotmc.org/resources/73583/");
             link.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.spigotmc.org/resources/73583/"));
             message.addExtra(link);
             sender.sendMessage(message);
@@ -49,7 +50,7 @@ public class ProxyChatCommand extends Command implements TabExecutor {
 
         Set<String> tabCommands = new HashSet<>();
 
-        if (commandSender.hasPermission(ProxyChat.config.getString("reload-permission"))) {
+        if (commandSender.hasPermission(ProxyChat.getConfig().getString("reload-permission"))) {
             tabCommands.add("reload");
         }
 
