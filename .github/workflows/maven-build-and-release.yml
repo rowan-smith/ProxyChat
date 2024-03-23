@@ -1,0 +1,55 @@
+name: Maven Build and Release
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v3
+
+      - name: Extract Java Version
+        run: echo "JAVA_VERSION=$(mvn help:evaluate -Dexpression=java.version -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Extract Artifact Version
+        run: echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Extract Artifact Name
+        run: echo "ARTIFACT_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.RELEASE_VERSION }}
+          release_name: Release v${{ env.RELEASE_VERSION }}
+          draft: false
+          prerelease: false
+
+      - name: Upload JAR
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/${{ env.ARTIFACT_NAME }}-${{ env.RELEASE_VERSION }}.jar
+          asset_name: ${{ env.ARTIFACT_NAME }}-${{ env.RELEASE_VERSION }}.jar
+          asset_content_type: application/java-archive
