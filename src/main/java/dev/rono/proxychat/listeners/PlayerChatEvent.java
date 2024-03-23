@@ -9,14 +9,13 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 public class PlayerChatEvent implements Listener {
-
     @EventHandler
     public void onChat(ChatEvent e) {
         if (e.getMessage().startsWith("/")) {
             return;
         }
 
-        for (ChatCommand command : ProxyChat.commands) {
+        for (ChatCommand command : ProxyChat.getCommands()) {
             ProxiedPlayer player = (ProxiedPlayer) e.getSender();
 
             if (command.useCommandPrefix && e.getMessage().startsWith(command.commandPrefix) && player.hasPermission(command.getPermission())) {

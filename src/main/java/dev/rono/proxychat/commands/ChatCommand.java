@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ChatCommand extends Command implements TabExecutor {
 
-    private ProxyChat instance;
+    private final ProxyChat instance;
 
     public Boolean useCommandPrefix;
     public String commandPrefix;
@@ -29,8 +29,8 @@ public class ChatCommand extends Command implements TabExecutor {
     public Boolean isIgnorable;
     public Boolean isLocal;
 
-    private Integer commandDelay;
-    private String commandDelayOverridePermission;
+    private final Integer commandDelay;
+    private final String commandDelayOverridePermission;
 
     public String chatFormat;
     public String chatName;
@@ -38,11 +38,11 @@ public class ChatCommand extends Command implements TabExecutor {
 
     public String consoleChatFormat;
     public Boolean isConsoleAllowed;
-    private Boolean isLoggedToConsole;
+    private final Boolean isLoggedToConsole;
 
-    private String commandAlias;
+    private final String commandAlias;
 
-    private String useColorInChatPermission;
+    private final String useColorInChatPermission;
 
     public ToggleUtils toggleUtils = new ToggleUtils();
 
@@ -90,7 +90,7 @@ public class ChatCommand extends Command implements TabExecutor {
                         .replace("%chat-name%", this.chatName);
                 sendAllMessage(new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message))));
             } else {
-                sender.sendMessage(new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', ProxyChat.config.getString("console-disabled-message")))));
+                sender.sendMessage(new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', ProxyChat.getConfig().getString("console-disabled-message")))));
             }
             return;
         }
@@ -105,30 +105,30 @@ public class ChatCommand extends Command implements TabExecutor {
         if (this.isToggleable)
             if (args[0].equalsIgnoreCase("toggle")) {
                 if (this.toggleUtils.toggleChat(proxiedPlayer.getUniqueId()))
-                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.config.getString("toggle-enable-message"), args));
+                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("toggle-enable-message"), args));
                 else
-                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.config.getString("toggle-disable-message"), args));
+                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("toggle-disable-message"), args));
                 return;
             }
 
         if (this.isIgnorable)
             if (args[0].equalsIgnoreCase("ignore")) {
                 if (this.toggleUtils.toggleIgnore(proxiedPlayer.getUniqueId()))
-                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.config.getString("ignore-enable-message"), args));
+                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("ignore-enable-message"), args));
                 else
-                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.config.getString("ignore-disable-message"), args));
+                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("ignore-disable-message"), args));
                 return;
             }
 
         if (this.toggleUtils.isDelayed(proxiedPlayer.getUniqueId())) {
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.config.getString("command-cooldown-message"), args));
+            proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("command-cooldown-message"), args));
             return;
         }
 
         TextComponent message = handleText(proxiedPlayer, this.chatFormat, args, true);
 
         if (this.toggleUtils.isIgnored(proxiedPlayer.getUniqueId())) {
-            proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.config.getString("chat-disabled-message"), args));
+            proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("chat-disabled-message"), args));
             return;
         }
 
@@ -169,19 +169,19 @@ public class ChatCommand extends Command implements TabExecutor {
 
     private TextComponent handleText(ProxiedPlayer proxiedPlayer, String message, String[] args, Boolean ignorePrefix) {
         if (!ignorePrefix)
-            message = ProxyChat.config.getString("prefix") + message;
+            message = ProxyChat.getConfig().getString("prefix") + message;
         return getTextComponent(proxiedPlayer, message, args);
     }
 
     private TextComponent handleText(ProxiedPlayer proxiedPlayer, String message, String[] args) {
-        message = ProxyChat.config.getString("prefix") + message;
+        message = ProxyChat.getConfig().getString("prefix") + message;
         return getTextComponent(proxiedPlayer, message, args);
     }
 
     private TextComponent getTextComponent(ProxiedPlayer proxiedPlayer, String message, String[] args) {
         message = message
                 .replace("%player%", proxiedPlayer.getName())
-                .replace("%prefix%", ProxyChat.config.getString("prefix"))
+                .replace("%prefix%", ProxyChat.getConfig().getString("prefix"))
                 .replace("%server%", proxiedPlayer.getServer().getInfo().getName())
                 .replace("%command-name%", this.getName())
                 .replace("%command-alias%", this.commandAlias)

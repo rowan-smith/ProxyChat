@@ -4,6 +4,8 @@ import com.google.common.io.ByteStreams;
 import dev.rono.proxychat.commands.ChatCommand;
 import dev.rono.proxychat.commands.ProxyChatCommand;
 import dev.rono.proxychat.listeners.PlayerChatEvent;
+import dev.rono.proxychat.utils.Helpers;
+import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -18,33 +20,41 @@ import java.util.logging.Level;
 
 public final class ProxyChat extends Plugin {
 
-    private static ProxyChat instance;
-    public static Configuration config;
-    public static ArrayList<ChatCommand> commands = new ArrayList<>();
+    @Getter private static ProxyChat instance;
+    @Getter private static Configuration config;
+    @Getter private static final ArrayList<ChatCommand> commands = new ArrayList<>();
+    private static final ArrayList<Configuration> chats = new ArrayList<>();
 
     @Override
     public void onEnable() {
         instance = this;
         registerConfiguration();
-        registerCommands();
+        registerChatFolder();
+        Helpers.migrateConfigChatToFolder();
+
+        if (ProxyChat.getConfig().contains("chats")) {
+            ProxyChat.getConfig().set("chats", null);
+            try {
+                ConfigurationProvider.getProvider(YamlConfiguration.class).save(ProxyChat.getConfig(), new File(getDataFolder(), "config.yml"));
+            } catch (IOException ignore) {
+            }
+        }
+
+        getChats();
         registerListeners();
+        registerCommands();
         new MetricsLite(this);
     }
 
     public static void registerCommands() {
-        Configuration chatList = config.getSection("chats");
-
-        for (String key : chatList.getKeys()) {
-            Configuration chatConfig = config.getSection("chats." + key);
-
-            ChatCommand command = new ChatCommand(chatConfig, instance);
+        for (var chat : chats) {
+            var command = new ChatCommand(chat, instance);
             instance.getProxy().getPluginManager().registerCommand(instance, command);
             commands.add(command);
         }
 
         instance.getLogger().info(commands.size() + " commands loaded.");
         instance.getProxy().getPluginManager().registerCommand(instance, new ProxyChatCommand());
-
     }
 
     public static void unregisterCommands() {
@@ -53,7 +63,6 @@ public final class ProxyChat extends Plugin {
         }
 
         commands.clear();
-
     }
 
     public static void registerConfiguration() {
@@ -61,7 +70,7 @@ public final class ProxyChat extends Plugin {
             instance.getLogger().info("Created ProxyChat folder.");
         }
 
-        File resourceFile = new File(instance.getDataFolder(), "config.yml");
+        var resourceFile = new File(instance.getDataFolder(), "config.yml");
 
         try {
             if (resourceFile.createNewFile()) {
@@ -83,13 +92,48 @@ public final class ProxyChat extends Plugin {
         }
     }
 
+    public static void registerChatFolder() {
+        var chatsFolder = new File(instance.getDataFolder(), "chats");
+        if (chatsFolder.mkdir()) {
+            instance.getLogger().info("Created chats folder.");
+
+            var resourceFile = new File(chatsFolder, "global.yml");
+
+            try {
+                if (resourceFile.createNewFile()) {
+                    instance.getLogger().info("Creating example chat.");
+
+                    try (InputStream in = instance.getResourceAsStream("global.yml");
+                         OutputStream out = Files.newOutputStream(resourceFile.toPath())) {
+                        ByteStreams.copy(in, out);
+                    }
+                }
+            } catch (Exception e) {
+                instance.getLogger().log(Level.SEVERE, "Example chat could not be created.", e);
+            }
+        }
+    }
+
+    public static void getChats() {
+        var chatsFolder = new File(instance.getDataFolder(), "chats");
+        var chatArray = chatsFolder.listFiles((dir, name) -> name.endsWith(".yml"));
+
+        assert chatArray != null;
+        for (File chatFile : chatArray) {
+            var chat = Helpers.loadYmlFile(chatFile);
+            if (chat != null) {
+                chats.add(chat);
+            }
+        }
+    }
+
     private static void registerListeners() {
         instance.getProxy().getPluginManager().registerListener(instance, new PlayerChatEvent());
     }
 
     public static TextComponent getConfigTextValue(String value) {
-        String prefix = config.getString("prefix");
-        String message = config.getString(value);
+        var prefix = config.getString("prefix");
+        var message = config.getString(value);
         return new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', prefix + message)));
     }
 }
