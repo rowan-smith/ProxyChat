@@ -14,17 +14,14 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 import net.md_5.bungee.config.Configuration;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ChatCommand extends Command implements TabExecutor {
-
-    private final ProxyChat instance;
-
     public Boolean useCommandPrefix;
     public String commandPrefix;
 
     public Boolean isToggleable;
-
     public Boolean isIgnorable;
     public Boolean isLocal;
 
@@ -43,12 +40,12 @@ public class ChatCommand extends Command implements TabExecutor {
 
     private final String useColorInChatPermission;
 
+    private final List<String> serverBlacklist;
+
     public ToggleUtils toggleUtils = new ToggleUtils();
 
-    public ChatCommand(Configuration chatConfig, ProxyChat plugin) {
-        super(chatConfig.getString("command-name"),
-                chatConfig.getString("permission"),
-                chatConfig.getString("command-alias"));
+    public ChatCommand(Configuration chatConfig) {
+        super(chatConfig.getString("command-name"), chatConfig.getString("permission"), chatConfig.getString("command-alias"));
 
         this.useCommandPrefix = chatConfig.getBoolean("use-command-prefix");
         this.commandPrefix = chatConfig.getString("command-prefix");
@@ -72,7 +69,7 @@ public class ChatCommand extends Command implements TabExecutor {
         this.isConsoleAllowed = chatConfig.getBoolean("console-chat-allowed");
         this.isLoggedToConsole = chatConfig.getBoolean("log-chat-to-console");
 
-        this.instance = plugin;
+        this.serverBlacklist = chatConfig.getStringList("blacklist");
     }
 
     @Override
@@ -96,28 +93,32 @@ public class ChatCommand extends Command implements TabExecutor {
 
         var proxiedPlayer = ((ProxiedPlayer) sender);
 
+        if (serverBlacklist.contains(proxiedPlayer.getServer().getInfo().getName())) {
+            return;
+        }
+
         if (args.length < 1) {
             proxiedPlayer.sendMessage(handleText(proxiedPlayer, this.invalidArguments, args));
             return;
         }
 
-        if (this.isToggleable)
-            if (args[0].equalsIgnoreCase("toggle")) {
-                if (this.toggleUtils.toggleChat(proxiedPlayer.getUniqueId()))
-                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("toggle-enable-message"), args));
-                else
-                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("toggle-disable-message"), args));
-                return;
+        if (this.isToggleable && args[0].equalsIgnoreCase("toggle")) {
+            if (this.toggleUtils.toggleChat(proxiedPlayer.getUniqueId())) {
+                proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("toggle-enable-message"), args));
+            } else {
+                proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("toggle-disable-message"), args));
             }
+            return;
+        }
 
-        if (this.isIgnorable)
-            if (args[0].equalsIgnoreCase("ignore")) {
-                if (this.toggleUtils.toggleIgnore(proxiedPlayer.getUniqueId()))
-                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("ignore-enable-message"), args));
-                else
-                    proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("ignore-disable-message"), args));
-                return;
+        if (this.isIgnorable && args[0].equalsIgnoreCase("ignore")) {
+            if (this.toggleUtils.toggleIgnore(proxiedPlayer.getUniqueId())) {
+                proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("ignore-enable-message"), args));
+            } else {
+                proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("ignore-disable-message"), args));
             }
+            return;
+        }
 
         if (this.toggleUtils.isDelayed(proxiedPlayer.getUniqueId())) {
             proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("command-cooldown-message"), args));
@@ -132,43 +133,52 @@ public class ChatCommand extends Command implements TabExecutor {
         }
 
         if (!proxiedPlayer.hasPermission(this.commandDelayOverridePermission)) {
-            var task = this.instance.getProxy().getScheduler().schedule(this.instance, (
-                    new CooldownRunnable(proxiedPlayer, this.toggleUtils, Long.valueOf(this.commandDelay))
-                    ), this.commandDelay, TimeUnit.MILLISECONDS);
+            var cooldown = new CooldownRunnable(proxiedPlayer, this.toggleUtils, Long.valueOf(this.commandDelay));
+            var task = ProxyChat.getInstance().getProxy().getScheduler().schedule(ProxyChat.getInstance(), cooldown, this.commandDelay, TimeUnit.MILLISECONDS);
+
             this.toggleUtils.toggleDelayOn(proxiedPlayer.getUniqueId(), task);
         }
 
-        if (this.isLocal)
-        	sendLocalMessage(proxiedPlayer, message);
-        else
-        	sendAllMessage(message);
+        if (this.isLocal) {
+            sendLocalMessage(proxiedPlayer, message);
+        } else {
+            sendAllMessage(message);
+        }
     }
 
     private void sendAllMessage(TextComponent message) {
         for (var player : ProxyServer.getInstance().getPlayers()) {
-            if (player.hasPermission(getPermission()) || getPermission().isEmpty())
+            if (player.hasPermission(getPermission()) || getPermission().isEmpty()) {
                 if (!this.toggleUtils.isIgnored(player.getUniqueId())) {
                     player.sendMessage(message);
                 }
+            }
         }
+
         if (this.isLoggedToConsole) {
-            this.instance.getLogger().info(message.toLegacyText());
+            ProxyChat.getInstance().getLogger().info(message.toLegacyText());
         }
     }
-    
+
     private void sendLocalMessage(ProxiedPlayer p, TextComponent message) {
-    	for (var player : p.getServer().getInfo().getPlayers())
-    		if (player.hasPermission(getPermission()) || getPermission().isEmpty())
-    			if (!this.toggleUtils.isIgnored(player.getUniqueId()))
-    				player.sendMessage(message);
-    	
-    	if (this.isLoggedToConsole)
-    		this.instance.getLogger().info(message.toLegacyText());
+        for (var player : p.getServer().getInfo().getPlayers()) {
+            if (player.hasPermission(getPermission()) || getPermission().isEmpty()) {
+                if (!this.toggleUtils.isIgnored(player.getUniqueId())) {
+                    player.sendMessage(message);
+                }
+            }
+        }
+
+        if (this.isLoggedToConsole) {
+            ProxyChat.getInstance().getLogger().info(message.toLegacyText());
+        }
     }
 
     private TextComponent handleText(ProxiedPlayer proxiedPlayer, String message, String[] args, Boolean ignorePrefix) {
-        if (!ignorePrefix)
+        if (!ignorePrefix) {
             message = ProxyChat.getConfig().getString("prefix") + message;
+        }
+
         return getTextComponent(proxiedPlayer, message, args);
     }
 
@@ -191,10 +201,11 @@ public class ChatCommand extends Command implements TabExecutor {
             message = message.replace("%chat-cooldown%", this.toggleUtils.getDelayedTask(proxiedPlayer.getUniqueId()).getTime());
         }
 
-        if (!proxiedPlayer.hasPermission(this.useColorInChatPermission))
+        if (!proxiedPlayer.hasPermission(this.useColorInChatPermission)) {
             message = message.replace("%message%", ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', String.join(" ", args))));
-        else
+        } else {
             message = message.replace("%message%", String.join(" ", args));
+        }
 
         return new TextComponent(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', message)));
     }
@@ -202,6 +213,11 @@ public class ChatCommand extends Command implements TabExecutor {
     @Override
     public Iterable<String> onTabComplete(CommandSender commandSender, String[] strings) {
         var tabComplete = new HashSet<String>();
+
+        var proxiedPlayer = ((ProxiedPlayer) commandSender);
+        if (serverBlacklist.contains(proxiedPlayer.getServer().getInfo().getName())) {
+            return tabComplete;
+        }
 
         if (strings.length == 1) {
             if (isToggleable) {

@@ -49,7 +49,7 @@ public final class ProxyChat extends Plugin {
 
     public static void registerCommands() {
         for (var chat : chats) {
-            var command = new ChatCommand(chat, instance);
+            var command = new ChatCommand(chat);
             instance.getProxy().getPluginManager().registerCommand(instance, command);
             commands.add(command);
         }
