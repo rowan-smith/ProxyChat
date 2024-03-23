@@ -2,6 +2,7 @@ package dev.rono.proxychat.listeners;
 
 import dev.rono.proxychat.ProxyChat;
 import dev.rono.proxychat.commands.ChatCommand;
+import lombok.var;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
@@ -16,10 +17,10 @@ public class PlayerChatEvent implements Listener {
         }
 
         for (ChatCommand command : ProxyChat.getCommands()) {
-            ProxiedPlayer player = (ProxiedPlayer) e.getSender();
+            var player = (ProxiedPlayer) e.getSender();
 
             if (command.useCommandPrefix && e.getMessage().startsWith(command.commandPrefix) && player.hasPermission(command.getPermission())) {
-                String message = (String) e.getMessage().subSequence(1, e.getMessage().length());
+                var message = (String) e.getMessage().subSequence(1, e.getMessage().length());
                 command.execute((CommandSender) e.getSender(), message.split(" "));
                 e.setCancelled(true);
 

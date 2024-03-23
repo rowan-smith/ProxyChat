@@ -1,6 +1,7 @@
 package dev.rono.proxychat.utils;
 
 import dev.rono.proxychat.ProxyChat;
+import lombok.var;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;

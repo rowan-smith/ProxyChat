@@ -9,9 +9,9 @@ import java.util.UUID;
 
 public class ToggleUtils {
 
-    private Set<UUID> chatIgnored = new HashSet<>();
-    private Set<UUID> chatToggled = new HashSet<>();
-    private HashMap<UUID, ScheduledTask> delay = new HashMap<>();
+    private final Set<UUID> chatIgnored = new HashSet<>();
+    private final Set<UUID> chatToggled = new HashSet<>();
+    private final HashMap<UUID, ScheduledTask> delay = new HashMap<>();
 
     public Boolean toggleIgnore(UUID player) {
         if (this.isIgnored(player)) {

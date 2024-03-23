@@ -3,6 +3,7 @@ package dev.rono.proxychat.commands;
 import dev.rono.proxychat.ProxyChat;
 import dev.rono.proxychat.utils.CooldownRunnable;
 import dev.rono.proxychat.utils.ToggleUtils;
+import lombok.var;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -10,11 +11,9 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.config.Configuration;
 
 import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class ChatCommand extends Command implements TabExecutor {
@@ -80,7 +79,7 @@ public class ChatCommand extends Command implements TabExecutor {
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof ProxiedPlayer)) {
             if (this.isConsoleAllowed) {
-                String message = this.consoleChatFormat;
+                var message = this.consoleChatFormat;
                 message = message
                         .replace("%message%", String.join(" ", args))
                         .replace("%player%", sender.getName())
@@ -95,7 +94,7 @@ public class ChatCommand extends Command implements TabExecutor {
             return;
         }
 
-        ProxiedPlayer proxiedPlayer = ((ProxiedPlayer) sender);
+        var proxiedPlayer = ((ProxiedPlayer) sender);
 
         if (args.length < 1) {
             proxiedPlayer.sendMessage(handleText(proxiedPlayer, this.invalidArguments, args));
@@ -125,7 +124,7 @@ public class ChatCommand extends Command implements TabExecutor {
             return;
         }
 
-        TextComponent message = handleText(proxiedPlayer, this.chatFormat, args, true);
+        var message = handleText(proxiedPlayer, this.chatFormat, args, true);
 
         if (this.toggleUtils.isIgnored(proxiedPlayer.getUniqueId())) {
             proxiedPlayer.sendMessage(handleText(proxiedPlayer, ProxyChat.getConfig().getString("chat-disabled-message"), args));
@@ -133,7 +132,7 @@ public class ChatCommand extends Command implements TabExecutor {
         }
 
         if (!proxiedPlayer.hasPermission(this.commandDelayOverridePermission)) {
-            ScheduledTask task = this.instance.getProxy().getScheduler().schedule(this.instance, (
+            var task = this.instance.getProxy().getScheduler().schedule(this.instance, (
                     new CooldownRunnable(proxiedPlayer, this.toggleUtils, Long.valueOf(this.commandDelay))
                     ), this.commandDelay, TimeUnit.MILLISECONDS);
             this.toggleUtils.toggleDelayOn(proxiedPlayer.getUniqueId(), task);
@@ -146,7 +145,7 @@ public class ChatCommand extends Command implements TabExecutor {
     }
 
     private void sendAllMessage(TextComponent message) {
-        for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
+        for (var player : ProxyServer.getInstance().getPlayers()) {
             if (player.hasPermission(getPermission()) || getPermission().isEmpty())
                 if (!this.toggleUtils.isIgnored(player.getUniqueId())) {
                     player.sendMessage(message);
@@ -158,7 +157,7 @@ public class ChatCommand extends Command implements TabExecutor {
     }
     
     private void sendLocalMessage(ProxiedPlayer p, TextComponent message) {
-    	for (ProxiedPlayer player : p.getServer().getInfo().getPlayers())
+    	for (var player : p.getServer().getInfo().getPlayers())
     		if (player.hasPermission(getPermission()) || getPermission().isEmpty())
     			if (!this.toggleUtils.isIgnored(player.getUniqueId()))
     				player.sendMessage(message);
@@ -202,7 +201,7 @@ public class ChatCommand extends Command implements TabExecutor {
 
     @Override
     public Iterable<String> onTabComplete(CommandSender commandSender, String[] strings) {
-        Set<String> tabComplete = new HashSet<>();
+        var tabComplete = new HashSet<String>();
 
         if (strings.length == 1) {
             if (isToggleable) {

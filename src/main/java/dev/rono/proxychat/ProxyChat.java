@@ -6,6 +6,7 @@ import dev.rono.proxychat.commands.ProxyChatCommand;
 import dev.rono.proxychat.listeners.PlayerChatEvent;
 import dev.rono.proxychat.utils.Helpers;
 import lombok.Getter;
+import lombok.var;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -58,7 +59,7 @@ public final class ProxyChat extends Plugin {
     }
 
     public static void unregisterCommands() {
-        for (ChatCommand command : commands) {
+        for (var command : commands) {
             instance.getProxy().getPluginManager().unregisterCommand(command);
         }
 
@@ -76,8 +77,8 @@ public final class ProxyChat extends Plugin {
             if (resourceFile.createNewFile()) {
                 instance.getLogger().info("Creating new config.");
 
-                try (InputStream in = instance.getResourceAsStream("config.yml");
-                     OutputStream out = Files.newOutputStream(resourceFile.toPath())) {
+                try (var in = instance.getResourceAsStream("config.yml");
+                     var out = Files.newOutputStream(resourceFile.toPath())) {
                     ByteStreams.copy(in, out);
                 }
             }
@@ -103,8 +104,8 @@ public final class ProxyChat extends Plugin {
                 if (resourceFile.createNewFile()) {
                     instance.getLogger().info("Creating example chat.");
 
-                    try (InputStream in = instance.getResourceAsStream("global.yml");
-                         OutputStream out = Files.newOutputStream(resourceFile.toPath())) {
+                    try (var in = instance.getResourceAsStream("global.yml");
+                         var out = Files.newOutputStream(resourceFile.toPath())) {
                         ByteStreams.copy(in, out);
                     }
                 }
@@ -119,7 +120,7 @@ public final class ProxyChat extends Plugin {
         var chatArray = chatsFolder.listFiles((dir, name) -> name.endsWith(".yml"));
 
         assert chatArray != null;
-        for (File chatFile : chatArray) {
+        for (var chatFile : chatArray) {
             var chat = Helpers.loadYmlFile(chatFile);
             if (chat != null) {
                 chats.add(chat);
