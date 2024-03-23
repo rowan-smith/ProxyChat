@@ -131,6 +131,10 @@ ignorable: true
 
 # Is this a local server chat
 local: false
+
+# blacklist this chat on specific servers
+blacklist:
+  - server1
 ```
 
 ### Issues

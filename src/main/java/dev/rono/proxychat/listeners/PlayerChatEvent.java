@@ -16,16 +16,16 @@ public class PlayerChatEvent implements Listener {
             return;
         }
 
-        for (ChatCommand command : ProxyChat.getCommands()) {
+        for (var command : ProxyChat.getCommands()) {
             var player = (ProxiedPlayer) e.getSender();
 
             if (command.useCommandPrefix && e.getMessage().startsWith(command.commandPrefix) && player.hasPermission(command.getPermission())) {
                 var message = (String) e.getMessage().subSequence(1, e.getMessage().length());
-                command.execute((CommandSender) e.getSender(), message.split(" "));
+                command.execute(player, message.split(" "));
                 e.setCancelled(true);
 
             } else if (command.toggleUtils.isToggled(player.getUniqueId())) {
-                command.execute((CommandSender) e.getSender(), e.getMessage().split(" "));
+                command.execute(player, e.getMessage().split(" "));
                 e.setCancelled(true);
             }
         }
