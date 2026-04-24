@@ -1,0 +1,10 @@
+{
+  "id": "proxychat",
+  "name": "ProxyChat",
+  "version": "${project.parent.version}",
+  "description": "A cross-proxy chat plugin for Velocity",
+  "authors": [
+    "Rono"
+  ],
+  "main": "dev.rono.proxychat.velocity.ProxyChatVelocity"
+}

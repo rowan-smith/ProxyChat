@@ -1,5 +1,6 @@
 # ProxyChat
-A chat system for Bungeecord and Waterfall!
+
+A cross-platform chat system for Bungeecord, Waterfall, and Velocity proxy servers!
 
 ### Features
 

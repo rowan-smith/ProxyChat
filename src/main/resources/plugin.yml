@@ -1,4 +1,0 @@
-name: ProxyChat
-version: ${project.version}
-main: dev.rono.proxychat.ProxyChat
-author: Rono
