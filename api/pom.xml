@@ -16,7 +16,6 @@
     <name>ProxyChat API</name>
 
     <properties>
-        <java.version>1.8</java.version>
         <kotlin.code.style>official</kotlin.code.style>
     </properties>
 

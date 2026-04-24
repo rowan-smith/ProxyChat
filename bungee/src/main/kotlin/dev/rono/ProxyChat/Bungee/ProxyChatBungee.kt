@@ -1,22 +1,25 @@
 ﻿package dev.rono.proxychat.bungee
 
-import com.google.common.io.ByteStreams
+import dev.rono.proxychat.core.proxyChatModule
 import dev.rono.proxychat.api.ProxyChatConfig
 import dev.rono.proxychat.core.ProxyChatInstance
+import dev.rono.proxychat.core.config.YamlProxyChatConfig
 import dev.rono.proxychat.core.utils.Helpers
 import dev.rono.proxychat.bungee.commands.ChatCommand
 import dev.rono.proxychat.bungee.commands.ProxyChatCommand
 import dev.rono.proxychat.bungee.listeners.PlayerChatEvent
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.plugin.Plugin
-import net.md_5.bungee.config.ConfigurationProvider
-import net.md_5.bungee.config.YamlConfiguration
 import java.io.File
-import java.nio.file.Files
 import java.util.logging.Level
 
-class ProxyChatBungee : Plugin(), ProxyChatInstance {
+class ProxyChatBungee : Plugin(), ProxyChatInstance, KoinComponent {
 
     companion object {
         lateinit var instance: ProxyChatBungee
@@ -29,13 +32,19 @@ class ProxyChatBungee : Plugin(), ProxyChatInstance {
 
     override fun onEnable() {
         instance = this
+        startKoin {
+            modules(proxyChatModule, module {
+                single { ProxyChatCommand() }
+                single { PlayerChatEvent() }
+            })
+        }
         registerConfiguration()
         registerChatFolder()
         Helpers.migrateConfigChatToFolder(this, config)
 
         if (config.contains("chats")) {
             config.set("chats", null)
-            config.save(File(dataFolder, "config.yml"))
+            config.save(File(getDataFolder(), "config.yml"))
         }
 
         getChats()
@@ -49,8 +58,7 @@ class ProxyChatBungee : Plugin(), ProxyChatInstance {
     override fun loadConfig(file: File): ProxyChatConfig? {
         if (!file.exists()) return null
         return try {
-            val bungeeConfig = ConfigurationProvider.getProvider(YamlConfiguration::class.java).load(file)
-            BungeeConfig(bungeeConfig)
+            YamlProxyChatConfig.load(file)
         } catch (e: Exception) {
             logger.log(Level.WARNING, "Failed to load ${file.name}", e)
             null
@@ -65,7 +73,7 @@ class ProxyChatBungee : Plugin(), ProxyChatInstance {
         }
 
         logger.info("${commands.size} commands loaded.")
-        proxy.pluginManager.registerCommand(this, ProxyChatCommand())
+        proxy.pluginManager.registerCommand(this, get<ProxyChatCommand>())
     }
 
     fun unregisterCommands() {
@@ -76,53 +84,23 @@ class ProxyChatBungee : Plugin(), ProxyChatInstance {
     }
 
     fun registerConfiguration() {
-        if (!dataFolder.exists()) {
-            dataFolder.mkdir()
-            logger.info("Created ProxyChat folder.")
-        }
-
-        val resourceFile = File(dataFolder, "config.yml")
-
-        try {
-            if (resourceFile.createNewFile()) {
-                logger.info("Creating new config.")
-                getResourceAsStream("config.yml").use { input ->
-                    Files.newOutputStream(resourceFile.toPath()).use { output ->
-                        ByteStreams.copy(input, output)
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            logger.log(Level.SEVERE, "Config file could not be created.", e)
-        }
-
+        val resourceFile = File(getDataFolder(), "config.yml")
+        Helpers.saveResource(this, "config.yml", resourceFile)
         config = loadConfig(resourceFile)!!
     }
 
-    fun registerChatFolder() {
-        val chatsFolder = File(dataFolder, "chats")
-        if (chatsFolder.mkdir()) {
-            logger.info("Created chats folder.")
-
-            val resourceFile = File(chatsFolder, "global.yml")
-            try {
-                if (resourceFile.createNewFile()) {
-                    logger.info("Creating example chat.")
-                    getResourceAsStream("global.yml").use { input ->
-                        Files.newOutputStream(resourceFile.toPath()).use { output ->
-                            ByteStreams.copy(input, output)
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                logger.log(Level.SEVERE, "Example chat could not be created.", e)
-            }
+    private fun registerChatFolder() {
+        val chatsFolder = File(getDataFolder(), "chats")
+        if (!chatsFolder.exists()) {
+            chatsFolder.mkdirs()
         }
+        val resourceFile = File(chatsFolder, "global.yml")
+        Helpers.saveResource(this, "global.yml", resourceFile)
     }
 
     fun getChats() {
         chats.clear()
-        val chatsFolder = File(dataFolder, "chats")
+        val chatsFolder = File(getDataFolder(), "chats")
         val chatArray = chatsFolder.listFiles { _, name -> name.endsWith(".yml") }
 
         chatArray?.forEach { chatFile ->
@@ -134,12 +112,16 @@ class ProxyChatBungee : Plugin(), ProxyChatInstance {
     }
 
     private fun registerListeners() {
-        proxy.pluginManager.registerListener(this, PlayerChatEvent())
+        proxy.pluginManager.registerListener(this, get<PlayerChatEvent>())
     }
 
     fun getConfigTextValue(value: String): TextComponent {
         val prefix = config.getString("prefix") ?: ""
         val message = config.getString(value) ?: ""
         return TextComponent(*TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', prefix + message)))
+    }
+
+    override fun onDisable() {
+        stopKoin()
     }
 }

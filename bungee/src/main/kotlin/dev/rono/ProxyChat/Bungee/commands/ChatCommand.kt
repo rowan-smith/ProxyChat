@@ -4,6 +4,8 @@ import dev.rono.proxychat.api.ProxyChatConfig
 import dev.rono.proxychat.bungee.ProxyChatBungee
 import dev.rono.proxychat.core.utils.CooldownRunnable
 import dev.rono.proxychat.core.utils.ToggleUtils
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
@@ -17,7 +19,7 @@ class ChatCommand(chatConfig: ProxyChatConfig) : Command(
     chatConfig.getString("command-name"),
     chatConfig.getString("permission"),
     chatConfig.getString("command-alias")
-), TabExecutor {
+), TabExecutor, KoinComponent {
     val useCommandPrefix = chatConfig.getBoolean("use-command-prefix")
     val commandPrefix = chatConfig.getString("command-prefix") ?: ""
 
@@ -40,7 +42,7 @@ class ChatCommand(chatConfig: ProxyChatConfig) : Command(
     val useColorInChatPermission = chatConfig.getString("use-color-in-chat-permission") ?: ""
     val serverBlacklist = chatConfig.getList("blacklist") ?: emptyList()
 
-    val toggleUtils = ToggleUtils()
+    val toggleUtils: ToggleUtils by inject()
 
     override fun execute(sender: CommandSender, args: Array<out String>) {
         if (sender !is ProxiedPlayer) {
@@ -60,6 +62,10 @@ class ChatCommand(chatConfig: ProxyChatConfig) : Command(
             return
         }
 
+        handleChat(sender, args)
+    }
+
+    fun handleChat(sender: ProxiedPlayer, args: Array<out String>) {
         if (serverBlacklist.contains(sender.server.info.name)) {
             return
         }
@@ -92,8 +98,6 @@ class ChatCommand(chatConfig: ProxyChatConfig) : Command(
             return
         }
 
-        val message = handleText(sender, this.chatFormat, args, true)
-
         if (this.toggleUtils.isIgnored(sender.uniqueId)) {
             sender.sendMessage(handleText(sender, ProxyChatBungee.config.getString("chat-disabled-message") ?: "", args))
             return
@@ -104,6 +108,8 @@ class ChatCommand(chatConfig: ProxyChatConfig) : Command(
             val task = ProxyServer.getInstance().scheduler.schedule(ProxyChatBungee.instance, cooldown, this.commandDelay.toLong(), TimeUnit.MILLISECONDS)
             this.toggleUtils.toggleDelayOn(sender.uniqueId, cooldown)
         }
+
+        val message = handleText(sender, this.chatFormat, args, true)
 
         if (this.isLocal) {
             sendLocalMessage(sender, message)

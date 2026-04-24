@@ -3,12 +3,36 @@
 import dev.rono.proxychat.api.ProxyChatConfig
 import dev.rono.proxychat.core.ProxyChatInstance
 import java.io.File
+import java.nio.file.Files
 import java.util.logging.Level
 
 /**
  * Helper utilities for ProxyChat
  */
 object Helpers {
+    fun saveResource(instance: ProxyChatInstance, resourcePath: String, outputFile: File) {
+        if (outputFile.exists()) return
+
+        try {
+            val inputStream = Helpers::class.java.classLoader.getResourceAsStream(resourcePath)
+            if (inputStream == null) {
+                instance.getLogger().warning("Resource $resourcePath not found in classpath.")
+                return
+            }
+
+            if (!outputFile.parentFile.exists()) {
+                outputFile.parentFile.mkdirs()
+            }
+
+            inputStream.use { input ->
+                Files.copy(input, outputFile.toPath())
+            }
+            instance.getLogger().info("Created $resourcePath.")
+        } catch (e: Exception) {
+            instance.getLogger().log(Level.SEVERE, "Could not save $resourcePath to $outputFile", e)
+        }
+    }
+
     fun migrateConfigChatToFolder(instance: ProxyChatInstance, config: ProxyChatConfig) {
         if (!config.contains("chats")) {
             return

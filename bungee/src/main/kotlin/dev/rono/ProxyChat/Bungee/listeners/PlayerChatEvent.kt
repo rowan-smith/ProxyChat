@@ -17,13 +17,13 @@ class PlayerChatEvent : Listener {
 
         for (command in ProxyChatBungee.commands) {
             if (command.useCommandPrefix && e.message.startsWith(command.commandPrefix) && player.hasPermission(command.permission)) {
-                val message = e.message.substring(command.commandPrefix.length)
-                command.execute(player, message.split(" ").toTypedArray())
-                e.isCancelled = true
+                val message = e.message.substring(command.commandPrefix.length).trim()
+                command.handleChat(player, message.split(" ").toTypedArray())
+                e.message = "/proxychat"
                 return
             } else if (command.toggleUtils.isToggled(player.uniqueId)) {
-                command.execute(player, e.message.split(" ").toTypedArray())
-                e.isCancelled = true
+                command.handleChat(player, e.message.split(" ").toTypedArray())
+                e.message = "/proxychat"
                 return
             }
         }

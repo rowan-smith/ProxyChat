@@ -15,9 +15,6 @@
 
   <name>ProxyChat Velocity</name>
 
-  <properties>
-    <java.version>21</java.version>
-  </properties>
 
   <profiles>
     <profile>
@@ -112,6 +109,8 @@
         <configuration>
           <jvmTarget>${java.version}</jvmTarget>
         </configuration>
+        <dependencies>
+        </dependencies>
       </plugin>
        <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -125,19 +124,23 @@
             </goals>
             <configuration>
               <finalName>ProxyChat-Velocity-${project.parent.version}</finalName>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                    <exclude>META-INF/MANIFEST.MF</exclude>
+                    <exclude>META-INF/LICENSE</exclude>
+                    <exclude>**/module-info.class</exclude>
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>
        </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
@@ -199,7 +202,15 @@
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib-jdk8</artifactId>
+      <artifactId>kotlin-stdlib</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.insert-koin</groupId>
+      <artifactId>koin-core-jvm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.insert-koin</groupId>
+      <artifactId>koin-annotations</artifactId>
     </dependency>
   </dependencies>
 </project>

@@ -18,6 +18,7 @@ class ProxyChatCommand : Command("proxychat", "", "pc"), TabExecutor {
         if (args[0].equals("reload", ignoreCase = true)) {
             if (sender.hasPermission(ProxyChatBungee.config.getString("reload-permission"))) {
                 ProxyChatBungee.instance.registerConfiguration()
+                ProxyChatBungee.instance.getChats()
                 ProxyChatBungee.instance.unregisterCommands()
                 ProxyChatBungee.instance.registerCommands()
 

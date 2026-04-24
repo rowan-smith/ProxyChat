@@ -15,9 +15,6 @@
 
   <name>ProxyChat Bungee</name>
 
-  <properties>
-    <java.version>1.8</java.version>
-  </properties>
 
   <build>
     <defaultGoal>clean package</defaultGoal>
@@ -38,6 +35,8 @@
         <configuration>
           <jvmTarget>${java.version}</jvmTarget>
         </configuration>
+        <dependencies>
+        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -51,6 +50,19 @@
             </goals>
             <configuration>
               <finalName>ProxyChat-Bungee-${project.parent.version}</finalName>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                    <exclude>META-INF/MANIFEST.MF</exclude>
+                    <exclude>META-INF/LICENSE</exclude>
+                    <exclude>**/module-info.class</exclude>
+                  </excludes>
+                </filter>
+              </filters>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <mainClass>dev.rono.proxychat.bungee.ProxyChatBungee</mainClass>
@@ -88,7 +100,15 @@
     </dependency>
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib-jdk8</artifactId>
+      <artifactId>kotlin-stdlib</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.insert-koin</groupId>
+      <artifactId>koin-core-jvm</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.insert-koin</groupId>
+      <artifactId>koin-annotations</artifactId>
     </dependency>
   </dependencies>
 </project>
