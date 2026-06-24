@@ -2,6 +2,8 @@ package dev.rono.proxychat.bungee.platform;
 
 import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
 import dev.rono.proxychat.common.platform.ProxyCommandSource;
+import dev.rono.proxychat.common.platform.ProxyPlayer;
+import dev.rono.proxychat.bungee.platform.BungeePlayer;
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -22,6 +24,15 @@ public record BungeeCommandSource(CommandSender handle) implements ProxyCommandS
     @Override
     public boolean isPlayer() {
         return handle instanceof ProxiedPlayer;
+    }
+
+    @Override
+    public ProxyPlayer asPlayer() {
+        if (handle instanceof ProxiedPlayer player) {
+            return new BungeePlayer(player);
+        }
+
+        return null;
     }
 
     @Override

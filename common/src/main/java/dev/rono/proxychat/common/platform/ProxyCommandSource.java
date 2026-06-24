@@ -14,11 +14,11 @@ public interface ProxyCommandSource {
     UUID getUniqueId();
 
     default ProxyPlayer asPlayer() {
-        if (!isPlayer()) {
-            return null;
+        if (this instanceof ProxyPlayer proxyPlayer) {
+            return proxyPlayer;
         }
 
-        return (ProxyPlayer) this;
+        return null;
     }
 
     void sendMessage(Component message);

@@ -3,6 +3,8 @@ package dev.rono.proxychat.velocity.platform;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import dev.rono.proxychat.common.platform.ProxyCommandSource;
+import dev.rono.proxychat.common.platform.ProxyPlayer;
+import dev.rono.proxychat.velocity.platform.VelocityPlayer;
 import net.kyori.adventure.text.Component;
 
 import java.util.UUID;
@@ -25,6 +27,15 @@ public record VelocityCommandSource(CommandSource handle) implements ProxyComman
     @Override
     public boolean isPlayer() {
         return handle instanceof Player;
+    }
+
+    @Override
+    public ProxyPlayer asPlayer() {
+        if (handle instanceof Player player) {
+            return new VelocityPlayer(player);
+        }
+
+        return null;
     }
 
     @Override
