@@ -1,6 +1,6 @@
 package dev.rono.proxychat.common.channel;
 
-import dev.rono.proxychat.common.config.YamlConfig;
+import dev.rono.proxychat.common.config.ProxyChatYaml;
 import dev.rono.proxychat.common.util.ToggleUtils;
 import lombok.Getter;
 
@@ -28,7 +28,7 @@ public final class ChatChannel {
     private final List<String> serverBlacklist;
     private final ToggleUtils toggleUtils = new ToggleUtils();
 
-    public ChatChannel(YamlConfig config) {
+    public ChatChannel(ProxyChatYaml config) {
         this.commandName = config.getString("command-name");
         this.permission = config.getString("permission");
         this.commandAlias = config.getString("command-alias");

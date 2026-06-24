@@ -1,5 +1,7 @@
 package dev.rono.proxychat.common.config;
 
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.rono.proxychat.common.config.migration.ConfigFixtures;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -14,37 +16,31 @@ class ProxyChatConfigTest {
 
     @Test
     void migratesLegacyChatsIntoSeparateFiles() throws Exception {
-        copyResource("config-legacy.yml", dataDirectory.resolve("config.yml"));
+        ConfigFixtures.copyResource("v1/1-5/config.yml", dataDirectory.resolve("config.yml"));
         Files.createDirectories(dataDirectory.resolve("chats"));
 
         ProxyChatConfig config = new ProxyChatConfig(Logger.getLogger("test"), dataDirectory);
         config.loadDefaults(null, null);
 
-        Path legacyFile = dataDirectory.resolve("chats").resolve("legacy.yml");
-        assertThat(legacyFile).exists();
-        assertThat(YamlConfig.load(legacyFile).getString("command-name")).isEqualTo("legacy");
+        Path globalFile = dataDirectory.resolve("chats").resolve("global.yml");
+        assertThat(globalFile).exists();
+
+        YamlDocument globalDocument = YamlDocument.create(globalFile.toFile());
+        assertThat(globalDocument.getString("command-name")).isEqualTo("global");
         assertThat(config.getConfig().contains("chats")).isFalse();
     }
 
     @Test
     void loadsChannelFilesFromChatsDirectory() throws Exception {
-        copyResource("config.yml", dataDirectory.resolve("config.yml"));
+        ConfigFixtures.copyResource(ConfigFixtures.LATEST_CONFIG, dataDirectory.resolve("config.yml"));
         Path chatsDir = dataDirectory.resolve("chats");
         Files.createDirectories(chatsDir);
-        copyResource("chats/global.yml", chatsDir.resolve("global.yml"));
-        copyResource("chats/local.yml", chatsDir.resolve("local.yml"));
+        ConfigFixtures.copyResource(ConfigFixtures.LATEST_CHATS_DIR + "/global.yml", chatsDir.resolve("global.yml"));
+        ConfigFixtures.copyResource(ConfigFixtures.LATEST_CHATS_DIR + "/local.yml", chatsDir.resolve("local.yml"));
 
         ProxyChatConfig config = new ProxyChatConfig(Logger.getLogger("test"), dataDirectory);
         config.reload();
 
         assertThat(config.loadChannels()).hasSize(2);
-    }
-
-    private void copyResource(String resourceName, Path target) throws Exception {
-        try (var input = getClass().getClassLoader().getResourceAsStream(resourceName)) {
-            assertThat(input).isNotNull();
-            Files.createDirectories(target.getParent() == null ? dataDirectory : target.getParent());
-            Files.copy(input, target);
-        }
     }
 }

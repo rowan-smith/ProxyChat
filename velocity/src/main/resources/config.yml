@@ -41,4 +41,4 @@ help-channels-header: "&7Chat channels:"
 # always - always intercept (can kick players on vanilla BungeeCord 1.19.3+)
 signed-chat-interception: auto
 
-version: 3
+version: "2.2"

@@ -28,6 +28,9 @@ jobs:
       - name: Build and test with Maven
         run: mvn -B verify --file pom.xml
 
+      - name: Verify config migrations across public releases
+        run: mvn -B test -pl common -Dtest=ConfigMigrationReleaseTest
+
       - name: Prepare release assets
         run: |
           BUNGEE_JAR="bungee/target/ProxyChat-Bungee-${RELEASE_VERSION}.jar"

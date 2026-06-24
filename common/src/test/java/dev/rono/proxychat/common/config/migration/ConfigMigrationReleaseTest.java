@@ -1,0 +1,66 @@
+package dev.rono.proxychat.common.config.migration;
+
+import dev.rono.proxychat.common.config.ProxyChatYaml;
+import dev.rono.proxychat.common.config.ProxyChatYamlDocuments;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.logging.Logger;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class ConfigMigrationReleaseTest {
+    @TempDir Path dataDirectory;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        ProxyChatYamlDocuments.configureDefaults(null, null);
+    }
+
+    @ParameterizedTest
+    @MethodSource("dev.rono.proxychat.common.config.migration.ConfigFixtures#releaseConfigResources")
+    void migratesEveryPublicReleaseConfigToLatest(String releaseConfig) throws Exception {
+        ConfigFixtures.copyResource(releaseConfig, dataDirectory.resolve("config.yml"));
+        Files.createDirectories(dataDirectory.resolve("chats"));
+
+        ProxyChatYaml config = ProxyChatYaml.wrap(
+                ProxyChatYamlDocuments.loadMainConfig(dataDirectory, Logger.getLogger("test"))
+        );
+
+        assertThat(config.getConfigVersion()).isEqualTo(ConfigFixtures.LATEST);
+        assertThat(config.getString("signed-chat-interception")).isEqualTo("auto");
+        assertThat(config.getString("toggle-unsupported-message")).isNotBlank();
+        assertThat(config.getString("help-header")).isNotBlank();
+        assertThat(config.contains("chats")).isFalse();
+        assertThat(config.contains("reload")).isFalse();
+    }
+
+    @Test
+    void migratesBungeeChatAndPreservesComments() throws Exception {
+        ConfigFixtures.copyResource("v1/1-0/config.yml", dataDirectory.resolve("config.yml"));
+
+        ProxyChatYamlDocuments.loadMainConfig(dataDirectory, Logger.getLogger("test"));
+
+        String saved = Files.readString(dataDirectory.resolve("config.yml"));
+        assertThat(saved).contains("# Prefix used in front of all messages");
+        assertThat(saved).contains("reload-permission: bungeechat.reload");
+        assertThat(saved).contains("%chat-name%");
+    }
+
+    @Test
+    void migratesInlineChatsToChatsDirectory() throws Exception {
+        ConfigFixtures.copyResource("v1/1-5/config.yml", dataDirectory.resolve("config.yml"));
+        Files.createDirectories(dataDirectory.resolve("chats"));
+
+        ProxyChatYamlDocuments.loadMainConfig(dataDirectory, Logger.getLogger("test"));
+
+        assertThat(dataDirectory.resolve("chats/global.yml")).exists();
+        assertThat(dataDirectory.resolve("chats/staffchat.yml")).exists();
+        assertThat(Files.readString(dataDirectory.resolve("config.yml"))).doesNotContain("chats:");
+    }
+}

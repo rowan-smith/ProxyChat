@@ -24,6 +24,10 @@
                 <configuration>
                     <relocations>
                         <relocation>
+                            <pattern>dev.dejvokep.boostedyaml</pattern>
+                            <shadedPattern>dev.rono.proxychat.lib.yaml</shadedPattern>
+                        </relocation>
+                        <relocation>
                             <pattern>org.bstats</pattern>
                             <shadedPattern>dev.rono.proxychat.lib.bstats</shadedPattern>
                         </relocation>

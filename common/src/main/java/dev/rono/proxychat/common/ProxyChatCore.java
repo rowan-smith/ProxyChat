@@ -3,7 +3,7 @@ package dev.rono.proxychat.common;
 import dev.rono.proxychat.common.channel.ChatChannel;
 import dev.rono.proxychat.common.channel.ChatChannelService;
 import dev.rono.proxychat.common.config.ProxyChatConfig;
-import dev.rono.proxychat.common.config.YamlConfig;
+import dev.rono.proxychat.common.config.ProxyChatYaml;
 import dev.rono.proxychat.common.platform.ProxyChatBootstrap;
 import dev.rono.proxychat.common.platform.ProxyChatPlatform;
 import dev.rono.proxychat.common.platform.SignedChatHandler;
@@ -39,10 +39,8 @@ public final class ProxyChatCore implements ProxyChatBootstrap {
                 Files.createDirectories(dataDirectory);
             }
 
-            copyIfMissing(dataDirectory.resolve("config.yml"), defaultConfig);
-            configManager.ensureChatsDirectory(null);
-            copyIfMissing(dataDirectory.resolve("chats").resolve("global.yml"), defaultChannel);
-            configManager.loadDefaults(null, null);
+            configManager.ensureChatsDirectory();
+            configManager.initialize(defaultConfig, defaultChannel);
 
             reloadChannels();
 
@@ -65,20 +63,11 @@ public final class ProxyChatCore implements ProxyChatBootstrap {
     private void reloadChannels() {
         channels.clear();
 
-        for (YamlConfig channelConfig : configManager.loadChannels()) {
+        for (ProxyChatYaml channelConfig : configManager.loadChannels()) {
             channels.add(new ChatChannel(channelConfig));
         }
 
         logger.info(channels.size() + " chat channels loaded.");
-    }
-
-    private static void copyIfMissing(Path target, InputStream source) throws Exception {
-        if (source == null || target.toFile().exists()) {
-            return;
-        }
-
-        Files.createDirectories(target.getParent());
-        Files.copy(source, target);
     }
 
     @Override

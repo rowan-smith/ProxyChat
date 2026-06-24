@@ -1,6 +1,6 @@
 package dev.rono.proxychat.common.util;
 
-import dev.rono.proxychat.common.config.YamlConfig;
+import dev.rono.proxychat.common.config.ProxyChatYaml;
 import dev.rono.proxychat.common.test.FakePlayer;
 import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
 import org.junit.jupiter.api.Test;
@@ -14,8 +14,8 @@ class SignedChatPolicyTest {
     private final RecordingSignedChatHandler handler = new RecordingSignedChatHandler().canIntercept(false);
 
     @Test
-    void autoModeDelegatesToHandler() {
-        YamlConfig config = configWithMode("auto");
+    void autoModeDelegatesToHandler() throws Exception {
+        ProxyChatYaml config = configWithMode("auto");
 
         assertThat(SignedChatPolicy.shouldInterceptChat(config, handler, player)).isFalse();
 
@@ -24,31 +24,31 @@ class SignedChatPolicyTest {
     }
 
     @Test
-    void treatsMissingModeAsAuto() {
-        YamlConfig config = YamlConfig.fromMap(new LinkedHashMap<>());
+    void treatsMissingModeAsAuto() throws Exception {
+        ProxyChatYaml config = ProxyChatYaml.fromMap(new LinkedHashMap<>());
 
         handler.canIntercept(true);
         assertThat(SignedChatPolicy.shouldInterceptChat(config, handler, player)).isTrue();
     }
 
     @Test
-    void neverModeSkipsHandler() {
-        YamlConfig config = configWithMode("never");
+    void neverModeSkipsHandler() throws Exception {
+        ProxyChatYaml config = configWithMode("never");
 
         handler.canIntercept(true);
         assertThat(SignedChatPolicy.shouldInterceptChat(config, handler, player)).isFalse();
     }
 
     @Test
-    void alwaysModeIgnoresHandler() {
-        YamlConfig config = configWithMode("always");
+    void alwaysModeIgnoresHandler() throws Exception {
+        ProxyChatYaml config = configWithMode("always");
 
         handler.canIntercept(false);
         assertThat(SignedChatPolicy.shouldInterceptChat(config, handler, player)).isTrue();
     }
 
     @Test
-    void acceptsSynonyms() {
+    void acceptsSynonyms() throws Exception {
         handler.canIntercept(true);
 
         assertThat(SignedChatPolicy.shouldInterceptChat(configWithMode("disabled"), handler, player)).isFalse();
@@ -57,10 +57,10 @@ class SignedChatPolicyTest {
         assertThat(SignedChatPolicy.shouldInterceptChat(configWithMode("false"), handler, player)).isFalse();
     }
 
-    private static YamlConfig configWithMode(String mode) {
+    private static ProxyChatYaml configWithMode(String mode) throws Exception {
         LinkedHashMap<String, Object> root = new LinkedHashMap<>();
         root.put("signed-chat-interception", mode);
 
-        return YamlConfig.fromMap(root);
+        return ProxyChatYaml.fromMap(root);
     }
 }

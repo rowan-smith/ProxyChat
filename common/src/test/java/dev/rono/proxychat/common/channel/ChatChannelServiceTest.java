@@ -210,7 +210,7 @@ class ChatChannelServiceTest {
 
     @Test
     void hidesToggleWhenSignedChatInterceptionDisabledInConfig() throws Exception {
-        harness.config().set("signed-chat-interception", "never");
+        harness.config().section().set("signed-chat-interception", "never");
         FakePlayer player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
 
         assertThat(service.tabComplete(harness.globalChannel(), player, new String[]{""})).containsExactly("ignore");

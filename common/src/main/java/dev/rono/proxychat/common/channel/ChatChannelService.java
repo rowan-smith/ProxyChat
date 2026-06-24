@@ -1,6 +1,7 @@
 package dev.rono.proxychat.common.channel;
 
-import dev.rono.proxychat.common.config.YamlConfig;
+import dev.rono.proxychat.common.config.ProxyChatMessages;
+import dev.rono.proxychat.common.config.ProxyChatYaml;
 import dev.rono.proxychat.common.message.MessageFormatter;
 import dev.rono.proxychat.common.platform.ProxyChatBootstrap;
 import dev.rono.proxychat.common.platform.ProxyChatPlatform;
@@ -21,7 +22,7 @@ public final class ChatChannelService {
 
     public void execute(ChatChannel channel, ProxyCommandSource sender, String[] args) {
         ProxyChatPlatform platform = bootstrap.getPlatform();
-        YamlConfig config = bootstrap.getConfig().getConfig();
+        ProxyChatYaml config = bootstrap.getConfig().getConfig();
 
         if (!sender.isPlayer()) {
             if (channel.isConsoleChatAllowed()) {
@@ -163,28 +164,33 @@ public final class ChatChannelService {
         }
     }
 
-    private Component formattedConfigMessage(YamlConfig config, String key, ProxyCommandSource source, ChatChannel channel, String[] args) {
-        return formatMessage(config, config.getString(key), source, channel, args, false);
+    private Component formattedConfigMessage(ProxyChatYaml config, String key, ProxyCommandSource source, ChatChannel channel, String[] args) {
+        return formatMessage(config, ProxyChatMessages.resolve(config, key), source, channel, args, false);
     }
 
-    private Component formatMessage(YamlConfig config, String template, ProxyCommandSource source, ChatChannel channel, String[] args, boolean ignorePrefix) {
+    private Component formatMessage(ProxyChatYaml config, String template, ProxyCommandSource source, ChatChannel channel, String[] args, boolean ignorePrefix) {
+        if (template == null || template.isEmpty()) {
+            return Component.empty();
+        }
+
         String message = applyPlaceholders(template, source, channel, args, config, ignorePrefix);
         if (!ignorePrefix) {
-            message = config.getString("prefix") + message;
+            message = ProxyChatMessages.resolve(config, "prefix") + message;
         }
 
         return MessageFormatter.legacy(message);
     }
 
-    private String applyPlaceholders(String template, ProxyCommandSource source, ChatChannel channel, String[] args, YamlConfig config, boolean ignorePrefix) {
+    private String applyPlaceholders(String template, ProxyCommandSource source, ChatChannel channel, String[] args, ProxyChatYaml config, boolean ignorePrefix) {
         ProxyPlayer player = source.asPlayer();
+        String prefix = nullToEmpty(ProxyChatMessages.resolve(config, "prefix"));
         String message = template
-                .replace("%player%", source.getName())
-                .replace("%prefix%", config.getString("prefix"))
-                .replace("%command-name%", channel.getCommandName())
-                .replace("%command-alias%", channel.getCommandAlias())
-                .replace("%command-prefix%", channel.getCommandPrefix())
-                .replace("%chat-name%", channel.getChatName());
+                .replace("%player%", nullToEmpty(source.getName()))
+                .replace("%prefix%", prefix)
+                .replace("%command-name%", nullToEmpty(channel.getCommandName()))
+                .replace("%command-alias%", nullToEmpty(channel.getCommandAlias()))
+                .replace("%command-prefix%", nullToEmpty(channel.getCommandPrefix()))
+                .replace("%chat-name%", nullToEmpty(channel.getChatName()));
 
         if (player != null) {
             message = message.replace("%server%", player.getServerName());
@@ -200,5 +206,9 @@ public final class ChatChannelService {
         }
 
         return message.replace("%message%", joinedArgs);
+    }
+
+    private static String nullToEmpty(String value) {
+        return value != null ? value : "";
     }
 }

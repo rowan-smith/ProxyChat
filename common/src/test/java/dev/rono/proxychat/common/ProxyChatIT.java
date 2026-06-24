@@ -71,22 +71,19 @@ class ProxyChatIT {
         platform.setSignedChatHandler(new RecordingSignedChatHandler());
         TestEnvironment.TestHarness harness = TestEnvironment.createWithLegacyConfig(dataDirectory, platform);
 
-        assertThat(harness.dataDirectory().resolve("chats").resolve("legacy.yml")).exists();
+        assertThat(harness.dataDirectory().resolve("chats").resolve("global.yml")).exists();
 
-        ChatChannel legacy = harness.core().getChannels().stream()
-                .filter(channel -> channel.getCommandName().equals("legacy"))
+        ChatChannel global = harness.core().getChannels().stream()
+                .filter(channel -> channel.getCommandName().equals("global"))
                 .findFirst()
                 .orElseThrow();
 
-        FakeConsole console = new FakeConsole();
-        platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.legacy"));
+        FakePlayer alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        FakePlayer bob = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
 
-        harness.core().getChannelService().execute(legacy, console, new String[]{"migrated"});
+        harness.core().getChannelService().execute(global, alice, new String[]{"migrated"});
 
-        assertThat(platform.getOnlinePlayers().stream()
-                .map(player -> ((FakePlayer) player).receivedMessages())
-                .anyMatch(messages -> messages.stream().anyMatch(message -> message.contains("migrated"))))
-                .isTrue();
+        assertThat(bob.receivedMessages()).anyMatch(message -> message.contains("migrated"));
     }
 
     @Test
