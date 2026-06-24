@@ -4,6 +4,7 @@ import dev.rono.proxychat.common.config.ProxyChatMessages;
 import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.boostedyaml.block.implementation.Section;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -120,9 +121,9 @@ public final class ProxyChatConfigMigrations {
       }
 
       try {
-        YamlDocument channelDocument = YamlDocument.create(target.toFile());
+        YamlDocument channelDocument = YamlDocument.create(new ByteArrayInputStream(new byte[0]));
         copySection(channel, channelDocument);
-        channelDocument.save();
+        Files.writeString(target, channelDocument.dump());
         logger.info("Migrated chats/" + commandName + ".yml");
 
       } catch (Exception exception) {

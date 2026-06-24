@@ -1,6 +1,5 @@
 package dev.rono.proxychat.common.config;
 
-import dev.dejvokep.boostedyaml.YamlDocument;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -15,7 +14,6 @@ public final class ProxyChatConfig {
     private final Logger logger;
     private final Path dataDirectory;
     @Getter private ProxyChatYaml config;
-    private YamlDocument configDocument;
 
     public ProxyChatConfig(Logger logger, Path dataDirectory) {
         this.logger = logger;
@@ -32,8 +30,7 @@ public final class ProxyChatConfig {
     }
 
     public void reload() throws Exception {
-        configDocument = ProxyChatYamlDocuments.loadMainConfig(dataDirectory, logger);
-        config = ProxyChatYaml.wrap(configDocument);
+        config = ProxyChatYaml.wrap(ProxyChatYamlDocuments.loadMainConfig(dataDirectory, logger));
     }
 
     public List<ProxyChatYaml> loadChannels() {
@@ -51,8 +48,7 @@ public final class ProxyChatConfig {
 
         for (var chatFile : chatFiles) {
             try {
-                YamlDocument channelDocument = ProxyChatYamlDocuments.loadChannel(chatFile.toPath());
-                channels.add(ProxyChatYaml.wrap(channelDocument));
+                channels.add(ProxyChatYaml.wrap(ProxyChatYamlDocuments.loadChannel(chatFile.toPath())));
 
             } catch (Exception exception) {
                 logger.log(Level.WARNING, "Failed to load " + chatFile.getName(), exception);

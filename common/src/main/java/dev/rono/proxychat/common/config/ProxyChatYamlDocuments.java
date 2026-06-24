@@ -4,7 +4,6 @@ import dev.rono.proxychat.common.config.migration.ConfigVersion;
 import dev.rono.proxychat.common.config.migration.ConfigVersionPattern;
 import dev.rono.proxychat.common.config.migration.LegacyVersionNormalizer;
 import dev.rono.proxychat.common.config.migration.ProxyChatConfigMigrations;
-import dev.rono.proxychat.common.config.ProxyChatMessages;
 import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.boostedyaml.dvs.versioning.AutomaticVersioning;
 import dev.dejvokep.boostedyaml.settings.Settings;
@@ -17,6 +16,7 @@ import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings.OptionSorting;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
@@ -42,22 +42,25 @@ public final class ProxyChatYamlDocuments {
   }
 
   public static YamlDocument loadMainConfig(Path dataDirectory, Logger logger) throws IOException {
-  ensureDefaultsLoaded();
+    ensureDefaultsLoaded();
 
     Path configPath = dataDirectory.resolve("config.yml");
+    if (!Files.exists(configPath) || Files.size(configPath) == 0) {
+      Files.createDirectories(configPath.getParent());
+      Files.write(configPath, bundledConfigDefaults);
+    }
+
     YamlDocument document = YamlDocument.create(
-        configPath.toFile(),
+        new ByteArrayInputStream(Files.readAllBytes(configPath)),
         configDefaultsStream(),
         mainConfigSettings(dataDirectory, logger)
     );
 
-    if (Files.exists(configPath) && Files.size(configPath) > 0) {
-      LegacyVersionNormalizer.normalize(document);
-      document.update();
-      ProxyChatConfigMigrations.ensureLatestKeys(document);
-      document.set(ConfigVersionPattern.VERSION_ROUTE, ConfigVersion.LATEST.toString());
-      document.save();
-    }
+    LegacyVersionNormalizer.normalize(document);
+    document.update();
+    ProxyChatConfigMigrations.ensureLatestKeys(document);
+    document.set(ConfigVersionPattern.VERSION_ROUTE, ConfigVersion.LATEST.toString());
+    writeDocument(configPath, document);
 
     return document;
   }
@@ -65,18 +68,26 @@ public final class ProxyChatYamlDocuments {
   public static YamlDocument loadChannel(Path channelFile) throws IOException {
     ensureDefaultsLoaded();
 
+    if (!Files.exists(channelFile) || Files.size(channelFile) == 0) {
+      Files.createDirectories(channelFile.getParent());
+      Files.write(channelFile, bundledChannelDefaults);
+    }
+
     YamlDocument document = YamlDocument.create(
-        channelFile.toFile(),
+        new ByteArrayInputStream(Files.readAllBytes(channelFile)),
         channelDefaultsStream(),
         channelSettings()
     );
 
-    if (Files.exists(channelFile) && Files.size(channelFile) > 0) {
-      document.update();
-      document.save();
-    }
+    document.update();
+    writeDocument(channelFile, document);
 
     return document;
+  }
+
+  private static void writeDocument(Path path, YamlDocument document) throws IOException {
+    Files.createDirectories(path.getParent());
+    Files.writeString(path, document.dump(), StandardCharsets.UTF_8);
   }
 
   private static Settings[] mainConfigSettings(Path dataDirectory, Logger logger) {

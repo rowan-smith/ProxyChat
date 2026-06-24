@@ -5,6 +5,7 @@ import dev.rono.proxychat.common.config.migration.ConfigFixtures;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
@@ -25,7 +26,7 @@ class ProxyChatConfigTest {
         Path globalFile = dataDirectory.resolve("chats").resolve("global.yml");
         assertThat(globalFile).exists();
 
-        YamlDocument globalDocument = YamlDocument.create(globalFile.toFile());
+        YamlDocument globalDocument = YamlDocument.create(new ByteArrayInputStream(Files.readAllBytes(globalFile)));
         assertThat(globalDocument.getString("command-name")).isEqualTo("global");
         assertThat(config.getConfig().contains("chats")).isFalse();
     }
