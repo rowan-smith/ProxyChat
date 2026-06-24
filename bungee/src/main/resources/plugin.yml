@@ -1,0 +1,4 @@
+name: ProxyChat
+version: ${project.version}
+main: dev.rono.proxychat.bungee.BungeeProxyChatPlugin
+author: Rono

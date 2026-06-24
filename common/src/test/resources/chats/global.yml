@@ -1,0 +1,18 @@
+chat-name: "Global Chat"
+command-name: "global"
+permission: "proxychat.global"
+command-alias: "G"
+command-prefix: "@"
+use-command-prefix: true
+log-chat-to-console: true
+command-delay: 100
+command-delay-override-permission: "proxychat.global.override"
+invalid-args: "&c/%command-name% <message>"
+format: "&8[&9%command-alias%&8] [&9%server%&8] &9%player% &8» &7%message%"
+console-format: "&8[&9%command-alias%&8] &9%player% &8» &7%message%"
+console-chat-allowed: false
+use-color-in-chat-permission: "proxychat.global.color"
+toggleable: true
+ignorable: true
+local: false
+blacklist: []

@@ -1,0 +1,37 @@
+############################################################
+# +------------------------------------------------------+ #
+# |                      Proxy Chat                      | #
+# +------------------------------------------------------+ #
+############################################################
+
+# Prefix used in front of all messages
+prefix: "&2ProxyChat » "
+
+# This is what is shown when you toggle a command.
+toggle-enable-message: "&aYou have toggled &2on &a%chat-name%"
+toggle-disable-message: "&aYou have toggled &4off &a%chat-name%"
+
+# This is what is shown when is ignored messages from a chat.
+ignore-enable-message: "&cYou have ignored %chat-name%!"
+ignore-disable-message: "&aYou have un-ignored %chat-name%!"
+
+# This is what is shown when you try chat in a channel when ignored.
+chat-disabled-message: "&cYou cannot send a message while %chat-name% is ignored!"
+
+# This is what message is shown when you use a command too quickly.
+command-cooldown-message: "&cChat on cooldown for &e%chat-cooldown% &csecond(s)!"
+
+# Message sent to console when disabled.
+console-disabled-message: "&cYou have to be a player to use this command!"
+
+# Reload information
+reload-permission: "proxychat.reload"
+reload-message: "&aConfiguration reloaded!"
+
+# Controls whether ProxyChat cancels plain chat for @prefix and toggle mode.
+# auto  - intercept when the proxy can safely handle signed chat (Waterfall / SignedVelocity)
+# never - only use /channel commands; never cancel plain chat (safe on vanilla BungeeCord)
+# always - always intercept (can kick players on vanilla BungeeCord 1.19.3+)
+signed-chat-interception: auto
+
+version: 3

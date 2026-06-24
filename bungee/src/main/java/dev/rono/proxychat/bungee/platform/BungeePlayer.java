@@ -1,0 +1,49 @@
+package dev.rono.proxychat.bungee.platform;
+
+import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
+import dev.rono.proxychat.common.platform.ProxyPlayer;
+import net.kyori.adventure.text.Component;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+
+import java.util.UUID;
+
+public record BungeePlayer(ProxiedPlayer handle) implements ProxyPlayer {
+    @Override
+    public String getName() {
+        return handle.getName();
+    }
+
+    @Override
+    public boolean hasPermission(String permission) {
+        return handle.hasPermission(permission);
+    }
+
+    @Override
+    public boolean isPlayer() {
+        return true;
+    }
+
+    @Override
+    public UUID getUniqueId() {
+        return handle.getUniqueId();
+    }
+
+    @Override
+    public String getServerName() {
+        if (handle.getServer() == null) {
+            return "";
+        }
+
+        return handle.getServer().getInfo().getName();
+    }
+
+    @Override
+    public int getProtocolVersion() {
+        return handle.getPendingConnection().getVersion();
+    }
+
+    @Override
+    public void sendMessage(Component message) {
+        BungeeProxyChatPlugin.getInstance().getAdventure().player(handle).sendMessage(message);
+    }
+}
