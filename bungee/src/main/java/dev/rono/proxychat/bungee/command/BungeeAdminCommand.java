@@ -1,10 +1,10 @@
 package dev.rono.proxychat.bungee.command;
 
+import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
+import dev.rono.proxychat.bungee.platform.BungeeCommandSource;
 import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.common.command.ProxyChatAdminHelp;
 import dev.rono.proxychat.common.message.MessageFormatter;
-import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
-import dev.rono.proxychat.bungee.platform.BungeeCommandSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.md_5.bungee.api.CommandSender;

@@ -7,11 +7,7 @@ import dev.rono.proxychat.common.platform.SignedChatHandler;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class FakePlatform implements ProxyChatPlatform {

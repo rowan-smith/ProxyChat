@@ -1,7 +1,7 @@
 package dev.rono.proxychat.bungee.listener;
 
-import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.bungee.platform.BungeePlayer;
+import dev.rono.proxychat.common.ProxyChatCore;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;

@@ -1,13 +1,13 @@
 package dev.rono.proxychat.bungee;
 
-import dev.rono.proxychat.common.ProxyChatCore;
-import dev.rono.proxychat.common.channel.ChatChannel;
 import dev.rono.proxychat.bungee.command.BungeeAdminCommand;
 import dev.rono.proxychat.bungee.command.BungeeChannelCommand;
 import dev.rono.proxychat.bungee.listener.BungeeChatListener;
 import dev.rono.proxychat.bungee.listener.BungeeSignedChatListener;
 import dev.rono.proxychat.bungee.platform.BungeePlatform;
 import dev.rono.proxychat.bungee.platform.WaterfallSignedChatHandler;
+import dev.rono.proxychat.common.ProxyChatCore;
+import dev.rono.proxychat.common.channel.ChatChannel;
 import lombok.Getter;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.plugin.Plugin;

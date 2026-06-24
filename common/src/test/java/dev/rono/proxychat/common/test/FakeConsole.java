@@ -4,11 +4,7 @@ import dev.rono.proxychat.common.platform.ProxyCommandSource;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class FakeConsole implements ProxyCommandSource {
     private static final PlainTextComponentSerializer PLAIN = PlainTextComponentSerializer.plainText();

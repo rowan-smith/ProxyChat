@@ -1,9 +1,9 @@
 package dev.rono.proxychat.bungee.command;
 
-import dev.rono.proxychat.common.ProxyChatCore;
-import dev.rono.proxychat.common.channel.ChatChannel;
 import dev.rono.proxychat.bungee.platform.BungeeCommandSource;
 import dev.rono.proxychat.bungee.platform.BungeePlayer;
+import dev.rono.proxychat.common.ProxyChatCore;
+import dev.rono.proxychat.common.channel.ChatChannel;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;

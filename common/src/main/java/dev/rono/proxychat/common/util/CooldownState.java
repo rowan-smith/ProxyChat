@@ -1,8 +1,8 @@
 package dev.rono.proxychat.common.util;
 
-import static java.lang.Math.abs;
-
 import java.util.concurrent.TimeUnit;
+
+import static java.lang.Math.abs;
 
 public final class CooldownState implements Runnable {
     private final long delayMillis;

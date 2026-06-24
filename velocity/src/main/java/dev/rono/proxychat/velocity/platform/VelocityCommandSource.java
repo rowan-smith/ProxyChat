@@ -4,7 +4,6 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import dev.rono.proxychat.common.platform.ProxyCommandSource;
 import dev.rono.proxychat.common.platform.ProxyPlayer;
-import dev.rono.proxychat.velocity.platform.VelocityPlayer;
 import net.kyori.adventure.text.Component;
 
 import java.util.UUID;
