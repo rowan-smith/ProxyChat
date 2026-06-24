@@ -1,0 +1,47 @@
+# This is the name of the chat, used in messages.
+chat-name: "Global Chat"
+
+# This is the name of the command.
+command-name: "global"
+
+# You need this permission to use the command above.
+permission: "proxychat.global"
+
+# You can also use this command.
+command-alias: "G"
+
+# This is an alternative to using the command.
+command-prefix: "@"
+use-command-prefix: true
+
+# Log the chat to console, so you see chat in console
+log-chat-to-console: false
+
+# This is a delay on how quickly you can use the command!
+# This is in milliseconds, 1 second = 1000 milliseconds
+command-delay: 5000
+
+# This overrides the command delay.
+command-delay-override-permission: "proxychat.global.override"
+
+# This shows when you enter command wrong.
+invalid-args: "&c/%command-name% <message> or %command-prefix%<message>"
+
+# This is the format the chat will show in chat.
+format: "&8[&9%command-alias%&8] [&9%server%&8] &9%player% &8» &7%message%"
+
+# This is the format when talking from console
+console-format: "&8[&9%command-alias%&8] &9%player% &8» &7%message%"
+console-chat-allowed: false
+
+# Add this permission so users can use color codes in messages.
+use-color-in-chat-permission: "proxychat.global.color"
+
+# Toggle the chat so you don't need commands!
+toggleable: true
+
+# Ignore the chat, so you can't send or receive messages!
+ignorable: true
+
+# Is this a local server chat
+local: false
