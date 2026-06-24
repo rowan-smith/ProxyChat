@@ -6,6 +6,7 @@ import dev.rono.proxychat.common.platform.ProxyChatBootstrap;
 import dev.rono.proxychat.common.platform.ProxyChatPlatform;
 import dev.rono.proxychat.common.platform.ProxyCommandSource;
 import dev.rono.proxychat.common.platform.ProxyPlayer;
+import dev.rono.proxychat.common.util.SignedChatPolicy;
 import net.kyori.adventure.text.Component;
 
 import java.util.ArrayList;
@@ -51,6 +52,11 @@ public final class ChatChannelService {
         }
 
         if (channel.isToggleable() && args[0].equalsIgnoreCase("toggle")) {
+            if (!isToggleAvailable(channel, player)) {
+                player.sendMessage(formattedConfigMessage(config, "toggle-unsupported-message", player, channel, args));
+                return;
+            }
+
             if (channel.getToggleUtils().toggleChat(player.getUniqueId())) {
                 player.sendMessage(formattedConfigMessage(config, "toggle-enable-message", player, channel, args));
 
@@ -104,7 +110,7 @@ public final class ChatChannelService {
         }
 
         if (args.length == 1) {
-            if (channel.isToggleable()) {
+            if (isToggleAvailable(channel, player)) {
                 suggestions.add("toggle");
             }
 
@@ -133,6 +139,15 @@ public final class ChatChannelService {
         }
 
         return false;
+    }
+
+    private boolean isToggleAvailable(ChatChannel channel, ProxyPlayer player) {
+        return SignedChatPolicy.isToggleAvailable(
+                bootstrap.getConfig().getConfig(),
+                bootstrap.getSignedChatHandler(),
+                channel,
+                player
+        );
     }
 
     private void broadcast(ChatChannel channel, Component message, ProxyPlayer localScope, boolean consoleFormat) {

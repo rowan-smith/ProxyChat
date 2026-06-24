@@ -1,5 +1,7 @@
-# Project exclude paths
-/target/
-/ProxyChat.iml
-/.idea/
+# Maven
+target/
+dependency-reduced-pom.xml
+
+# IntelliJ IDEA
+.idea/
 *.iml

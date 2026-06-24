@@ -3,6 +3,7 @@ package dev.rono.proxychat.velocity.command;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import dev.rono.proxychat.common.ProxyChatCore;
+import dev.rono.proxychat.common.command.ProxyChatAdminHelp;
 import dev.rono.proxychat.common.message.MessageFormatter;
 import dev.rono.proxychat.velocity.platform.VelocityCommandSource;
 import net.kyori.adventure.text.Component;
@@ -24,6 +25,7 @@ public final class VelocityAdminCommand implements SimpleCommand {
         String[] args = invocation.arguments();
 
         if (args.length < 1) {
+            ProxyChatAdminHelp.send(core, new VelocityCommandSource(source));
             return;
         }
 

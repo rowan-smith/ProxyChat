@@ -1,6 +1,7 @@
 package dev.rono.proxychat.bungee.command;
 
 import dev.rono.proxychat.common.ProxyChatCore;
+import dev.rono.proxychat.common.command.ProxyChatAdminHelp;
 import dev.rono.proxychat.common.message.MessageFormatter;
 import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
 import dev.rono.proxychat.bungee.platform.BungeeCommandSource;
@@ -26,6 +27,7 @@ public final class BungeeAdminCommand extends Command implements TabExecutor {
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (args.length < 1) {
+            ProxyChatAdminHelp.send(core, new BungeeCommandSource(sender));
             return;
         }
 

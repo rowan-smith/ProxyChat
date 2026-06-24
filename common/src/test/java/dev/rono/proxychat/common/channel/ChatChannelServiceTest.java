@@ -197,6 +197,35 @@ class ChatChannelServiceTest {
     }
 
     @Test
+    void hidesToggleWhenSignedChatInterceptionUnavailable() throws Exception {
+        FakePlatform blockedPlatform = new FakePlatform();
+        blockedPlatform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(false));
+        TestEnvironment.TestHarness blockedHarness = TestEnvironment.create(dataDirectory.resolve("blocked-toggle"), blockedPlatform);
+        ChatChannelService blockedService = blockedHarness.core().getChannelService();
+        FakePlayer player = blockedPlatform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+
+        assertThat(blockedService.tabComplete(blockedHarness.globalChannel(), player, new String[]{""})).containsExactly("ignore");
+
+        blockedService.execute(blockedHarness.globalChannel(), player, new String[]{"toggle"});
+
+        assertThat(player.receivedMessages()).anyMatch(message -> message.contains("unavailable"));
+        assertThat(blockedHarness.globalChannel().getToggleUtils().isToggled(player.getUniqueId())).isFalse();
+    }
+
+    @Test
+    void hidesToggleWhenSignedChatInterceptionDisabledInConfig() throws Exception {
+        harness.config().set("signed-chat-interception", "never");
+        FakePlayer player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+
+        assertThat(service.tabComplete(harness.globalChannel(), player, new String[]{""})).containsExactly("ignore");
+
+        service.execute(harness.globalChannel(), player, new String[]{"toggle"});
+
+        assertThat(player.receivedMessages()).anyMatch(message -> message.contains("unavailable"));
+        assertThat(harness.globalChannel().getToggleUtils().isToggled(player.getUniqueId())).isFalse();
+    }
+
+    @Test
     void returnsNoTabCompletionsOnBlacklistedServer() {
         FakePlayer player = platform.addPlayer(new FakePlayer("Alice", "blocked-server").withPermission("proxychat.staff"));
 

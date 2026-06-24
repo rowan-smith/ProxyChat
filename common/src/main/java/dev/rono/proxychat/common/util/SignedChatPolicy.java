@@ -1,5 +1,6 @@
 package dev.rono.proxychat.common.util;
 
+import dev.rono.proxychat.common.channel.ChatChannel;
 import dev.rono.proxychat.common.config.YamlConfig;
 import dev.rono.proxychat.common.platform.ProxyPlayer;
 import dev.rono.proxychat.common.platform.SignedChatHandler;
@@ -24,5 +25,13 @@ public final class SignedChatPolicy {
         }
 
         return handler.canInterceptChat(player);
+    }
+
+    public static boolean isToggleAvailable(YamlConfig config, SignedChatHandler handler, ChatChannel channel, ProxyPlayer player) {
+        if (!channel.isToggleable()) {
+            return false;
+        }
+
+        return shouldInterceptChat(config, handler, player);
     }
 }

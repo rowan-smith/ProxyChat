@@ -10,6 +10,7 @@ prefix: "&2ProxyChat » "
 # This is what is shown when you toggle a command.
 toggle-enable-message: "&aYou have toggled &2on &a%chat-name%"
 toggle-disable-message: "&aYou have toggled &4off &a%chat-name%"
+toggle-unsupported-message: "&cToggle chat is unavailable on this proxy for your client version. Use /%command-name% <message> instead."
 
 # This is what is shown when is ignored messages from a chat.
 ignore-enable-message: "&cYou have ignored %chat-name%!"
@@ -27,6 +28,12 @@ console-disabled-message: "&cYou have to be a player to use this command!"
 # Reload information
 reload-permission: "proxychat.reload"
 reload-message: "&aConfiguration reloaded!"
+
+# Shown when running /proxychat or /pc with no arguments
+help-header: "&7ProxyChat commands:"
+help-reload: "&7/proxychat reload &8- Reload configuration and channels"
+help-version: "&7/proxychat version &8- Plugin information"
+help-channels-header: "&7Chat channels:"
 
 # Controls whether ProxyChat cancels plain chat for @prefix and toggle mode.
 # auto  - intercept when the proxy can safely handle signed chat (Waterfall / SignedVelocity)

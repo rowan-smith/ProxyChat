@@ -2,6 +2,7 @@ prefix: "&2ProxyChat » "
 
 toggle-enable-message: "&aYou have toggled &2on &a%chat-name%"
 toggle-disable-message: "&aYou have toggled &4off &a%chat-name%"
+toggle-unsupported-message: "&cToggle chat is unavailable on this proxy for your client version. Use /%command-name% <message> instead."
 ignore-enable-message: "&cYou have ignored %chat-name%!"
 ignore-disable-message: "&aYou have un-ignored %chat-name%!"
 chat-disabled-message: "&cYou cannot send a message while %chat-name% is ignored!"
