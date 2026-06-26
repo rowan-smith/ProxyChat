@@ -24,13 +24,17 @@ class VelocityPrefixChatRegressionTest {
 
     @Test
     void prefixedChatDeniesSignedMessageAndBroadcastsProxyFormattedLine() throws Exception {
+
+        // arrange
         FakePlatform platform = signedVelocityPlatform();
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
         FakePlayer sender = platform.addPlayer(new FakePlayer("Rono", "lobby").withPermission("proxychat.global"));
         FakePlayer sameServer = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
 
+        // act
         VelocityChatIntercept.Action action = VelocityChatIntercept.decide(harness.core(), sender, "@hello");
 
+        // assert
         assertThat(action).isEqualTo(VelocityChatIntercept.Action.DENY);
         assertThat(sender.receivedMessages()).anyMatch(message ->
                 message.contains("[G]") && message.contains("Rono") && message.contains("hello"));
@@ -40,10 +44,13 @@ class VelocityPrefixChatRegressionTest {
 
     @Test
     void prefixedChatDoesNotLeakVanillaInputWhenIntercepted() throws Exception {
+
+        // arrange
         FakePlatform platform = signedVelocityPlatform();
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
         FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
 
+        // act
         Optional<VelocityPrefixInterceptResult> result =
                 harness.core().getChannelService().tryVelocityPrefixedIntercept(sender, "@hello");
 
@@ -53,22 +60,31 @@ class VelocityPrefixChatRegressionTest {
 
     @Test
     void prefixedChatWithLeadingWhitespaceIsIntercepted() throws Exception {
+
+        // arrange
         FakePlatform platform = signedVelocityPlatform();
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
         FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
 
+        // act
         VelocityChatIntercept.Action action = VelocityChatIntercept.decide(harness.core(), sender, "  @leading");
 
+        // assert
         assertThat(action).isEqualTo(VelocityChatIntercept.Action.DENY);
         assertThat(sender.receivedMessages()).anyMatch(message -> message.contains("leading"));
     }
 
     @Test
     void prefixedChatWithoutPermissionPassesThrough() throws Exception {
+
+        // arrange
         FakePlatform platform = signedVelocityPlatform();
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
+
+        // act
         FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby"));
 
+        // assert
         assertThat(VelocityChatIntercept.decide(harness.core(), sender, "@hidden"))
                 .isEqualTo(VelocityChatIntercept.Action.PASS);
         assertThat(sender.receivedMessages()).isEmpty();
@@ -76,16 +92,19 @@ class VelocityPrefixChatRegressionTest {
 
     @Test
     void cooldownBlocksSecondPrefixedMessageWithoutBroadcastingIt() throws Exception {
+
+        // arrange
         FakePlatform platform = signedVelocityPlatform();
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
         FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
         FakePlayer recipient = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
-
-        VelocityChatIntercept.decide(harness.core(), sender, "@first");
         recipient.receivedMessages().clear();
 
+        // act
+        VelocityChatIntercept.decide(harness.core(), sender, "@first");
         VelocityChatIntercept.Action action = VelocityChatIntercept.decide(harness.core(), sender, "@second");
 
+        // assert
         assertThat(action).isEqualTo(VelocityChatIntercept.Action.DENY);
         assertThat(sender.receivedMessages()).anyMatch(message -> message.contains("cooldown"));
         assertThat(recipient.receivedMessages()).noneMatch(message -> message.contains("second"));
@@ -93,10 +112,15 @@ class VelocityPrefixChatRegressionTest {
 
     @Test
     void normalChatStillPassesThrough() throws Exception {
+
+        // arrange
         FakePlatform platform = signedVelocityPlatform();
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
+
+        // act
         FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
 
+        // assert
         assertThat(VelocityChatIntercept.decide(harness.core(), sender, "hello"))
                 .isEqualTo(VelocityChatIntercept.Action.PASS);
         assertThat(sender.receivedMessages()).isEmpty();
@@ -104,11 +128,16 @@ class VelocityPrefixChatRegressionTest {
 
     @Test
     void toggledPlainChatStillDeniesSignedMessage() throws Exception {
+
+        // arrange
         FakePlatform platform = signedVelocityPlatform();
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
         FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+
+        // act
         harness.globalChannel().getToggleUtils().toggleChat(sender.getUniqueId());
 
+        // assert
         assertThat(VelocityChatIntercept.decide(harness.core(), sender, "plain chat"))
                 .isEqualTo(VelocityChatIntercept.Action.DENY);
         assertThat(sender.receivedMessages()).anyMatch(message -> message.contains("plain chat"));
@@ -116,11 +145,16 @@ class VelocityPrefixChatRegressionTest {
 
     @Test
     void withoutSignedVelocityPrefixedChatPassesThrough() throws Exception {
+
+        // arrange
         FakePlatform platform = new FakePlatform();
         platform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(false));
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
+
+        // act
         FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
 
+        // assert
         assertThat(SignedChatPolicy.shouldInterceptChat(harness.config(), harness.core().getSignedChatHandler(), sender))
                 .isFalse();
         assertThat(VelocityChatIntercept.decide(harness.core(), sender, "@hello"))
@@ -129,25 +163,38 @@ class VelocityPrefixChatRegressionTest {
 
     @Test
     void proxyPrefixCommandIsNotRegisteredWhenSignedVelocityIsPresent() throws Exception {
+
+        // arrange
         FakePlatform platform = signedVelocityPlatform();
         platform.installPlugin("signedvelocity");
+
+        // act
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
 
+        // assert
         assertThat(SignedChatPolicy.shouldRegisterProxyPrefixCommand(harness.config(), platform)).isFalse();
     }
 
     @Test
     void proxyPrefixCommandIsRegisteredWithoutSignedVelocity() throws Exception {
+
+        // arrange
         FakePlatform platform = new FakePlatform();
+
+        // act
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
 
+        // assert
         assertThat(SignedChatPolicy.shouldRegisterProxyPrefixCommand(harness.config(), platform)).isTrue();
     }
 
     @Test
     void proxyPrefixCommandIsRegisteredWhenInterceptionDisabledEvenWithSignedVelocity() {
+
+        // arrange & act
         FakePlatform platform = signedVelocityPlatform();
 
+        // assert
         assertThat(SignedChatPolicy.shouldRegisterProxyPrefixCommand(configWithMode("never"), platform)).isTrue();
     }
 

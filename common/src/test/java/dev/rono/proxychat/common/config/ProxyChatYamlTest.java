@@ -12,6 +12,8 @@ class ProxyChatYamlTest {
 
     @Test
     void readsScalarValues() throws Exception {
+
+        // arrange
         String yaml = """
                 name: global
                 enabled: true
@@ -23,8 +25,11 @@ class ProxyChatYamlTest {
         YamlDocument document = YamlDocument.create(
                 new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8))
         );
+
+        // act
         ProxyChatYaml config = ProxyChatYaml.wrap(document);
 
+        // assert
         assertThat(config.getString("name")).isEqualTo("global");
         assertThat(config.getBoolean("enabled")).isTrue();
         assertThat(config.getInt("delay")).isEqualTo(5);
@@ -33,11 +38,16 @@ class ProxyChatYamlTest {
 
     @Test
     void returnsDefaultsForMissingValues() throws Exception {
+
+        // arrange
         YamlDocument document = YamlDocument.create(
                 new ByteArrayInputStream("prefix: test\n".getBytes(StandardCharsets.UTF_8))
         );
+
+        // act
         ProxyChatYaml config = ProxyChatYaml.wrap(document);
 
+        // assert
         assertThat(config.getString("missing")).isNull();
         assertThat(config.getBoolean("missing")).isFalse();
         assertThat(config.getInt("missing")).isZero();

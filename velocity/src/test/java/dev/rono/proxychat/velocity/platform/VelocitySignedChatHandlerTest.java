@@ -13,21 +13,32 @@ class VelocitySignedChatHandlerTest {
 
     @Test
     void allowsInterceptOnLegacyProtocol() {
+
+        // arrange
         VelocitySignedChatHandler handler = new VelocitySignedChatHandler(new FakePlatform(), LOGGER);
+
+        // act
         FakePlayer player = new FakePlayer("Alice", "lobby").withProtocolVersion(759);
 
+        // assert
         assertThat(handler.canInterceptChat(player)).isTrue();
     }
 
     @Test
     void requiresSignedVelocityOnModernProtocol() {
+
+        // arrange
         FakePlatform platform = new FakePlatform();
         VelocitySignedChatHandler handler = new VelocitySignedChatHandler(platform, LOGGER);
         FakePlayer player = new FakePlayer("Alice", "lobby").withProtocolVersion(767);
 
-        assertThat(handler.canInterceptChat(player)).isFalse();
-
+        // act
+        boolean withoutSignedVelocity = handler.canInterceptChat(player);
         platform.installPlugin("signedvelocity");
-        assertThat(handler.canInterceptChat(player)).isTrue();
+        boolean withSignedVelocity = handler.canInterceptChat(player);
+
+        // assert
+        assertThat(withoutSignedVelocity).isFalse();
+        assertThat(withSignedVelocity).isTrue();
     }
 }

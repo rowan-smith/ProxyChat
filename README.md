@@ -1,13 +1,13 @@
 # ProxyChat
 
-Cross-server proxy chat for **Waterfall**, **BungeeCord**, and **Velocity**. Version **2.0.0** is a multi-module build: shared logic in `common`, with thin Bungee and Velocity adapters.
+Cross-server proxy chat for **BungeeCord**, **Waterfall**, and **Velocity**.
 
 ## Downloads
 
-| Proxy | JAR | Install location |
-|-------|-----|------------------|
-| Waterfall / BungeeCord | `ProxyChat-Bungee-*.jar` | `plugins/` |
-| Velocity | `ProxyChat-Velocity-*.jar` | `plugins/` |
+| Proxy                  | JAR                        | Install location |
+|------------------------|----------------------------|------------------|
+| Waterfall / BungeeCord | `ProxyChat-Bungee-*.jar`   | `plugins/`       |
+| Velocity               | `ProxyChat-Velocity-*.jar` | `plugins/`       |
 
 Requires **Java 17+** on the proxy.
 
@@ -27,51 +27,19 @@ Requires **Java 17+** on the proxy.
 * Legacy `chats:` section in `config.yml` auto-migrates to `chats/*.yml`
 * **Adventure** components for outbound messages (`&` colour codes)
 
-## Platform feature matrix
+## Signed Chat Feature Matrix
 
-Features that work the same everywhere are marked **All**. Features that depend on signed-chat handling list per platform.
+ProxyChat intercepts plain chat on the proxy and rebroadcasts formatted **unsigned** Adventure messages. This breaks signed chat on 1.19.3+ clients.
 
-| Feature | Waterfall | BungeeCord | Velocity |
-|---------|-----------|------------|----------|
-| Channel commands (`/global`, `/g`, etc.) | Yes | Yes | Yes |
-| Command aliases | Yes | Yes | Yes |
-| Cross-server broadcast | Yes | Yes | Yes |
-| Local (same-server) channels | Yes | Yes | Yes |
-| Toggle / ignore | Yes | Yes | Yes |
-| Cooldowns & override permission | Yes | Yes | Yes |
-| Colour codes (with permission) | Yes | Yes | Yes |
-| Console chat (when enabled per channel) | Yes | Yes | Yes |
-| Console logging (when enabled per channel) | Yes | Yes | Yes |
-| Server blacklist | Yes | Yes | Yes |
-| Tab complete (`toggle`, `ignore`) | Yes | Yes | Yes |
-| `/proxychat reload` & `/pc version` | Yes | Yes | Yes |
-| Prefix intercept (`@message`) | `/<prefix>` command only¹ | 1.19.3+ clients: **No** (auto) | Yes, with SignedVelocity² |
-| Toggle mode (plain chat intercept) | **No** on 1.19.3+¹ | 1.19.3+ clients: **No** (auto) | Yes, with SignedVelocity² |
-| Signed-chat acknowledgement to backend | N/A¹ | No | Via SignedVelocity² |
+| Feature                                    | BungeeCord                     | Waterfall                 | Velocity                  |
+|--------------------------------------------|--------------------------------|---------------------------|---------------------------|
+| Prefix intercept (`@message`)              | 1.19.3+ clients: **No** (auto) | `/<prefix>` command only¹ | Yes, with SignedVelocity² |
+| Toggle mode (plain chat intercept)         | 1.19.3+ clients: **No** (auto) | **No** on 1.19.3+¹        | Yes, with SignedVelocity² |
+| Signed-chat acknowledgement to backend     | No                             | N/A¹                      | Via SignedVelocity²       |
 
-¹ **Waterfall + Paper (typical):** plain `@message` and toggle **cannot** cancel signed chat without kicks. Use `/global hello`, `/g hello`, or `/@hello` instead. Toggle is unavailable on 1.19.3+ unless you set `signed-chat-interception: always` (not recommended on Paper).
+¹ **Waterfall + Paper (typical):** plain `@message` and toggle **cannot** cancel signed chat without kicks. Use `/global hello`, `/g hello`, or `/@ hello` instead. Toggle is unavailable on 1.19.3+ unless you set `signed-chat-interception: always` (not recommended on Paper).
 
 ² **[SignedVelocity](https://modrinth.com/plugin/signedvelocity)** must be installed on the **proxy and every backend**. Without it, prefix and toggle interception are skipped for **1.19.1+** clients and a one-time warning is logged.
-
-### Signed chat notes
-
-ProxyChat intercepts plain chat on the proxy and rebroadcasts formatted **unsigned** Adventure messages. That is the correct model for custom proxy channels.
-
-**Adventure does not fix signed-chat cancellation.** Cancelling a player's signed chat packet still requires platform-specific acknowledgement (Waterfall) or SignedVelocity (Velocity). On **Paper backends**, proxy-side cancellation is not reliable — ProxyChat disables it on Waterfall 1.19.3+ by default and registers `/<prefix>` commands instead.
-
-#### BungeeCord vs Waterfall
-
-Vanilla BungeeCord lacks Waterfall's `ClientChatAcknowledgement` packet. With default `signed-chat-interception: auto`, prefix and toggle modes are **automatically disabled** for 1.19.3+ clients on BungeeCord. `/channel` commands still work.
-
-On **Waterfall**, the same applies for 1.19.3+ when using Paper backends (the common case): plain `@message` in chat and toggle mode stay off. Use `/channel <message>` or `/<prefix><message>` (e.g. `/@hello`). Spigot-only backends may tolerate `signed-chat-interception: always`, but Paper will still kick.
-
-| Option | Effect |
-|--------|--------|
-| `signed-chat-interception: auto` (default) | Intercept only when the platform can handle signed chat safely |
-| `signed-chat-interception: never` | Never cancel plain chat; use `/channel` commands only |
-| `signed-chat-interception: always` | Always intercept — **not recommended** on vanilla BungeeCord 1.19.3+ |
-
-**Recommended:** use [Waterfall](https://papermc.io/software/waterfall) with `/channel` and `/<prefix>` commands on Paper backends. Do not rely on toggle or plain `@prefix` in chat on 1.19.3+.
 
 #### Velocity
 
@@ -95,65 +63,36 @@ ProxyChat/
 mvn clean verify
 ```
 
-`verify` runs unit tests (`*Test.java`) and integration tests (`*IT.java`), then packages both JARs:
-
-* `bungee/target/ProxyChat-Bungee-2.0.0.jar`
-* `velocity/target/ProxyChat-Velocity-2.0.0.jar`
-
 ## Commands
 
-Default global channel (from `chats/global.yml`):
+### Default global channel (from `chats/global.yml`):
 
 ```
 Global Chat
 - Commands: /global & /g
-- Permission: proxychat.global
+- Permission: proxychat.global (or set to '' for no permission)
 - Prefix: @message (when use-command-prefix is true)
 - Toggle: /global toggle
 - Ignore: /global ignore
 ```
 
-Admin:
+### Admin:
 
 * `/proxychat reload` — reload config and channels (requires `proxychat.reload`)
 * `/proxychat version` — plugin info (aliases: `/pc`)
 
-## Configuration
-
-On first run, `config.yml` and `chats/global.yml` are copied to `plugins/ProxyChat/`. Add more channels as `plugins/ProxyChat/chats/<name>.yml`.
-
-Example files: `bungee/src/main/resources/config.yml` and `global.yml`.
-
-### Global options (`config.yml`)
-
-| Key | Description |
-|-----|-------------|
-| `prefix` | Prepended to plugin feedback messages |
-| `signed-chat-interception` | `auto`, `never`, or `always` — see signed chat section |
-| `reload-permission` | Permission for `/proxychat reload` |
-
-### Per-channel options (`chats/*.yml`)
-
-| Key | Description |
-|-----|-------------|
-| `command-name` / `command-alias` | Command and alias |
-| `permission` | Required to send/receive |
-| `use-command-prefix` / `command-prefix` | Prefix intercept (e.g. `@`) |
-| `toggleable` / `ignorable` | Enable toggle and ignore subcommands |
-| `local` | Restrict broadcast to same backend server |
-| `format` / `console-format` | Chat format templates |
-| `command-delay` | Cooldown in milliseconds |
-| `command-delay-override-permission` | Bypass cooldown |
-| `use-color-in-chat-permission` | Allow `&` codes in messages |
-| `console-chat-allowed` | Allow console to use the channel |
-| `log-chat-to-console` | Log formatted messages to proxy console |
-| `blacklist` | Server names where the channel is disabled |
-
 ### Placeholders
 
 ```
-%player% %prefix% %server% %command-name% %command-alias%
-%command-prefix% %chat-name% %message% %chat-cooldown%
+%player%
+%prefix%
+%server%
+%command-name%
+%command-alias%
+%command-prefix%
+%chat-name%
+%message%
+%chat-cooldown%
 ```
 
 ## Issues

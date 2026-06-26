@@ -16,42 +16,66 @@ class SignedChatPolicyTest {
 
     @Test
     void autoModeDelegatesToHandler() throws Exception {
+
+        // arrange
         ProxyChatYaml config = configWithMode("auto");
 
-        assertThat(SignedChatPolicy.shouldInterceptChat(config, handler, player)).isFalse();
-
+        // act
+        boolean interceptBeforeEnable = SignedChatPolicy.shouldInterceptChat(config, handler, player);
         handler.canIntercept(true);
-        assertThat(SignedChatPolicy.shouldInterceptChat(config, handler, player)).isTrue();
+        boolean interceptAfterEnable = SignedChatPolicy.shouldInterceptChat(config, handler, player);
+
+        // assert
+        assertThat(interceptBeforeEnable).isFalse();
+        assertThat(interceptAfterEnable).isTrue();
     }
 
     @Test
     void treatsMissingModeAsAuto() throws Exception {
+
+        // arrange
         ProxyChatYaml config = ProxyChatYaml.fromMap(new LinkedHashMap<>());
 
+        // act
         handler.canIntercept(true);
+
+        // assert
         assertThat(SignedChatPolicy.shouldInterceptChat(config, handler, player)).isTrue();
     }
 
     @Test
     void neverModeSkipsHandler() throws Exception {
+
+        // arrange
         ProxyChatYaml config = configWithMode("never");
 
+        // act
         handler.canIntercept(true);
+
+        // assert
         assertThat(SignedChatPolicy.shouldInterceptChat(config, handler, player)).isFalse();
     }
 
     @Test
     void alwaysModeIgnoresHandler() throws Exception {
+
+        // arrange
         ProxyChatYaml config = configWithMode("always");
 
+        // act
         handler.canIntercept(false);
+
+        // assert
         assertThat(SignedChatPolicy.shouldInterceptChat(config, handler, player)).isTrue();
     }
 
     @Test
     void acceptsSynonyms() throws Exception {
+
+        // arrange & act
         handler.canIntercept(true);
 
+        // assert
         assertThat(SignedChatPolicy.shouldInterceptChat(configWithMode("disabled"), handler, player)).isFalse();
         assertThat(SignedChatPolicy.shouldInterceptChat(configWithMode("enabled"), handler, player)).isTrue();
         assertThat(SignedChatPolicy.shouldInterceptChat(configWithMode("true"), handler, player)).isTrue();
@@ -60,24 +84,37 @@ class SignedChatPolicyTest {
 
     @Test
     void skipsProxyPrefixCommandWhenSignedVelocityHandlesPlainPrefix() {
+
+        // arrange
         FakePlatform platform = new FakePlatform();
+
+        // act
         platform.installPlugin("signedvelocity");
 
+        // assert
         assertThat(SignedChatPolicy.shouldRegisterProxyPrefixCommand(configWithMode("auto"), platform)).isFalse();
     }
 
     @Test
     void registersProxyPrefixCommandWithoutSignedVelocity() throws Exception {
+
+        // arrange & act
         FakePlatform platform = new FakePlatform();
 
+        // assert
         assertThat(SignedChatPolicy.shouldRegisterProxyPrefixCommand(configWithMode("auto"), platform)).isTrue();
     }
 
     @Test
     void registersProxyPrefixCommandWhenInterceptionDisabled() {
+
+        // arrange
         FakePlatform platform = new FakePlatform();
+
+        // act
         platform.installPlugin("signedvelocity");
 
+        // assert
         assertThat(SignedChatPolicy.shouldRegisterProxyPrefixCommand(configWithMode("never"), platform)).isTrue();
     }
 

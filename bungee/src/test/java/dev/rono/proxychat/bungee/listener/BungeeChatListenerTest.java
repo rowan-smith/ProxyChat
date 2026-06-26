@@ -29,56 +29,64 @@ class BungeeChatListenerTest {
 
     @Test
     void cancelsAndAcknowledgesInterceptedChat() throws Exception {
+
+        // arrange
         FakePlatform platform = new FakePlatform();
         RecordingSignedChatHandler handler = new RecordingSignedChatHandler().canIntercept(true);
         platform.setSignedChatHandler(handler);
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
         platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
 
+        // act
         ProxiedPlayer handle = mockPlayer("Alice", "lobby", "proxychat.global");
         ChatEvent event = mock(ChatEvent.class);
         when(event.isCancelled()).thenReturn(false);
         when(event.isCommand()).thenReturn(false);
         when(event.getSender()).thenReturn(handle);
         when(event.getMessage()).thenReturn("@intercepted message");
-
         new BungeeChatListener(harness.core()).onChat(event);
-
         verify(event).setCancelled(true);
+
+        // assert
         assertThat(handler.acknowledgedPlayers()).containsExactly(handle.getUniqueId());
     }
 
     @Test
     void ignoresChatWhenPolicyBlocksInterception() throws Exception {
+
+        // arrange
         FakePlatform platform = new FakePlatform();
         RecordingSignedChatHandler handler = new RecordingSignedChatHandler().canIntercept(false);
         platform.setSignedChatHandler(handler);
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
 
+        // act
         ProxiedPlayer handle = mockPlayer("Alice", "lobby", "proxychat.global");
         ChatEvent event = mock(ChatEvent.class);
         when(event.isCancelled()).thenReturn(false);
         when(event.isCommand()).thenReturn(false);
         when(event.getSender()).thenReturn(handle);
         when(event.getMessage()).thenReturn("@should-not-intercept");
-
         new BungeeChatListener(harness.core()).onChat(event);
 
+        // assert
         assertThat(handler.acknowledgedPlayers()).isEmpty();
     }
 
     @Test
     void ignoresCancelledAndCommandEvents() {
-        BungeeChatListener listener = new BungeeChatListener(mock(dev.rono.proxychat.common.ProxyChatCore.class));
 
+        // arrange & act
+        BungeeChatListener listener = new BungeeChatListener(mock(dev.rono.proxychat.common.ProxyChatCore.class));
         ChatEvent cancelled = mock(ChatEvent.class);
         when(cancelled.isCancelled()).thenReturn(true);
         listener.onChat(cancelled);
-
         ChatEvent command = mock(ChatEvent.class);
         when(command.isCancelled()).thenReturn(false);
         when(command.isCommand()).thenReturn(true);
         listener.onChat(command);
+
+        // assert
     }
 
     private static ProxiedPlayer mockPlayer(String name, String server, String permission) {

@@ -42,11 +42,15 @@ class ConfigMigrationReleaseTest {
 
     @Test
     void migratesBungeeChatAndPreservesComments() throws Exception {
-        ConfigFixtures.copyResource("v1/1-0/config.yml", dataDirectory.resolve("config.yml"));
 
+        // arrange
+        ConfigFixtures.copyResource("v1/1-0/config.yml", dataDirectory.resolve("config.yml"));
         ProxyChatYamlDocuments.loadMainConfig(dataDirectory, Logger.getLogger("test"));
 
+        // act
         String saved = Files.readString(dataDirectory.resolve("config.yml"));
+
+        // assert
         assertThat(saved).contains("# Prefix used in front of all messages");
         assertThat(saved).contains("reload-permission: bungeechat.reload");
         assertThat(saved).contains("%chat-name%");
@@ -54,11 +58,15 @@ class ConfigMigrationReleaseTest {
 
     @Test
     void migratesInlineChatsToChatsDirectory() throws Exception {
+
+        // arrange
         ConfigFixtures.copyResource("v1/1-5/config.yml", dataDirectory.resolve("config.yml"));
         Files.createDirectories(dataDirectory.resolve("chats"));
 
+        // act
         ProxyChatYamlDocuments.loadMainConfig(dataDirectory, Logger.getLogger("test"));
 
+        // assert
         assertThat(dataDirectory.resolve("chats/global.yml")).exists();
         assertThat(dataDirectory.resolve("chats/staffchat.yml")).exists();
         assertThat(Files.readString(dataDirectory.resolve("config.yml"))).doesNotContain("chats:");
