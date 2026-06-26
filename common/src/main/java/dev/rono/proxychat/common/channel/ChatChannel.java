@@ -33,7 +33,8 @@ public final class ChatChannel {
         this.permission = config.getString("permission");
         this.commandAlias = config.getString("command-alias");
         this.useCommandPrefix = config.getBoolean("use-command-prefix");
-        this.commandPrefix = config.getString("command-prefix");
+        String prefix = config.getString("command-prefix");
+        this.commandPrefix = prefix == null ? null : prefix.trim();
         this.toggleable = config.getBoolean("toggleable");
         this.ignorable = config.getBoolean("ignorable");
         this.local = config.getBoolean("local");

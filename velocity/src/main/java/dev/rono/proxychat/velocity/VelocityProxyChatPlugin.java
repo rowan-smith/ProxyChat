@@ -11,7 +11,9 @@ import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.common.channel.ChatChannel;
 import dev.rono.proxychat.velocity.command.VelocityAdminCommand;
 import dev.rono.proxychat.velocity.command.VelocityChannelCommand;
+import dev.rono.proxychat.velocity.command.VelocityPrefixCommand;
 import dev.rono.proxychat.velocity.listener.VelocityChatListener;
+import dev.rono.proxychat.velocity.listener.VelocityCommandInterceptListener;
 import dev.rono.proxychat.velocity.listener.VelocityConnectionListener;
 import dev.rono.proxychat.velocity.platform.VelocityPlatform;
 import dev.rono.proxychat.velocity.platform.VelocitySignedChatHandler;
@@ -56,6 +58,7 @@ public final class VelocityProxyChatPlugin {
         registerCommands();
 
         server.getEventManager().register(this, new VelocityChatListener(core));
+        server.getEventManager().register(this, new VelocityCommandInterceptListener(core));
         server.getEventManager().register(this, new VelocityConnectionListener(core));
 
         ProxyChatBStats.register(this, metricsFactory);
@@ -74,6 +77,8 @@ public final class VelocityProxyChatPlugin {
                                     .build(),
                             new VelocityChannelCommand(core, channel)
             );
+
+            registerPrefixCommand(channel);
         }
 
         server.getCommandManager().register(
@@ -86,5 +91,24 @@ public final class VelocityProxyChatPlugin {
         );
 
         logger.info("{} channel commands loaded.", core.getChannels().size());
+    }
+
+    private void registerPrefixCommand(ChatChannel channel) {
+        if (!channel.isUseCommandPrefix()) {
+            return;
+        }
+
+        String prefix = channel.getCommandPrefix();
+        if (prefix == null || prefix.isEmpty()) {
+            return;
+        }
+
+        server.getCommandManager().register(
+                server.getCommandManager()
+                        .metaBuilder(prefix)
+                        .plugin(this)
+                        .build(),
+                new VelocityPrefixCommand(core, channel)
+        );
     }
 }

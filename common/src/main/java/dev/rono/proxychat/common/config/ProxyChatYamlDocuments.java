@@ -1,5 +1,6 @@
 package dev.rono.proxychat.common.config;
 
+import dev.rono.proxychat.common.config.migration.ConfigLayoutNormalizer;
 import dev.rono.proxychat.common.config.migration.ConfigVersion;
 import dev.rono.proxychat.common.config.migration.ConfigVersionPattern;
 import dev.rono.proxychat.common.config.migration.LegacyVersionNormalizer;
@@ -60,6 +61,11 @@ public final class ProxyChatYamlDocuments {
     document.update();
     ProxyChatConfigMigrations.ensureLatestKeys(document);
     document.set(ConfigVersionPattern.VERSION_ROUTE, ConfigVersion.LATEST.toString());
+
+    if (!ConfigLayoutNormalizer.layoutMatches(document, bundledConfigDefaults)) {
+      document = ConfigLayoutNormalizer.applyLayout(document, bundledConfigDefaults);
+    }
+
     writeDocument(configPath, document);
 
     return document;
@@ -87,7 +93,7 @@ public final class ProxyChatYamlDocuments {
 
   private static void writeDocument(Path path, YamlDocument document) throws IOException {
     Files.createDirectories(path.getParent());
-    Files.writeString(path, document.dump(), StandardCharsets.UTF_8);
+    Files.writeString(path, ConfigLayoutNormalizer.dumpPolished(document), StandardCharsets.UTF_8);
   }
 
   private static Settings[] mainConfigSettings(Path dataDirectory, Logger logger) {

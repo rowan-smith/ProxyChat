@@ -1,5 +1,6 @@
 package dev.rono.proxychat.velocity.listener;
 
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
 import dev.rono.proxychat.common.ProxyChatCore;
@@ -13,8 +14,12 @@ public final class VelocityChatListener {
         this.core = core;
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.FIRST)
     public void onPlayerChat(PlayerChatEvent event) {
+        if (!event.getResult().isAllowed()) {
+            return;
+        }
+
         VelocityPlayer player = new VelocityPlayer(event.getPlayer());
 
         if (!SignedChatPolicy.shouldInterceptChat(core.getConfig().getConfig(), core.getSignedChatHandler(), player)) {

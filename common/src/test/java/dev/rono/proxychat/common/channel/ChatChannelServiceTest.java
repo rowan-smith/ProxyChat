@@ -240,6 +240,24 @@ class ChatChannelServiceTest {
     }
 
     @Test
+    void interceptsPrefixMessagesWithLeadingWhitespace() {
+        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        FakePlayer recipient = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
+
+        assertThat(service.tryInterceptPrefixedInput(sender, "  @leading space")).isTrue();
+        assertThat(recipient.receivedMessages()).anyMatch(message -> message.contains("leading space"));
+    }
+
+    @Test
+    void interceptsPrefixedCommandInput() {
+        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        FakePlayer recipient = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
+
+        assertThat(service.tryInterceptPrefixedInput(sender, "@command style")).isTrue();
+        assertThat(recipient.receivedMessages()).anyMatch(message -> message.contains("command style"));
+    }
+
+    @Test
     void interceptsToggledPlainChat() {
         FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
         FakePlayer recipient = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));

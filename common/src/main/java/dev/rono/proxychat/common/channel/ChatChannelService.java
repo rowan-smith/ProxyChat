@@ -122,22 +122,61 @@ public final class ChatChannelService {
     }
 
     public boolean tryInterceptChat(ProxyPlayer player, String message) {
+        if (tryInterceptPrefixedInput(player, message)) {
+            return true;
+        }
+
+        String normalized = normalizeIncoming(message);
         for (ChatChannel channel : bootstrap.getChannels()) {
-            if (channel.isUseCommandPrefix() && message.startsWith(channel.getCommandPrefix()) && player.hasPermission(channel.getPermission())) {
-                String body = message.substring(channel.getCommandPrefix().length());
-                execute(channel, player, body.isEmpty() ? new String[0] : body.split(" "));
-
-                return true;
-            }
-
-            if (channel.getToggleUtils().isToggled(player.getUniqueId())) {
-                execute(channel, player, message.split(" "));
+            if (channel.getToggleUtils().isToggled(player.getUniqueId()) && hasChannelPermission(player, channel)) {
+                execute(channel, player, normalized.isEmpty() ? new String[0] : normalized.split(" "));
 
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Intercepts chat or proxy command input that begins with a configured channel prefix.
+     */
+    public boolean tryInterceptPrefixedInput(ProxyPlayer player, String input) {
+        String normalized = normalizeIncoming(input);
+        if (normalized.isEmpty()) {
+            return false;
+        }
+
+        for (ChatChannel channel : bootstrap.getChannels()) {
+            if (!matchesPrefix(normalized, channel) || !hasChannelPermission(player, channel)) {
+                continue;
+            }
+
+            String body = normalized.substring(channel.getCommandPrefix().length()).stripLeading();
+            execute(channel, player, body.isEmpty() ? new String[0] : body.split(" "));
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private static String normalizeIncoming(String input) {
+        return input == null ? "" : input.stripLeading();
+    }
+
+    private static boolean matchesPrefix(String message, ChatChannel channel) {
+        if (!channel.isUseCommandPrefix()) {
+            return false;
+        }
+
+        String prefix = channel.getCommandPrefix();
+        return prefix != null && !prefix.isEmpty() && message.startsWith(prefix);
+    }
+
+    static boolean hasChannelPermission(ProxyPlayer player, ChatChannel channel) {
+        String permission = channel.getPermission();
+        return permission == null || permission.isEmpty() || player.hasPermission(permission);
     }
 
     private boolean isToggleAvailable(ChatChannel channel, ProxyPlayer player) {
