@@ -25,7 +25,7 @@ command-delay: 5000
 command-delay-override-permission: "proxychat.global.override"
 
 # This shows when you enter command wrong.
-invalid-args: "&c/%command-name% <message> or %command-prefix%<message>"
+invalid-args: "&c/%command-name% <message> or /%command-prefix%<message>"
 
 # This is the format the chat will show in chat.
 format: "&8[&9%command-alias%&8] [&9%server%&8] &9%player% &8» &7%message%"

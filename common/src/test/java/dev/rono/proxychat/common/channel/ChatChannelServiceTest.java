@@ -7,6 +7,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -267,6 +268,41 @@ class ChatChannelServiceTest {
 
         assertThat(intercepted).isTrue();
         assertThat(recipient.receivedMessages()).anyMatch(message -> message.contains("plain chat"));
+    }
+
+    @Test
+    void velocityPrefixedInterceptBroadcastsToAllPlayers() {
+        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        FakePlayer sameServer = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
+        FakePlayer remoteServer = platform.addPlayer(new FakePlayer("Carol", "survival").withPermission("proxychat.global"));
+
+        Optional<VelocityPrefixInterceptResult> result = service.tryVelocityPrefixedIntercept(sender, "@remote only");
+
+        assertThat(result).containsInstanceOf(VelocityPrefixInterceptResult.Delivered.class);
+        assertThat(sameServer.receivedMessages()).anyMatch(message -> message.contains("remote only"));
+        assertThat(remoteServer.receivedMessages()).anyMatch(message -> message.contains("remote only"));
+    }
+
+    @Test
+    void velocityPrefixedInterceptIncludesSenderOnSameServer() {
+        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+
+        Optional<VelocityPrefixInterceptResult> result = service.tryVelocityPrefixedIntercept(sender, "@hello");
+
+        assertThat(result).containsInstanceOf(VelocityPrefixInterceptResult.Delivered.class);
+        assertThat(sender.receivedMessages()).anyMatch(message -> message.contains("Alice") && message.contains("hello"));
+        assertThat(sender.receivedMessages()).noneMatch(message -> message.contains("<Alice>"));
+    }
+
+    @Test
+    void velocityPrefixedInterceptReturnsBlockedOnCooldown() {
+        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+
+        service.tryVelocityPrefixedIntercept(sender, "@first");
+        Optional<VelocityPrefixInterceptResult> blocked = service.tryVelocityPrefixedIntercept(sender, "@second");
+
+        assertThat(blocked).containsInstanceOf(VelocityPrefixInterceptResult.Blocked.class);
+        assertThat(sender.receivedMessages()).anyMatch(message -> message.contains("cooldown"));
     }
 
     @Test

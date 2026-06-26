@@ -17,10 +17,10 @@ class WaterfallSignedChatHandlerTest {
     }
 
     @Test
-    void defersToWaterfallSupportOnModernProtocol() {
+    void disablesPlainChatInterceptOnModernProtocol() {
         WaterfallSignedChatHandler handler = new WaterfallSignedChatHandler(Logger.getLogger("test"));
         FakePlayer player = new FakePlayer("Alice", "lobby").withProtocolVersion(767);
 
-        assertThat(handler.canInterceptChat(player)).isIn(true, false);
+        assertThat(handler.canInterceptChat(player)).isFalse();
     }
 }

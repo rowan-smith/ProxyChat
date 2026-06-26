@@ -11,6 +11,7 @@ import dev.rono.proxychat.common.util.SignedChatPolicy;
 import net.kyori.adventure.text.Component;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public final class ChatChannelService {
@@ -82,23 +83,16 @@ public final class ChatChannelService {
             return;
         }
 
-        Component outgoing = formatMessage(config, channel.getFormat(), player, channel, args, true);
-
-        if (channel.getToggleUtils().isIgnored(player.getUniqueId())) {
-            player.sendMessage(formattedConfigMessage(config, "chat-disabled-message", player, channel, args));
+        Optional<OutgoingChatMessage> outgoing = preparePlayerChat(channel, player, args, config);
+        if (outgoing.isEmpty()) {
             return;
         }
 
-        if (!player.hasPermission(channel.getCommandDelayOverridePermission())) {
-            channel.getToggleUtils().startDelay(player.getUniqueId(), channel.getCommandDelay(), () -> channel.getToggleUtils().clearDelay(player.getUniqueId()));
-            platform.scheduleDelayedTask(channel.getToggleUtils().getDelay(player.getUniqueId()), channel.getCommandDelay());
-        }
-
         if (channel.isLocal()) {
-            broadcast(channel, outgoing, player, false);
+            broadcast(channel, outgoing.get().component(), player, false);
 
         } else {
-            broadcast(channel, outgoing, null, false);
+            broadcast(channel, outgoing.get().component(), null, false);
         }
     }
 
@@ -126,6 +120,51 @@ public final class ChatChannelService {
             return true;
         }
 
+        return tryInterceptToggleOnly(player, message);
+    }
+
+    /**
+     * Velocity signed-chat path: proxy-broadcast {@code @prefix} chat and deny the original signed
+     * message so Paper does not wrap it as {@code <player> ...}.
+     */
+    public Optional<VelocityPrefixInterceptResult> tryVelocityPrefixedIntercept(ProxyPlayer player, String input) {
+        String normalized = normalizeIncoming(input);
+        if (normalized.isEmpty()) {
+            return Optional.empty();
+        }
+
+        ProxyChatYaml config = bootstrap.getConfig().getConfig();
+
+        for (ChatChannel channel : bootstrap.getChannels()) {
+            if (!matchesPrefix(normalized, channel) || !hasChannelPermission(player, channel)) {
+                continue;
+            }
+
+            String body = normalized.substring(channel.getCommandPrefix().length()).stripLeading();
+            String[] args = body.isEmpty() ? new String[0] : body.split(" ");
+            if (args.length < 1) {
+                player.sendMessage(formatMessage(config, channel.getInvalidArgs(), player, channel, args, false));
+                return Optional.of(new VelocityPrefixInterceptResult.Blocked());
+            }
+
+            Optional<OutgoingChatMessage> outgoing = preparePlayerChat(channel, player, args, config);
+            if (outgoing.isEmpty()) {
+                return Optional.of(new VelocityPrefixInterceptResult.Blocked());
+            }
+
+            if (channel.isLocal()) {
+                broadcast(channel, outgoing.get().component(), player, false);
+            } else {
+                broadcast(channel, outgoing.get().component(), null, false);
+            }
+
+            return Optional.of(new VelocityPrefixInterceptResult.Delivered());
+        }
+
+        return Optional.empty();
+    }
+
+    public boolean tryInterceptToggleOnly(ProxyPlayer player, String message) {
         String normalized = normalizeIncoming(message);
         for (ChatChannel channel : bootstrap.getChannels()) {
             if (channel.getToggleUtils().isToggled(player.getUniqueId()) && hasChannelPermission(player, channel)) {
@@ -201,6 +240,35 @@ public final class ChatChannelService {
         if (channel.isLogChatToConsole()) {
             platform.logInfo(net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(message));
         }
+    }
+
+    private Optional<OutgoingChatMessage> preparePlayerChat(ChatChannel channel, ProxyPlayer player, String[] args, ProxyChatYaml config) {
+        if (channel.getServerBlacklist().contains(player.getServerName())) {
+            return Optional.empty();
+        }
+
+        if (channel.getToggleUtils().isDelayed(player.getUniqueId())) {
+            player.sendMessage(formattedConfigMessage(config, "command-cooldown-message", player, channel, args));
+            return Optional.empty();
+        }
+
+        if (channel.getToggleUtils().isIgnored(player.getUniqueId())) {
+            player.sendMessage(formattedConfigMessage(config, "chat-disabled-message", player, channel, args));
+            return Optional.empty();
+        }
+
+        if (!player.hasPermission(channel.getCommandDelayOverridePermission())) {
+            channel.getToggleUtils().startDelay(player.getUniqueId(), channel.getCommandDelay(), () -> channel.getToggleUtils().clearDelay(player.getUniqueId()));
+            bootstrap.getPlatform().scheduleDelayedTask(channel.getToggleUtils().getDelay(player.getUniqueId()), channel.getCommandDelay());
+        }
+
+        String legacyText = applyPlaceholders(channel.getFormat(), player, channel, args, config, true);
+        Component component = formatMessage(config, channel.getFormat(), player, channel, args, true);
+
+        return Optional.of(new OutgoingChatMessage(legacyText, component));
+    }
+
+    private record OutgoingChatMessage(String legacyText, Component component) {
     }
 
     private Component formattedConfigMessage(ProxyChatYaml config, String key, ProxyCommandSource source, ChatChannel channel, String[] args) {

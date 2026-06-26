@@ -45,21 +45,25 @@ Features that work the same everywhere are marked **All**. Features that depend 
 | Server blacklist | Yes | Yes | Yes |
 | Tab complete (`toggle`, `ignore`) | Yes | Yes | Yes |
 | `/proxychat reload` & `/pc version` | Yes | Yes | Yes |
-| Prefix intercept (`@message`) | Yes | 1.19.3+ clients: **No** (auto) | Yes, with SignedVelocity¹ |
-| Toggle mode (plain chat intercept) | Yes | 1.19.3+ clients: **No** (auto) | Yes, with SignedVelocity¹ |
-| Signed-chat acknowledgement to backend | Yes | No | Via SignedVelocity¹ |
+| Prefix intercept (`@message`) | `/<prefix>` command only¹ | 1.19.3+ clients: **No** (auto) | Yes, with SignedVelocity² |
+| Toggle mode (plain chat intercept) | **No** on 1.19.3+¹ | 1.19.3+ clients: **No** (auto) | Yes, with SignedVelocity² |
+| Signed-chat acknowledgement to backend | N/A¹ | No | Via SignedVelocity² |
 
-¹ **[SignedVelocity](https://modrinth.com/plugin/signedvelocity)** must be installed on the **proxy and every backend**. Without it, prefix and toggle interception are skipped for **1.19.1+** clients and a one-time warning is logged.
+¹ **Waterfall + Paper (typical):** plain `@message` and toggle **cannot** cancel signed chat without kicks. Use `/global hello`, `/g hello`, or `/@hello` instead. Toggle is unavailable on 1.19.3+ unless you set `signed-chat-interception: always` (not recommended on Paper).
+
+² **[SignedVelocity](https://modrinth.com/plugin/signedvelocity)** must be installed on the **proxy and every backend**. Without it, prefix and toggle interception are skipped for **1.19.1+** clients and a one-time warning is logged.
 
 ### Signed chat notes
 
 ProxyChat intercepts plain chat on the proxy and rebroadcasts formatted **unsigned** Adventure messages. That is the correct model for custom proxy channels.
 
-**Adventure does not fix signed-chat cancellation.** Cancelling a player's signed chat packet still requires platform-specific acknowledgement (Waterfall) or SignedVelocity (Velocity). Otherwise the client's signature chain breaks and players can be kicked.
+**Adventure does not fix signed-chat cancellation.** Cancelling a player's signed chat packet still requires platform-specific acknowledgement (Waterfall) or SignedVelocity (Velocity). On **Paper backends**, proxy-side cancellation is not reliable — ProxyChat disables it on Waterfall 1.19.3+ by default and registers `/<prefix>` commands instead.
 
 #### BungeeCord vs Waterfall
 
 Vanilla BungeeCord lacks Waterfall's `ClientChatAcknowledgement` packet. With default `signed-chat-interception: auto`, prefix and toggle modes are **automatically disabled** for 1.19.3+ clients on BungeeCord. `/channel` commands still work.
+
+On **Waterfall**, the same applies for 1.19.3+ when using Paper backends (the common case): plain `@message` in chat and toggle mode stay off. Use `/channel <message>` or `/<prefix><message>` (e.g. `/@hello`). Spigot-only backends may tolerate `signed-chat-interception: always`, but Paper will still kick.
 
 | Option | Effect |
 |--------|--------|
@@ -67,11 +71,13 @@ Vanilla BungeeCord lacks Waterfall's `ClientChatAcknowledgement` packet. With de
 | `signed-chat-interception: never` | Never cancel plain chat; use `/channel` commands only |
 | `signed-chat-interception: always` | Always intercept — **not recommended** on vanilla BungeeCord 1.19.3+ |
 
-**Recommended:** use [Waterfall](https://papermc.io/software/waterfall) (drop-in BungeeCord replacement) for full prefix/toggle support.
+**Recommended:** use [Waterfall](https://papermc.io/software/waterfall) with `/channel` and `/<prefix>` commands on Paper backends. Do not rely on toggle or plain `@prefix` in chat on 1.19.3+.
 
 #### Velocity
 
 Velocity denies cancelled signed chat unless SignedVelocity is present. Install it on the proxy and all backends for prefix/toggle on 1.19.1+.
+
+Plain `@prefix` chat on Velocity uses `ChatResult.message()` (SignedVelocity MODIFY) on the sender's server and proxy-broadcasts to other servers only, so Paper does not show the message twice. `/@prefix` and `/channel` commands still use full proxy broadcast.
 
 ## Project layout
 

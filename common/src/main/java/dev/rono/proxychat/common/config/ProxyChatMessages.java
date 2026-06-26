@@ -23,7 +23,7 @@ public final class ProxyChatMessages {
             Map.entry("help-header", "&7ProxyChat commands:"),
             Map.entry("help-reload", "&7/proxychat reload &8- Reload configuration and channels"),
             Map.entry("help-version", "&7/proxychat version &8- Plugin information"),
-            Map.entry("help-channels-header", "&7Chat channels:")
+            Map.entry("help-channels-header", "&7Chat Channels:")
     );
 
     public static String resolve(ProxyChatYaml config, String key) {

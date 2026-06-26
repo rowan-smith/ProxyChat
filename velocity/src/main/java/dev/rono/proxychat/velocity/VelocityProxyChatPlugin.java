@@ -2,6 +2,8 @@ package dev.rono.proxychat.velocity;
 
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.command.CommandExecuteEvent;
+import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
@@ -9,6 +11,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.common.channel.ChatChannel;
+import dev.rono.proxychat.common.util.SignedChatPolicy;
 import dev.rono.proxychat.velocity.command.VelocityAdminCommand;
 import dev.rono.proxychat.velocity.command.VelocityChannelCommand;
 import dev.rono.proxychat.velocity.command.VelocityPrefixCommand;
@@ -57,8 +60,11 @@ public final class VelocityProxyChatPlugin {
 
         registerCommands();
 
-        server.getEventManager().register(this, new VelocityChatListener(core));
-        server.getEventManager().register(this, new VelocityCommandInterceptListener(core));
+        short interceptPriority = Short.MAX_VALUE;
+        VelocityChatListener chatListener = new VelocityChatListener(core);
+        VelocityCommandInterceptListener commandInterceptListener = new VelocityCommandInterceptListener(core);
+        server.getEventManager().register(this, PlayerChatEvent.class, interceptPriority, chatListener::onPlayerChat);
+        server.getEventManager().register(this, CommandExecuteEvent.class, interceptPriority, commandInterceptListener::onCommandExecute);
         server.getEventManager().register(this, new VelocityConnectionListener(core));
 
         ProxyChatBStats.register(this, metricsFactory);
@@ -100,6 +106,10 @@ public final class VelocityProxyChatPlugin {
 
         String prefix = channel.getCommandPrefix();
         if (prefix == null || prefix.isEmpty()) {
+            return;
+        }
+
+        if (!SignedChatPolicy.shouldRegisterProxyPrefixCommand(core.getConfig().getConfig(), core.getPlatform())) {
             return;
         }
 

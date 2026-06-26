@@ -1,6 +1,7 @@
 package dev.rono.proxychat.common.util;
 
 import dev.rono.proxychat.common.config.ProxyChatYaml;
+import dev.rono.proxychat.common.test.FakePlatform;
 import dev.rono.proxychat.common.test.FakePlayer;
 import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
 import org.junit.jupiter.api.Test;
@@ -57,10 +58,37 @@ class SignedChatPolicyTest {
         assertThat(SignedChatPolicy.shouldInterceptChat(configWithMode("false"), handler, player)).isFalse();
     }
 
-    private static ProxyChatYaml configWithMode(String mode) throws Exception {
-        LinkedHashMap<String, Object> root = new LinkedHashMap<>();
-        root.put("signed-chat-interception", mode);
+    @Test
+    void skipsProxyPrefixCommandWhenSignedVelocityHandlesPlainPrefix() {
+        FakePlatform platform = new FakePlatform();
+        platform.installPlugin("signedvelocity");
 
-        return ProxyChatYaml.fromMap(root);
+        assertThat(SignedChatPolicy.shouldRegisterProxyPrefixCommand(configWithMode("auto"), platform)).isFalse();
+    }
+
+    @Test
+    void registersProxyPrefixCommandWithoutSignedVelocity() throws Exception {
+        FakePlatform platform = new FakePlatform();
+
+        assertThat(SignedChatPolicy.shouldRegisterProxyPrefixCommand(configWithMode("auto"), platform)).isTrue();
+    }
+
+    @Test
+    void registersProxyPrefixCommandWhenInterceptionDisabled() {
+        FakePlatform platform = new FakePlatform();
+        platform.installPlugin("signedvelocity");
+
+        assertThat(SignedChatPolicy.shouldRegisterProxyPrefixCommand(configWithMode("never"), platform)).isTrue();
+    }
+
+    private static ProxyChatYaml configWithMode(String mode) {
+        try {
+            LinkedHashMap<String, Object> root = new LinkedHashMap<>();
+            root.put("signed-chat-interception", mode);
+
+            return ProxyChatYaml.fromMap(root);
+        } catch (Exception exception) {
+            throw new AssertionError(exception);
+        }
     }
 }

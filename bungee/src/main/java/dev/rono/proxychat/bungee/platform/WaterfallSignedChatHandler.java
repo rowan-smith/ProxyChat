@@ -19,8 +19,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Waterfall-specific signed chat support. Adventure cannot replace this: cancelling
- * {@code ChatEvent} still requires a protocol-level acknowledgement on 1.19.3+.
+ * Waterfall-specific signed chat support. Cancelling {@code ChatEvent} on 1.19.3+ is not
+ * reliable with Paper backends; {@link #canInterceptChat} stays off so players use commands instead.
  */
 public final class WaterfallSignedChatHandler implements SignedChatHandler {
     private static final String BOSS_HANDLER = "inbound-boss";
@@ -28,6 +28,7 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
 
     private final Logger logger;
     private final Map<UUID, Integer> pendingOffsets = new ConcurrentHashMap<>();
+    private boolean warnedAboutPaperBackends;
 
     private Boolean supported;
     private Constructor<?> acknowledgementConstructor;
@@ -51,6 +52,7 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
             Field protocolField = Class.forName("net.md_5.bungee.protocol.ProtocolConstants").getField("MINECRAFT_1_19_3");
             minimumProtocolVersion = protocolField.getInt(null);
             supported = true;
+            logger.info("Waterfall detected. Plain @prefix and toggle chat are disabled for 1.19.3+ clients (required for Paper backends). Use /channel or /<prefix><message> instead. Set signed-chat-interception: always to force plain-chat intercept (not recommended on Paper).");
 
         } catch (ReflectiveOperationException exception) {
             supported = false;
@@ -64,7 +66,7 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
             return true;
         }
 
-        return Boolean.TRUE.equals(supported);
+        return false;
     }
 
     @Override
@@ -98,6 +100,12 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
 
         Integer offset = pendingOffsets.remove(player.getUniqueId());
         if (offset == null) {
+            if (!warnedAboutPaperBackends) {
+                warnedAboutPaperBackends = true;
+                logger.warning("Could not acknowledge cancelled chat for " + handle.getName()
+                        + ". Toggle and @prefix may kick players on 1.19.3+ (especially Paper backends). Use /channel commands or signed-chat-interception: never.");
+            }
+
             return;
         }
 
@@ -108,7 +116,7 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
             sendPacket.invoke(unsafe, packet);
 
         } catch (ReflectiveOperationException exception) {
-            logger.log(Level.FINE, "Failed to acknowledge cancelled chat", exception);
+            logger.log(Level.WARNING, "Failed to acknowledge cancelled chat for " + handle.getName(), exception);
         }
     }
 
@@ -153,12 +161,7 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
 
     private void captureClientChatOffset(Object message, UUID playerId) {
         try {
-            Class<?> packetWrapperClass = Class.forName("net.md_5.bungee.protocol.PacketWrapper");
-            if (!packetWrapperClass.isInstance(message)) {
-                return;
-            }
-
-            Object packet = packetWrapperClass.getField("packet").get(message);
+            Object packet = unwrapPacket(message);
             if (packet == null) {
                 return;
             }
@@ -179,6 +182,20 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
         } catch (ReflectiveOperationException exception) {
             logger.log(Level.FINE, "Failed to capture signed chat metadata", exception);
         }
+    }
+
+    private Object unwrapPacket(Object message) throws ReflectiveOperationException {
+        Class<?> packetWrapperClass = Class.forName("net.md_5.bungee.protocol.PacketWrapper");
+        if (packetWrapperClass.isInstance(message)) {
+            return packetWrapperClass.getField("packet").get(message);
+        }
+
+        Class<?> definedPacketClass = Class.forName("net.md_5.bungee.protocol.DefinedPacket");
+        if (definedPacketClass.isInstance(message)) {
+            return message;
+        }
+
+        return null;
     }
 
     private final class SignedChatCaptureHandler extends ChannelInboundHandlerAdapter {

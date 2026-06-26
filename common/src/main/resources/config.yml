@@ -33,7 +33,7 @@ reload-message: "&aConfiguration reloaded!"
 help-header: "&7ProxyChat commands:"
 help-reload: "&7/proxychat reload &8- Reload configuration and channels"
 help-version: "&7/proxychat version &8- Plugin information"
-help-channels-header: "&7Chat channels:"
+help-channels-header: "&7Chat Channels:"
 
 # Controls whether ProxyChat cancels plain chat for @prefix and toggle mode.
 # auto  - intercept when the proxy can safely handle signed chat (Waterfall / SignedVelocity)
@@ -41,6 +41,4 @@ help-channels-header: "&7Chat channels:"
 # always - always intercept (can kick players on vanilla BungeeCord 1.19.3+)
 signed-chat-interception: auto
 
-# Config schema version matches public ProxyChat release (see test/resources/v* fixtures)
-# v1 ends at 1.5 (inline chats); v2 starts at 2 (chats/ folder)
 version: "2.2"

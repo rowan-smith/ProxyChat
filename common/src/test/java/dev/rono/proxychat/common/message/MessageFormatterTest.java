@@ -24,4 +24,13 @@ class MessageFormatterTest {
     void leavesPlainTextUntouched() {
         assertThat(MessageFormatter.stripLegacyColors("plain message")).isEqualTo("plain message");
     }
+
+    @Test
+    void serializesLegacyTextWithSectionSigns() {
+        String serialized = MessageFormatter.legacySectionSerialized("&8[&9G&8] &9Alice");
+
+        assertThat(serialized).doesNotContain("&");
+        assertThat(serialized).contains("§");
+        assertThat(serialized).contains("Alice");
+    }
 }

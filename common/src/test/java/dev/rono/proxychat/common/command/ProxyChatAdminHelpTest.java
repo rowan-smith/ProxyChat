@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,11 +30,14 @@ class ProxyChatAdminHelpTest {
 
         ProxyChatAdminHelp.send(harness.core(), player);
 
-        assertThat(player.receivedMessages()).anyMatch(message -> message.contains("reload"));
-        assertThat(player.receivedMessages()).anyMatch(message -> message.contains("version"));
-        assertThat(player.receivedMessages()).anyMatch(message -> message.contains("/global"));
-        assertThat(player.receivedMessages()).anyMatch(message -> message.contains("Global Chat"));
-        assertThat(player.receivedMessages()).noneMatch(message -> message.contains("/local"));
+        List<String> messages = player.receivedMessages();
+        assertThat(messages).anyMatch(message -> message.contains("reload"));
+        assertThat(messages).anyMatch(message -> message.contains("version"));
+        assertThat(messages).anyMatch(message -> message.contains("Chat channels:"));
+        assertThat(messages).anyMatch(message -> message.contains("> Global"));
+        assertThat(messages).anyMatch(message -> message.contains("- /g") && message.contains("toggle") && message.contains("ignore"));
+        assertThat(messages).anyMatch(message -> message.contains("- /global"));
+        assertThat(messages).noneMatch(message -> message.contains("/local"));
     }
 
     @Test
@@ -55,8 +59,37 @@ class ProxyChatAdminHelpTest {
 
         ProxyChatAdminHelp.send(blockedHarness.core(), player);
 
-        assertThat(player.receivedMessages()).anyMatch(message -> message.contains("/global") && message.contains("ignore"));
-        assertThat(player.receivedMessages()).noneMatch(message -> message.contains("toggle"));
+        List<String> messages = player.receivedMessages();
+        assertThat(messages).anyMatch(message -> message.contains("- /global") && message.contains("ignore"));
+        assertThat(messages).noneMatch(message -> message.contains("toggle"));
+    }
+
+    @Test
+    void showsPlainPrefixLineWhenSignedChatInterceptionIsAvailable() throws Exception {
+        FakePlatform platform = new FakePlatform();
+        platform.installPlugin("signedvelocity");
+        platform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(true));
+        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory.resolve("signed-help"), platform);
+        FakePlayer player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+
+        ProxyChatAdminHelp.send(harness.core(), player);
+
+        List<String> messages = player.receivedMessages();
+        assertThat(messages).anyMatch(message -> message.contains("- @") && message.contains("<message>"));
+        assertThat(messages).noneMatch(message -> message.contains("- /@"));
+    }
+
+    @Test
+    void showsProxyPrefixCommandWhenSignedChatInterceptionIsUnavailable() throws Exception {
+        FakePlatform platform = new FakePlatform();
+        platform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(false));
+        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory.resolve("unsigned-help"), platform);
+        FakePlayer player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+
+        ProxyChatAdminHelp.send(harness.core(), player);
+
+        assertThat(player.receivedMessages()).anyMatch(message -> message.contains("- /@"));
+        assertThat(player.receivedMessages()).noneMatch(message -> message.contains("- @") && !message.contains("- /@"));
     }
 
     @Test
@@ -65,7 +98,23 @@ class ProxyChatAdminHelpTest {
 
         ProxyChatAdminHelp.send(harness.core(), console);
 
-        assertThat(console.receivedMessages()).anyMatch(message -> message.contains("/global"));
-        assertThat(console.receivedMessages()).anyMatch(message -> message.contains("/local"));
+        List<String> messages = console.receivedMessages();
+        assertThat(messages).anyMatch(message -> message.contains("> Global"));
+        assertThat(messages).anyMatch(message -> message.contains("- /global"));
+        assertThat(messages).anyMatch(message -> message.contains("> Local"));
+        assertThat(messages).anyMatch(message -> message.contains("- /local"));
+    }
+
+    @Test
+    void omitsSubcommandsForChannelsWithoutToggleOrIgnore() throws Exception {
+        FakePlatform platform = new FakePlatform();
+        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory.resolve("staff-help"), platform);
+        FakePlayer player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.staff"));
+
+        ProxyChatAdminHelp.send(harness.core(), player);
+
+        List<String> messages = player.receivedMessages();
+        assertThat(messages).anyMatch(message -> message.contains("> Staff"));
+        assertThat(messages).anyMatch(message -> message.contains("- /staff") && !message.contains("["));
     }
 }

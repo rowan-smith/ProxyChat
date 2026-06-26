@@ -2,6 +2,7 @@ package dev.rono.proxychat.bungee;
 
 import dev.rono.proxychat.bungee.command.BungeeAdminCommand;
 import dev.rono.proxychat.bungee.command.BungeeChannelCommand;
+import dev.rono.proxychat.bungee.command.BungeePrefixCommand;
 import dev.rono.proxychat.bungee.listener.BungeeChatListener;
 import dev.rono.proxychat.bungee.listener.BungeeSignedChatListener;
 import dev.rono.proxychat.bungee.platform.BungeePlatform;
@@ -10,6 +11,7 @@ import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.common.channel.ChatChannel;
 import lombok.Getter;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
+import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.nio.file.Path;
@@ -26,7 +28,7 @@ public final class BungeeProxyChatPlugin extends Plugin {
     @Getter
     private BungeeAudiences adventure;
 
-    private final List<BungeeChannelCommand> registeredCommands = new ArrayList<>();
+    private final List<Command> registeredCommands = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -60,14 +62,30 @@ public final class BungeeProxyChatPlugin extends Plugin {
             BungeeChannelCommand command = new BungeeChannelCommand(core, channel);
             getProxy().getPluginManager().registerCommand(this, command);
             registeredCommands.add(command);
+            registerPrefixCommand(channel);
         }
 
         getProxy().getPluginManager().registerCommand(this, new BungeeAdminCommand(core));
         getLogger().info(registeredCommands.size() + " channel commands loaded.");
     }
 
+    private void registerPrefixCommand(ChatChannel channel) {
+        if (!channel.isUseCommandPrefix()) {
+            return;
+        }
+
+        String prefix = channel.getCommandPrefix();
+        if (prefix == null || prefix.isEmpty()) {
+            return;
+        }
+
+        BungeePrefixCommand command = new BungeePrefixCommand(core, channel);
+        getProxy().getPluginManager().registerCommand(this, command);
+        registeredCommands.add(command);
+    }
+
     public void unregisterCommands() {
-        for (BungeeChannelCommand command : registeredCommands) {
+        for (Command command : registeredCommands) {
             getProxy().getPluginManager().unregisterCommand(command);
         }
 

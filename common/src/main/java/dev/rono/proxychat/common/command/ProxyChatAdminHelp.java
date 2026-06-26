@@ -12,6 +12,7 @@ import dev.rono.proxychat.common.util.SignedChatPolicy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public final class ProxyChatAdminHelp {
     public static void send(ProxyChatBootstrap bootstrap, ProxyCommandSource sender) {
@@ -39,7 +40,9 @@ public final class ProxyChatAdminHelp {
         sendLine(platform, sender, prefix + ProxyChatMessages.resolve(config, "help-channels-header"));
 
         for (ChatChannel channel : visibleChannels) {
-            sendLine(platform, sender, prefix + formatChannelLine(bootstrap, config, channel, sender));
+            for (String line : formatChannelHelp(bootstrap, config, channel, sender)) {
+                sendLine(platform, sender, prefix + line);
+            }
         }
     }
 
@@ -48,17 +51,52 @@ public final class ProxyChatAdminHelp {
         return permission == null || permission.isEmpty() || sender.hasPermission(permission);
     }
 
-    private static String formatChannelLine(ProxyChatBootstrap bootstrap, ProxyChatYaml config, ChatChannel channel, ProxyCommandSource sender) {
-        StringBuilder line = new StringBuilder("&7/")
-                .append(channel.getCommandName())
-                .append(" <message>");
+    private static List<String> formatChannelHelp(
+            ProxyChatBootstrap bootstrap,
+            ProxyChatYaml config,
+            ChatChannel channel,
+            ProxyCommandSource sender
+    ) {
+        List<String> lines = new ArrayList<>();
+        lines.add(formatChannelHeading(channel));
 
-        if (channel.getCommandAlias() != null && !channel.getCommandAlias().isEmpty()) {
-            line.append(" &8(/").append(channel.getCommandAlias()).append(")");
+        String optionBracket = formatSubcommandBracket(bootstrap, config, channel, sender);
+        appendCommandLine(lines, channel.getCommandAlias(), optionBracket);
+        appendCommandLine(lines, channel.getCommandName(), optionBracket);
+
+        appendPrefixLines(lines, bootstrap, config, channel, sender);
+
+        return lines;
+    }
+
+    private static String formatChannelHeading(ChatChannel channel) {
+        String displayName = channel.getChatName();
+        if (displayName != null && displayName.endsWith(" Chat")) {
+            displayName = displayName.substring(0, displayName.length() - " Chat".length());
         }
 
-        line.append(" &8- ").append(channel.getChatName());
+        return "&a> &f" + (displayName == null || displayName.isEmpty() ? channel.getCommandName() : displayName);
+    }
 
+    private static void appendCommandLine(List<String> lines, String command, String optionBracket) {
+        if (command == null || command.isEmpty()) {
+            return;
+        }
+
+        String usage = "&7- &f/" + command.toLowerCase(Locale.ROOT);
+        if (!optionBracket.isEmpty()) {
+            usage += " &7[" + optionBracket + "]";
+        }
+
+        lines.add(usage + " &8<message>");
+    }
+
+    private static String formatSubcommandBracket(
+            ProxyChatBootstrap bootstrap,
+            ProxyChatYaml config,
+            ChatChannel channel,
+            ProxyCommandSource sender
+    ) {
         ProxyPlayer player = sender.asPlayer();
         List<String> subcommands = new ArrayList<>();
 
@@ -70,19 +108,41 @@ public final class ProxyChatAdminHelp {
             subcommands.add("ignore");
         }
 
-        if (!subcommands.isEmpty()) {
-            line.append(" &8[").append(String.join(", ", subcommands)).append("]");
+        if (subcommands.isEmpty()) {
+            return "";
         }
 
-        if (player != null
-                && channel.isUseCommandPrefix()
-                && channel.getCommandPrefix() != null
-                && !channel.getCommandPrefix().isEmpty()
-                && SignedChatPolicy.shouldInterceptChat(config, bootstrap.getSignedChatHandler(), player)) {
-            line.append(" &8prefix ").append(channel.getCommandPrefix());
+        return String.join(" &8| &7", subcommands);
+    }
+
+    private static void appendPrefixLines(
+            List<String> lines,
+            ProxyChatBootstrap bootstrap,
+            ProxyChatYaml config,
+            ChatChannel channel,
+            ProxyCommandSource sender
+    ) {
+        ProxyPlayer player = sender.asPlayer();
+        if (player == null) {
+            return;
         }
 
-        return line.toString();
+        if (!channel.isUseCommandPrefix()) {
+            return;
+        }
+
+        String commandPrefix = channel.getCommandPrefix();
+        if (commandPrefix == null || commandPrefix.isEmpty()) {
+            return;
+        }
+
+        if (SignedChatPolicy.shouldInterceptChat(config, bootstrap.getSignedChatHandler(), player)) {
+            lines.add("&7- &f" + commandPrefix + "&8<message>");
+        }
+
+        if (SignedChatPolicy.shouldRegisterProxyPrefixCommand(config, bootstrap.getPlatform())) {
+            lines.add("&7- &f/" + commandPrefix + " &8<message>");
+        }
     }
 
     private static void sendLine(ProxyChatPlatform platform, ProxyCommandSource sender, String message) {

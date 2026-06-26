@@ -50,7 +50,6 @@ class ConfigLayoutNormalizerTest {
         assertThat(saved).contains("# Prefix used in front of all messages");
         assertThat(saved).contains("# Shown when running /proxychat or /pc with no arguments");
         assertThat(saved).contains("# Controls whether ProxyChat cancels plain chat for @prefix and toggle mode.");
-        assertThat(saved).contains("# Config schema version matches public ProxyChat release");
         assertThat(saved.lines().filter(line -> line.trim().equals("#")).findAny()).isEmpty();
         assertThat(saved).contains("\n\n# This is what is shown when you toggle a command.");
     }
