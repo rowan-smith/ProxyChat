@@ -1,22 +1,22 @@
 package dev.rono.proxychat.velocity.listener;
 
+import java.util.Optional;
+
+import lombok.experimental.UtilityClass;
+
 import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.common.channel.VelocityPrefixInterceptResult;
 import dev.rono.proxychat.common.platform.ProxyPlayer;
 import dev.rono.proxychat.common.util.SignedChatPolicy;
 
-import java.util.Optional;
-
 /**
  * Chooses how Velocity should handle intercepted plain chat when SignedVelocity is present.
  */
-public final class VelocityChatIntercept {
+@UtilityClass
+public class VelocityChatIntercept {
     public enum Action {
         PASS,
         DENY
-    }
-
-    private VelocityChatIntercept() {
     }
 
     public static Action decide(ProxyChatCore core, ProxyPlayer player, String message) {
@@ -24,7 +24,8 @@ public final class VelocityChatIntercept {
             return Action.PASS;
         }
 
-        Optional<VelocityPrefixInterceptResult> prefixResult = core.getChannelService().tryVelocityPrefixedIntercept(player, message);
+        Optional<VelocityPrefixInterceptResult> prefixResult =
+                core.getChannelService().tryVelocityPrefixedIntercept(player, message);
         if (prefixResult.isPresent()) {
             return Action.DENY;
         }

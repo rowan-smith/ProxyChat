@@ -1,12 +1,15 @@
 package dev.rono.proxychat.common.util;
 
+import lombok.experimental.UtilityClass;
+
 import dev.rono.proxychat.common.channel.ChatChannel;
 import dev.rono.proxychat.common.config.ProxyChatYaml;
 import dev.rono.proxychat.common.platform.ProxyChatPlatform;
 import dev.rono.proxychat.common.platform.ProxyPlayer;
 import dev.rono.proxychat.common.platform.SignedChatHandler;
 
-public final class SignedChatPolicy {
+@UtilityClass
+public class SignedChatPolicy {
 
     /**
      * signed-chat-interception config value: auto (default), always, never
@@ -28,7 +31,12 @@ public final class SignedChatPolicy {
         return handler.canInterceptChat(player);
     }
 
-    public static boolean isToggleAvailable(ProxyChatYaml config, SignedChatHandler handler, ChatChannel channel, ProxyPlayer player) {
+    public static boolean isToggleAvailable(
+            ProxyChatYaml config,
+            SignedChatHandler handler,
+            ChatChannel channel,
+            ProxyPlayer player
+    ) {
         if (!channel.isToggleable()) {
             return false;
         }
@@ -50,10 +58,8 @@ public final class SignedChatPolicy {
 
     private static boolean isInterceptionDisabled(ProxyChatYaml config) {
         String mode = config.getString("signed-chat-interception");
-        return mode != null && (
-                mode.equalsIgnoreCase("never")
-                        || mode.equalsIgnoreCase("false")
-                        || mode.equalsIgnoreCase("disabled")
-        );
+        return mode != null && (mode.equalsIgnoreCase("never")
+                || mode.equalsIgnoreCase("false")
+                || mode.equalsIgnoreCase("disabled"));
     }
 }

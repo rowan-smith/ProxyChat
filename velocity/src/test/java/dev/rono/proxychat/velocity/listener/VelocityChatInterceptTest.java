@@ -1,14 +1,15 @@
 package dev.rono.proxychat.velocity.listener;
 
+import java.nio.file.Path;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
 import dev.rono.proxychat.common.test.FakePlatform;
 import dev.rono.proxychat.common.test.FakePlayer;
 import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
 import dev.rono.proxychat.common.test.TestEnvironment;
 import dev.rono.proxychat.common.util.SignedChatPolicy;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
-import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,7 +33,8 @@ class VelocityChatInterceptTest {
 
         // assert
         assertThat(action).isEqualTo(VelocityChatIntercept.Action.DENY);
-        assertThat(sameServer.receivedMessages()).anyMatch(message -> message.contains("Alice") && message.contains("hello"));
+        assertThat(sameServer.receivedMessages())
+                .anyMatch(message -> message.contains("Alice") && message.contains("hello"));
         assertThat(platform.getOnlinePlayers().stream()
                 .filter(player -> "survival".equals(player.getServerName()))
                 .flatMap(player -> ((FakePlayer) player).receivedMessages().stream())
@@ -105,7 +107,12 @@ class VelocityChatInterceptTest {
         FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
 
         // assert
-        assertThat(SignedChatPolicy.shouldInterceptChat(harness.config(), harness.core().getSignedChatHandler(), sender)).isFalse();
-        assertThat(VelocityChatIntercept.decide(harness.core(), sender, "@hello")).isEqualTo(VelocityChatIntercept.Action.PASS);
+        assertThat(SignedChatPolicy.shouldInterceptChat(
+                harness.config(),
+                harness.core().getSignedChatHandler(),
+                sender
+        )).isFalse();
+        assertThat(VelocityChatIntercept.decide(harness.core(), sender, "@hello"))
+                .isEqualTo(VelocityChatIntercept.Action.PASS);
     }
 }

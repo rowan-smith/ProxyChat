@@ -1,8 +1,8 @@
 package dev.rono.proxychat.common.platform;
 
-import net.kyori.adventure.text.Component;
-
 import java.util.Collection;
+
+import net.kyori.adventure.text.Component;
 
 public interface ProxyChatPlatform {
     Collection<? extends ProxyPlayer> getOnlinePlayers();

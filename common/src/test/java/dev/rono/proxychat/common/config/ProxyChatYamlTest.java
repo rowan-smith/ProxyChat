@@ -1,10 +1,11 @@
 package dev.rono.proxychat.common.config;
 
-import dev.dejvokep.boostedyaml.YamlDocument;
-import org.junit.jupiter.api.Test;
-
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+
+import org.junit.jupiter.api.Test;
+
+import dev.dejvokep.boostedyaml.YamlDocument;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

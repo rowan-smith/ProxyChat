@@ -3,5 +3,6 @@ target/
 dependency-reduced-pom.xml
 
 # IntelliJ IDEA
-.idea/
+.idea/*
+!.idea/checkstyle-idea.xml
 *.iml

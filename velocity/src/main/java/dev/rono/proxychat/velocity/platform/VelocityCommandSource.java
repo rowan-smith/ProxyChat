@@ -1,12 +1,14 @@
 package dev.rono.proxychat.velocity.platform;
 
+import java.util.UUID;
+
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import dev.rono.proxychat.common.platform.ProxyCommandSource;
-import dev.rono.proxychat.common.platform.ProxyPlayer;
+
 import net.kyori.adventure.text.Component;
 
-import java.util.UUID;
+import dev.rono.proxychat.common.platform.ProxyCommandSource;
+import dev.rono.proxychat.common.platform.ProxyPlayer;
 
 public record VelocityCommandSource(CommandSource handle) implements ProxyCommandSource {
     @Override

@@ -1,14 +1,15 @@
 package dev.rono.proxychat.common.config;
 
-import dev.dejvokep.boostedyaml.YamlDocument;
-import dev.rono.proxychat.common.config.migration.ConfigFixtures;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.rono.proxychat.common.config.migration.ConfigFixtures;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

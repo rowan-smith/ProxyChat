@@ -1,11 +1,11 @@
 package dev.rono.proxychat.common.test;
 
-import dev.rono.proxychat.common.platform.ProxyPlayer;
-import dev.rono.proxychat.common.platform.SignedChatHandler;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import dev.rono.proxychat.common.platform.ProxyPlayer;
+import dev.rono.proxychat.common.platform.SignedChatHandler;
 
 public final class RecordingSignedChatHandler implements SignedChatHandler {
 

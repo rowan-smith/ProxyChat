@@ -1,10 +1,11 @@
 package dev.rono.proxychat.common.channel;
 
-import dev.rono.proxychat.common.config.ProxyChatYaml;
-import dev.rono.proxychat.common.util.ToggleUtils;
+import java.util.List;
+
 import lombok.Getter;
 
-import java.util.List;
+import dev.rono.proxychat.common.config.ProxyChatYaml;
+import dev.rono.proxychat.common.util.ToggleUtils;
 
 @Getter
 public final class ChatChannel {

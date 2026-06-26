@@ -2,8 +2,6 @@ package dev.rono.proxychat.common.util;
 
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.Math.abs;
-
 public final class CooldownState implements Runnable {
     private final long delayMillis;
     private final Runnable onComplete;
@@ -21,6 +19,6 @@ public final class CooldownState implements Runnable {
 
     public String getRemainingSeconds() {
         long elapsed = System.currentTimeMillis() - startTime;
-        return String.valueOf(abs(TimeUnit.MILLISECONDS.toSeconds(elapsed - delayMillis)));
+        return String.valueOf(Math.abs(TimeUnit.MILLISECONDS.toSeconds(elapsed - delayMillis)));
     }
 }

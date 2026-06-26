@@ -1,15 +1,16 @@
 package dev.rono.proxychat.bungee.platform;
 
-import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
-import dev.rono.proxychat.common.platform.ProxyChatPlatform;
-import dev.rono.proxychat.common.platform.ProxyCommandSource;
-import dev.rono.proxychat.common.platform.ProxyPlayer;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
+import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
+import dev.rono.proxychat.common.platform.ProxyChatPlatform;
+import dev.rono.proxychat.common.platform.ProxyCommandSource;
+import dev.rono.proxychat.common.platform.ProxyPlayer;
 
 public final class BungeePlatform implements ProxyChatPlatform {
     private final BungeeProxyChatPlugin plugin;
@@ -67,7 +68,12 @@ public final class BungeePlatform implements ProxyChatPlatform {
 
     @Override
     public void scheduleDelayedTask(Runnable task, long delayMillis) {
-        plugin.getProxy().getScheduler().schedule(plugin, task, delayMillis, java.util.concurrent.TimeUnit.MILLISECONDS);
+        plugin.getProxy().getScheduler().schedule(
+                plugin,
+                task,
+                delayMillis,
+                java.util.concurrent.TimeUnit.MILLISECONDS
+        );
     }
 
     @Override

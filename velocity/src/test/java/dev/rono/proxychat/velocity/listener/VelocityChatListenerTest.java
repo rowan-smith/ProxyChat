@@ -1,13 +1,14 @@
 package dev.rono.proxychat.velocity.listener;
 
+import java.nio.file.Path;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
 import dev.rono.proxychat.common.test.FakePlatform;
 import dev.rono.proxychat.common.test.FakePlayer;
 import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
 import dev.rono.proxychat.common.test.TestEnvironment;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
-import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,10 +43,13 @@ class VelocityChatListenerTest {
         RecordingSignedChatHandler handler = new RecordingSignedChatHandler().canIntercept(false);
         platform.setSignedChatHandler(handler);
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
-        FakePlayer alice = new FakePlayer("Alice", "lobby").withPermission("proxychat.global").withProtocolVersion(767);
+        FakePlayer alice = new FakePlayer("Alice", "lobby")
+                .withPermission("proxychat.global")
+                .withProtocolVersion(767);
 
         // act
-        VelocityChatIntercept.Action decision = VelocityChatIntercept.decide(harness.core(), alice, "@should-not-intercept");
+        VelocityChatIntercept.Action decision =
+                VelocityChatIntercept.decide(harness.core(), alice, "@should-not-intercept");
 
         // assert
         assertThat(decision).isEqualTo(VelocityChatIntercept.Action.PASS);

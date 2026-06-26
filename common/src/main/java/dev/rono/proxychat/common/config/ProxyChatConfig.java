@@ -1,14 +1,13 @@
 package dev.rono.proxychat.common.config;
 
-import lombok.Getter;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import lombok.Getter;
 
 public final class ProxyChatConfig {
     private final Logger logger;

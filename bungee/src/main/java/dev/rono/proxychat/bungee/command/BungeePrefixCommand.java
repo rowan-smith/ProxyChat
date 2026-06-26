@@ -1,16 +1,17 @@
 package dev.rono.proxychat.bungee.command;
 
-import dev.rono.proxychat.bungee.platform.BungeeCommandSource;
-import dev.rono.proxychat.bungee.platform.BungeePlayer;
-import dev.rono.proxychat.common.ProxyChatCore;
-import dev.rono.proxychat.common.channel.ChatChannel;
+import java.util.HashSet;
+import java.util.Set;
+
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
-import java.util.HashSet;
-import java.util.Set;
+import dev.rono.proxychat.bungee.platform.BungeeCommandSource;
+import dev.rono.proxychat.bungee.platform.BungeePlayer;
+import dev.rono.proxychat.common.ProxyChatCore;
+import dev.rono.proxychat.common.channel.ChatChannel;
 
 /**
  * Handles {@code /<prefix><message>} without cancelling signed chat (safe on Paper backends).

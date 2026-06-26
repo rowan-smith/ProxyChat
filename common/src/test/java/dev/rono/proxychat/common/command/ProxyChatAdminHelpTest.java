@@ -1,12 +1,17 @@
 package dev.rono.proxychat.common.command;
 
-import dev.rono.proxychat.common.test.*;
+import java.nio.file.Path;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.nio.file.Path;
-import java.util.List;
+import dev.rono.proxychat.common.test.FakeConsole;
+import dev.rono.proxychat.common.test.FakePlatform;
+import dev.rono.proxychat.common.test.FakePlayer;
+import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
+import dev.rono.proxychat.common.test.TestEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,7 +44,8 @@ class ProxyChatAdminHelpTest {
         assertThat(messages).anyMatch(message -> message.contains("version"));
         assertThat(messages).anyMatch(message -> message.contains("Chat channels:"));
         assertThat(messages).anyMatch(message -> message.contains("> Global"));
-        assertThat(messages).anyMatch(message -> message.contains("- /g") && message.contains("toggle") && message.contains("ignore"));
+        assertThat(messages).anyMatch(message ->
+                message.contains("- /g") && message.contains("toggle") && message.contains("ignore"));
         assertThat(messages).anyMatch(message -> message.contains("- /global"));
         assertThat(messages).noneMatch(message -> message.contains("/local"));
     }
@@ -64,8 +70,13 @@ class ProxyChatAdminHelpTest {
         // arrange
         FakePlatform blockedPlatform = new FakePlatform();
         blockedPlatform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(false));
-        TestEnvironment.TestHarness blockedHarness = TestEnvironment.create(dataDirectory.resolve("blocked-help"), blockedPlatform);
-        FakePlayer player = blockedPlatform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        TestEnvironment.TestHarness blockedHarness = TestEnvironment.create(
+                dataDirectory.resolve("blocked-help"),
+                blockedPlatform
+        );
+        FakePlayer player = blockedPlatform.addPlayer(
+                new FakePlayer("Alice", "lobby").withPermission("proxychat.global")
+        );
         ProxyChatAdminHelp.send(blockedHarness.core(), player);
 
         // act
@@ -109,7 +120,8 @@ class ProxyChatAdminHelpTest {
 
         // assert
         assertThat(player.receivedMessages()).anyMatch(message -> message.contains("- /@"));
-        assertThat(player.receivedMessages()).noneMatch(message -> message.contains("- @") && !message.contains("- /@"));
+        assertThat(player.receivedMessages())
+                .noneMatch(message -> message.contains("- @") && !message.contains("- /@"));
     }
 
     @Test

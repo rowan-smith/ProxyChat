@@ -7,12 +7,15 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 
+import lombok.experimental.UtilityClass;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Back-versioned {@code config.yml} snapshots under {@code src/test/resources}, keyed by public release.
  */
-public final class ConfigFixtures {
+@UtilityClass
+public class ConfigFixtures {
     public static final ConfigVersion LATEST = ConfigVersion.of(2, 2);
     public static final String LATEST_CONFIG = "v2/2-2/config.yml";
     public static final String LATEST_CHATS_DIR = "v2/2-2/chats";

@@ -1,5 +1,11 @@
 package dev.rono.proxychat.common.channel;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
+import net.kyori.adventure.text.Component;
+
 import dev.rono.proxychat.common.config.ProxyChatMessages;
 import dev.rono.proxychat.common.config.ProxyChatYaml;
 import dev.rono.proxychat.common.message.MessageFormatter;
@@ -8,11 +14,6 @@ import dev.rono.proxychat.common.platform.ProxyChatPlatform;
 import dev.rono.proxychat.common.platform.ProxyCommandSource;
 import dev.rono.proxychat.common.platform.ProxyPlayer;
 import dev.rono.proxychat.common.util.SignedChatPolicy;
-import net.kyori.adventure.text.Component;
-
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 public final class ChatChannelService {
     private final ProxyChatBootstrap bootstrap;
@@ -31,7 +32,10 @@ public final class ChatChannelService {
                 broadcast(channel, MessageFormatter.legacy(message), null, true);
 
             } else {
-                platform.sendMessage(sender, formattedConfigMessage(config, "console-disabled-message", sender, channel, args));
+                platform.sendMessage(
+                        sender,
+                        formattedConfigMessage(config, "console-disabled-message", sender, channel, args)
+                );
             }
 
             return;
@@ -229,20 +233,32 @@ public final class ChatChannelService {
 
     private void broadcast(ChatChannel channel, Component message, ProxyPlayer localScope, boolean consoleFormat) {
         ProxyChatPlatform platform = bootstrap.getPlatform();
-        Iterable<? extends ProxyPlayer> recipients = localScope == null ? platform.getOnlinePlayers() : platform.getPlayersOnServer(localScope);
+        Iterable<? extends ProxyPlayer> recipients = localScope == null
+                ? platform.getOnlinePlayers()
+                : platform.getPlayersOnServer(localScope);
 
         for (ProxyPlayer recipient : recipients) {
-            if ((recipient.hasPermission(channel.getPermission()) || channel.getPermission().isEmpty()) && !channel.getToggleUtils().isIgnored(recipient.getUniqueId())) {
+            boolean permitted = recipient.hasPermission(channel.getPermission())
+                    || channel.getPermission().isEmpty();
+            if (permitted && !channel.getToggleUtils().isIgnored(recipient.getUniqueId())) {
                 recipient.sendMessage(message);
             }
         }
 
         if (channel.isLogChatToConsole()) {
-            platform.logInfo(net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(message));
+            String plain = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+                    .plainText()
+                    .serialize(message);
+            platform.logInfo(plain);
         }
     }
 
-    private Optional<OutgoingChatMessage> preparePlayerChat(ChatChannel channel, ProxyPlayer player, String[] args, ProxyChatYaml config) {
+    private Optional<OutgoingChatMessage> preparePlayerChat(
+            ChatChannel channel,
+            ProxyPlayer player,
+            String[] args,
+            ProxyChatYaml config
+    ) {
         if (channel.getServerBlacklist().contains(player.getServerName())) {
             return Optional.empty();
         }
@@ -258,8 +274,15 @@ public final class ChatChannelService {
         }
 
         if (!player.hasPermission(channel.getCommandDelayOverridePermission())) {
-            channel.getToggleUtils().startDelay(player.getUniqueId(), channel.getCommandDelay(), () -> channel.getToggleUtils().clearDelay(player.getUniqueId()));
-            bootstrap.getPlatform().scheduleDelayedTask(channel.getToggleUtils().getDelay(player.getUniqueId()), channel.getCommandDelay());
+            channel.getToggleUtils().startDelay(
+                    player.getUniqueId(),
+                    channel.getCommandDelay(),
+                    () -> channel.getToggleUtils().clearDelay(player.getUniqueId())
+            );
+            bootstrap.getPlatform().scheduleDelayedTask(
+                    channel.getToggleUtils().getDelay(player.getUniqueId()),
+                    channel.getCommandDelay()
+            );
         }
 
         String legacyText = applyPlaceholders(channel.getFormat(), player, channel, args, config, true);
@@ -271,11 +294,24 @@ public final class ChatChannelService {
     private record OutgoingChatMessage(String legacyText, Component component) {
     }
 
-    private Component formattedConfigMessage(ProxyChatYaml config, String key, ProxyCommandSource source, ChatChannel channel, String[] args) {
+    private Component formattedConfigMessage(
+            ProxyChatYaml config,
+            String key,
+            ProxyCommandSource source,
+            ChatChannel channel,
+            String[] args
+    ) {
         return formatMessage(config, ProxyChatMessages.resolve(config, key), source, channel, args, false);
     }
 
-    private Component formatMessage(ProxyChatYaml config, String template, ProxyCommandSource source, ChatChannel channel, String[] args, boolean ignorePrefix) {
+    private Component formatMessage(
+            ProxyChatYaml config,
+            String template,
+            ProxyCommandSource source,
+            ChatChannel channel,
+            String[] args,
+            boolean ignorePrefix
+    ) {
         if (template == null || template.isEmpty()) {
             return Component.empty();
         }
@@ -288,7 +324,14 @@ public final class ChatChannelService {
         return MessageFormatter.legacy(message);
     }
 
-    private String applyPlaceholders(String template, ProxyCommandSource source, ChatChannel channel, String[] args, ProxyChatYaml config, boolean ignorePrefix) {
+    private String applyPlaceholders(
+            String template,
+            ProxyCommandSource source,
+            ChatChannel channel,
+            String[] args,
+            ProxyChatYaml config,
+            boolean ignorePrefix
+    ) {
         ProxyPlayer player = source.asPlayer();
         String prefix = nullToEmpty(ProxyChatMessages.resolve(config, "prefix"));
         String message = template
@@ -303,7 +346,10 @@ public final class ChatChannelService {
             message = message.replace("%server%", player.getServerName());
 
             if (channel.getToggleUtils().isDelayed(player.getUniqueId())) {
-                message = message.replace("%chat-cooldown%", channel.getToggleUtils().getDelay(player.getUniqueId()).getRemainingSeconds());
+                String remaining = channel.getToggleUtils()
+                        .getDelay(player.getUniqueId())
+                        .getRemainingSeconds();
+                message = message.replace("%chat-cooldown%", remaining);
             }
         }
 

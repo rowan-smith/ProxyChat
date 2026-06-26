@@ -1,5 +1,11 @@
 package dev.rono.proxychat.common.command;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+import lombok.experimental.UtilityClass;
+
 import dev.rono.proxychat.common.channel.ChatChannel;
 import dev.rono.proxychat.common.config.ProxyChatMessages;
 import dev.rono.proxychat.common.config.ProxyChatYaml;
@@ -10,11 +16,9 @@ import dev.rono.proxychat.common.platform.ProxyCommandSource;
 import dev.rono.proxychat.common.platform.ProxyPlayer;
 import dev.rono.proxychat.common.util.SignedChatPolicy;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+@UtilityClass
+public class ProxyChatAdminHelp {
 
-public final class ProxyChatAdminHelp {
     public static void send(ProxyChatBootstrap bootstrap, ProxyCommandSource sender) {
         ProxyChatYaml config = bootstrap.getConfig().getConfig();
         ProxyChatPlatform platform = bootstrap.getPlatform();
@@ -100,7 +104,8 @@ public final class ProxyChatAdminHelp {
         ProxyPlayer player = sender.asPlayer();
         List<String> subcommands = new ArrayList<>();
 
-        if (player != null && SignedChatPolicy.isToggleAvailable(config, bootstrap.getSignedChatHandler(), channel, player)) {
+        if (player != null
+                && SignedChatPolicy.isToggleAvailable(config, bootstrap.getSignedChatHandler(), channel, player)) {
             subcommands.add("toggle");
         }
 

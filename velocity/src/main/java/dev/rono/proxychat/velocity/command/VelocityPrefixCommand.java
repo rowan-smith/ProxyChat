@@ -1,14 +1,15 @@
 package dev.rono.proxychat.velocity.command;
 
+import java.util.List;
+
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
+
 import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.common.channel.ChatChannel;
 import dev.rono.proxychat.velocity.platform.VelocityCommandSource;
 import dev.rono.proxychat.velocity.platform.VelocityPlayer;
-
-import java.util.List;
 
 public final class VelocityPrefixCommand implements SimpleCommand {
     private final ProxyChatCore core;
@@ -38,7 +39,9 @@ public final class VelocityPrefixCommand implements SimpleCommand {
             return List.of();
         }
 
-        return List.copyOf(core.getChannelService().tabComplete(channel, new VelocityPlayer(player), invocation.arguments()));
+        return List.copyOf(
+                core.getChannelService().tabComplete(channel, new VelocityPlayer(player), invocation.arguments())
+        );
     }
 
     @Override

@@ -2,6 +2,7 @@ package dev.rono.proxychat.velocity.listener;
 
 import com.velocitypowered.api.event.command.CommandExecuteEvent;
 import com.velocitypowered.api.proxy.Player;
+
 import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.common.util.SignedChatPolicy;
 import dev.rono.proxychat.velocity.platform.VelocityPlayer;
@@ -22,7 +23,11 @@ public final class VelocityCommandInterceptListener {
         }
 
         VelocityPlayer proxyPlayer = new VelocityPlayer(player);
-        if (!SignedChatPolicy.shouldInterceptChat(core.getConfig().getConfig(), core.getSignedChatHandler(), proxyPlayer)) {
+        if (!SignedChatPolicy.shouldInterceptChat(
+                core.getConfig().getConfig(),
+                core.getSignedChatHandler(),
+                proxyPlayer
+        )) {
             return;
         }
 

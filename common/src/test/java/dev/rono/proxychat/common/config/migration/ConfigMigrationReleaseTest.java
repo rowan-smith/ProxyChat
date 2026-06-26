@@ -1,16 +1,17 @@
 package dev.rono.proxychat.common.config.migration;
 
-import dev.rono.proxychat.common.config.ProxyChatYaml;
-import dev.rono.proxychat.common.config.ProxyChatYamlDocuments;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.logging.Logger;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.logging.Logger;
+import dev.rono.proxychat.common.config.ProxyChatYaml;
+import dev.rono.proxychat.common.config.ProxyChatYamlDocuments;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

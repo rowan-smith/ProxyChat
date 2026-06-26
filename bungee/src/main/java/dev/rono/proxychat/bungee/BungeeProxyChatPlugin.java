@@ -1,5 +1,15 @@
 package dev.rono.proxychat.bungee;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
+import net.md_5.bungee.api.plugin.Command;
+import net.md_5.bungee.api.plugin.Plugin;
+
+import lombok.Getter;
+
 import dev.rono.proxychat.bungee.command.BungeeAdminCommand;
 import dev.rono.proxychat.bungee.command.BungeeChannelCommand;
 import dev.rono.proxychat.bungee.command.BungeePrefixCommand;
@@ -9,14 +19,6 @@ import dev.rono.proxychat.bungee.platform.BungeePlatform;
 import dev.rono.proxychat.bungee.platform.WaterfallSignedChatHandler;
 import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.common.channel.ChatChannel;
-import lombok.Getter;
-import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
-import net.md_5.bungee.api.plugin.Command;
-import net.md_5.bungee.api.plugin.Plugin;
-
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 public final class BungeeProxyChatPlugin extends Plugin {
     @Getter

@@ -1,7 +1,8 @@
 package dev.rono.proxychat.common.message;
 
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.junit.jupiter.api.Test;
+
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

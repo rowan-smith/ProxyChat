@@ -1,5 +1,12 @@
 package dev.rono.proxychat.velocity.listener;
 
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
 import dev.rono.proxychat.common.channel.VelocityPrefixInterceptResult;
 import dev.rono.proxychat.common.config.ProxyChatYaml;
 import dev.rono.proxychat.common.test.FakePlatform;
@@ -7,12 +14,6 @@ import dev.rono.proxychat.common.test.FakePlayer;
 import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
 import dev.rono.proxychat.common.test.TestEnvironment;
 import dev.rono.proxychat.common.util.SignedChatPolicy;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
-import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,7 +56,8 @@ class VelocityPrefixChatRegressionTest {
                 harness.core().getChannelService().tryVelocityPrefixedIntercept(sender, "@hello");
 
         assertThat(result).containsInstanceOf(VelocityPrefixInterceptResult.Delivered.class);
-        assertThat(sender.receivedMessages()).noneMatch(message -> message.equals("@hello") || message.contains("<Alice> @hello"));
+        assertThat(sender.receivedMessages()).noneMatch(message ->
+                message.equals("@hello") || message.contains("<Alice> @hello"));
     }
 
     @Test
@@ -155,8 +157,11 @@ class VelocityPrefixChatRegressionTest {
         FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
 
         // assert
-        assertThat(SignedChatPolicy.shouldInterceptChat(harness.config(), harness.core().getSignedChatHandler(), sender))
-                .isFalse();
+        assertThat(SignedChatPolicy.shouldInterceptChat(
+                harness.config(),
+                harness.core().getSignedChatHandler(),
+                sender
+        )).isFalse();
         assertThat(VelocityChatIntercept.decide(harness.core(), sender, "@hello"))
                 .isEqualTo(VelocityChatIntercept.Action.PASS);
     }

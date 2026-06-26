@@ -1,14 +1,19 @@
 package dev.rono.proxychat.common.channel;
 
-import dev.rono.proxychat.common.test.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import dev.rono.proxychat.common.test.FakeConsole;
+import dev.rono.proxychat.common.test.FakePlatform;
+import dev.rono.proxychat.common.test.FakePlayer;
+import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
+import dev.rono.proxychat.common.test.TestEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,7 +44,8 @@ class ChatChannelServiceTest {
         service.execute(harness.globalChannel(), sender, new String[]{"Hello", "world"});
 
         // assert
-        assertThat(recipient.receivedMessages()).anyMatch(message -> message.contains("Alice") && message.contains("Hello world"));
+        assertThat(recipient.receivedMessages())
+                .anyMatch(message -> message.contains("Alice") && message.contains("Hello world"));
         assertThat(denied.receivedMessages()).isEmpty();
         assertThat(platform.infoLogs()).anyMatch(log -> log.contains("Alice"));
     }
@@ -50,7 +56,9 @@ class ChatChannelServiceTest {
         // arrange
         FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.local"));
         FakePlayer sameServer = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.local"));
-        FakePlayer otherServer = platform.addPlayer(new FakePlayer("Carol", "survival").withPermission("proxychat.local"));
+        FakePlayer otherServer = platform.addPlayer(
+                new FakePlayer("Carol", "survival").withPermission("proxychat.local")
+        );
 
         // act
         service.execute(harness.localChannel(), sender, new String[]{"Local", "only"});
@@ -185,7 +193,11 @@ class ChatChannelServiceTest {
     void bypassesCooldownWithOverridePermission() {
 
         // arrange
-        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global").withPermission("proxychat.global.override"));
+        FakePlayer sender = platform.addPlayer(
+                new FakePlayer("Alice", "lobby")
+                        .withPermission("proxychat.global")
+                        .withPermission("proxychat.global.override")
+        );
         platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
         service.execute(harness.globalChannel(), sender, new String[]{"first"});
 
@@ -207,14 +219,19 @@ class ChatChannelServiceTest {
         service.execute(harness.globalChannel(), sender, new String[]{"&aGreen"});
 
         // assert
-        assertThat(recipient.receivedMessages()).anyMatch(message -> message.contains("Green") && !message.contains("&a"));
+        assertThat(recipient.receivedMessages())
+                .anyMatch(message -> message.contains("Green") && !message.contains("&a"));
     }
 
     @Test
     void keepsColorsWithPermission() {
 
         // arrange
-        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global").withPermission("proxychat.global.color"));
+        FakePlayer sender = platform.addPlayer(
+                new FakePlayer("Alice", "lobby")
+                        .withPermission("proxychat.global")
+                        .withPermission("proxychat.global.color")
+        );
         FakePlayer recipient = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
 
         // act
@@ -228,7 +245,9 @@ class ChatChannelServiceTest {
     void ignoresBlacklistedServer() {
 
         // arrange
-        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "blocked-server").withPermission("proxychat.staff"));
+        FakePlayer sender = platform.addPlayer(
+                new FakePlayer("Alice", "blocked-server").withPermission("proxychat.staff")
+        );
 
         // act
         service.execute(harness.staffChannel(), sender, new String[]{"secret"});
@@ -259,15 +278,21 @@ class ChatChannelServiceTest {
         // arrange
         FakePlatform blockedPlatform = new FakePlatform();
         blockedPlatform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(false));
-        TestEnvironment.TestHarness blockedHarness = TestEnvironment.create(dataDirectory.resolve("blocked-toggle"), blockedPlatform);
+        TestEnvironment.TestHarness blockedHarness = TestEnvironment.create(
+                dataDirectory.resolve("blocked-toggle"),
+                blockedPlatform
+        );
         ChatChannelService blockedService = blockedHarness.core().getChannelService();
-        FakePlayer player = blockedPlatform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        FakePlayer player = blockedPlatform.addPlayer(
+                new FakePlayer("Alice", "lobby").withPermission("proxychat.global")
+        );
 
         // act
         blockedService.execute(blockedHarness.globalChannel(), player, new String[]{"toggle"});
 
         // assert
-        assertThat(blockedService.tabComplete(blockedHarness.globalChannel(), player, new String[]{""})).containsExactly("ignore");
+        assertThat(blockedService.tabComplete(blockedHarness.globalChannel(), player, new String[]{""}))
+                .containsExactly("ignore");
         assertThat(player.receivedMessages()).anyMatch(message -> message.contains("unavailable"));
         assertThat(blockedHarness.globalChannel().getToggleUtils().isToggled(player.getUniqueId())).isFalse();
     }
@@ -292,7 +317,9 @@ class ChatChannelServiceTest {
     void returnsNoTabCompletionsOnBlacklistedServer() {
 
         // arrange & act
-        FakePlayer player = platform.addPlayer(new FakePlayer("Alice", "blocked-server").withPermission("proxychat.staff"));
+        FakePlayer player = platform.addPlayer(
+                new FakePlayer("Alice", "blocked-server").withPermission("proxychat.staff")
+        );
 
         // assert
         assertThat(service.tabComplete(harness.staffChannel(), player, new String[]{""})).isEmpty();
@@ -363,7 +390,9 @@ class ChatChannelServiceTest {
         // arrange
         FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
         FakePlayer sameServer = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
-        FakePlayer remoteServer = platform.addPlayer(new FakePlayer("Carol", "survival").withPermission("proxychat.global"));
+        FakePlayer remoteServer = platform.addPlayer(
+                new FakePlayer("Carol", "survival").withPermission("proxychat.global")
+        );
 
         // act
         Optional<VelocityPrefixInterceptResult> result = service.tryVelocityPrefixedIntercept(sender, "@remote only");
@@ -385,7 +414,8 @@ class ChatChannelServiceTest {
 
         // assert
         assertThat(result).containsInstanceOf(VelocityPrefixInterceptResult.Delivered.class);
-        assertThat(sender.receivedMessages()).anyMatch(message -> message.contains("Alice") && message.contains("hello"));
+        assertThat(sender.receivedMessages())
+                .anyMatch(message -> message.contains("Alice") && message.contains("hello"));
         assertThat(sender.receivedMessages()).noneMatch(message -> message.contains("<Alice>"));
     }
 

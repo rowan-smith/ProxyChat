@@ -1,12 +1,13 @@
 package dev.rono.proxychat.common;
 
-import dev.rono.proxychat.common.test.FakePlatform;
-import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
-import dev.rono.proxychat.common.test.TestEnvironment;
+import java.nio.file.Path;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.nio.file.Path;
+import dev.rono.proxychat.common.test.FakePlatform;
+import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
+import dev.rono.proxychat.common.test.TestEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

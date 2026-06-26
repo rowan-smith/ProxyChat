@@ -1,11 +1,11 @@
 package dev.rono.proxychat.common.platform;
 
+import java.nio.file.Path;
+import java.util.List;
+
 import dev.rono.proxychat.common.channel.ChatChannel;
 import dev.rono.proxychat.common.channel.ChatChannelService;
 import dev.rono.proxychat.common.config.ProxyChatConfig;
-
-import java.nio.file.Path;
-import java.util.List;
 
 public interface ProxyChatBootstrap {
     ProxyChatPlatform getPlatform();

@@ -1,6 +1,7 @@
 package dev.rono.proxychat.velocity.listener;
 
 import com.velocitypowered.api.event.player.PlayerChatEvent;
+
 import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.velocity.platform.VelocityPlayer;
 

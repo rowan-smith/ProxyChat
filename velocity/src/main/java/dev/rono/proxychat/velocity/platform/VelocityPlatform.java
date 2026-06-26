@@ -1,15 +1,16 @@
 package dev.rono.proxychat.velocity.platform;
 
-import dev.rono.proxychat.common.platform.ProxyChatPlatform;
-import dev.rono.proxychat.common.platform.ProxyCommandSource;
-import dev.rono.proxychat.common.platform.ProxyPlayer;
-import dev.rono.proxychat.velocity.VelocityProxyChatPlugin;
-import net.kyori.adventure.text.Component;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import net.kyori.adventure.text.Component;
+
+import dev.rono.proxychat.common.platform.ProxyChatPlatform;
+import dev.rono.proxychat.common.platform.ProxyCommandSource;
+import dev.rono.proxychat.common.platform.ProxyPlayer;
+import dev.rono.proxychat.velocity.VelocityProxyChatPlugin;
 
 public final class VelocityPlatform implements ProxyChatPlatform {
     private final VelocityProxyChatPlugin plugin;

@@ -4,7 +4,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
-public final class MessageFormatter {
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
+public class MessageFormatter {
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacyAmpersand();
     private static final LegacyComponentSerializer LEGACY_SECTION = LegacyComponentSerializer.legacySection();
     private static final PlainTextComponentSerializer PLAIN = PlainTextComponentSerializer.plainText();

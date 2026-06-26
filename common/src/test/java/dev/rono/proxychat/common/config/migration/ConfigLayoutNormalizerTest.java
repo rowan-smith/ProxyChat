@@ -1,10 +1,5 @@
 package dev.rono.proxychat.common.config.migration;
 
-import dev.dejvokep.boostedyaml.YamlDocument;
-import dev.rono.proxychat.common.config.ProxyChatYamlDocuments;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -12,6 +7,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.rono.proxychat.common.config.ProxyChatYamlDocuments;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,7 +48,9 @@ class ConfigLayoutNormalizerTest {
         );
         ProxyChatYamlDocuments.loadMainConfig(dataDirectory, Logger.getLogger("test"));
         String saved = Files.readString(dataDirectory.resolve("config.yml"));
-        YamlDocument savedDocument = YamlDocument.create(new ByteArrayInputStream(saved.getBytes(StandardCharsets.UTF_8)));
+        YamlDocument savedDocument = YamlDocument.create(
+                new ByteArrayInputStream(saved.getBytes(StandardCharsets.UTF_8))
+        );
 
         // act
         List<String> keyOrder = new ArrayList<>(savedDocument.getRoutesAsStrings(false));

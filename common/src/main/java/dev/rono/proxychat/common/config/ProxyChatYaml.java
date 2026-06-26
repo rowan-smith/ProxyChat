@@ -1,15 +1,15 @@
 package dev.rono.proxychat.common.config;
 
-import dev.rono.proxychat.common.config.migration.ConfigVersion;
-import dev.dejvokep.boostedyaml.YamlDocument;
-import dev.dejvokep.boostedyaml.block.implementation.Section;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.dejvokep.boostedyaml.block.implementation.Section;
+import dev.rono.proxychat.common.config.migration.ConfigVersion;
 
 /**
  * Thin read facade over a BoostedYAML {@link Section}.

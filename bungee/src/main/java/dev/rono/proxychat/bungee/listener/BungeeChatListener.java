@@ -1,13 +1,14 @@
 package dev.rono.proxychat.bungee.listener;
 
-import dev.rono.proxychat.bungee.platform.BungeePlayer;
-import dev.rono.proxychat.common.ProxyChatCore;
-import dev.rono.proxychat.common.platform.ProxyPlayer;
-import dev.rono.proxychat.common.util.SignedChatPolicy;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+
+import dev.rono.proxychat.bungee.platform.BungeePlayer;
+import dev.rono.proxychat.common.ProxyChatCore;
+import dev.rono.proxychat.common.platform.ProxyPlayer;
+import dev.rono.proxychat.common.util.SignedChatPolicy;
 
 public final class BungeeChatListener implements Listener {
     private final ProxyChatCore core;

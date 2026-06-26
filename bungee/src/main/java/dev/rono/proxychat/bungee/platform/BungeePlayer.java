@@ -1,11 +1,12 @@
 package dev.rono.proxychat.bungee.platform;
 
-import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
-import dev.rono.proxychat.common.platform.ProxyPlayer;
+import java.util.UUID;
+
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.util.UUID;
+import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
+import dev.rono.proxychat.common.platform.ProxyPlayer;
 
 public record BungeePlayer(ProxiedPlayer handle) implements ProxyPlayer {
     @Override

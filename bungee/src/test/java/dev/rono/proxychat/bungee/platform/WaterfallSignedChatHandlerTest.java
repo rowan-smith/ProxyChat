@@ -1,9 +1,10 @@
 package dev.rono.proxychat.bungee.platform;
 
-import dev.rono.proxychat.common.test.FakePlayer;
+import java.util.logging.Logger;
+
 import org.junit.jupiter.api.Test;
 
-import java.util.logging.Logger;
+import dev.rono.proxychat.common.test.FakePlayer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

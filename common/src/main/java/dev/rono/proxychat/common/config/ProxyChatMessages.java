@@ -2,15 +2,22 @@ package dev.rono.proxychat.common.config;
 
 import java.util.Map;
 
+import lombok.experimental.UtilityClass;
+
 /**
  * Built-in defaults for config keys added after a server first generated {@code config.yml}.
  * Runtime reads should use {@link #resolve(ProxyChatYaml, String)} so older files stay valid.
  */
-public final class ProxyChatMessages {
+@UtilityClass
+public class ProxyChatMessages {
     public static final Map<String, String> DEFAULTS = Map.ofEntries(
             Map.entry("toggle-enable-message", "&aYou have toggled &2on &a%chat-name%"),
             Map.entry("toggle-disable-message", "&aYou have toggled &4off &a%chat-name%"),
-            Map.entry("toggle-unsupported-message", "&cToggle chat is unavailable on this proxy for your client version. Use /%command-name% <message> instead."),
+            Map.entry(
+                    "toggle-unsupported-message",
+                    "&cToggle chat is unavailable on this proxy for your client version. "
+                            + "Use /%command-name% <message> instead."
+            ),
             Map.entry("ignore-enable-message", "&cYou have ignored %chat-name%!"),
             Map.entry("ignore-disable-message", "&aYou have un-ignored %chat-name%!"),
             Map.entry("chat-disabled-message", "&cYou cannot send a message while %chat-name% is ignored!"),

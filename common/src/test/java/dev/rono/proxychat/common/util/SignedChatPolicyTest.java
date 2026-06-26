@@ -1,12 +1,13 @@
 package dev.rono.proxychat.common.util;
 
+import java.util.LinkedHashMap;
+
+import org.junit.jupiter.api.Test;
+
 import dev.rono.proxychat.common.config.ProxyChatYaml;
 import dev.rono.proxychat.common.test.FakePlatform;
 import dev.rono.proxychat.common.test.FakePlayer;
 import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
-import org.junit.jupiter.api.Test;
-
-import java.util.LinkedHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

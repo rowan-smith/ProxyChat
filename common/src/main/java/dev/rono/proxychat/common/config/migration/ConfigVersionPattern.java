@@ -1,16 +1,19 @@
 package dev.rono.proxychat.common.config.migration;
 
-import dev.dejvokep.boostedyaml.dvs.Pattern;
-import dev.dejvokep.boostedyaml.dvs.segment.Segment;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.experimental.UtilityClass;
+
+import dev.dejvokep.boostedyaml.dvs.Pattern;
+import dev.dejvokep.boostedyaml.dvs.segment.Segment;
 
 /**
  * BoostedYAML version pattern aligned with public ProxyChat releases:
  * {@code 0} (BungeeChat) → {@code 1} → {@code 1.1}…{@code 1.5} → {@code 2} → {@code 2.1+}.
  */
-public final class ConfigVersionPattern {
+@UtilityClass
+public class ConfigVersionPattern {
     public static final String VERSION_ROUTE = "version";
 
     private static final Pattern PATTERN = new Pattern(

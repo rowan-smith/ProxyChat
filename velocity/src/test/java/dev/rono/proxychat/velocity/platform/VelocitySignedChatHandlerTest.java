@@ -1,10 +1,11 @@
 package dev.rono.proxychat.velocity.platform;
 
-import dev.rono.proxychat.common.test.FakePlatform;
-import dev.rono.proxychat.common.test.FakePlayer;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import dev.rono.proxychat.common.test.FakePlatform;
+import dev.rono.proxychat.common.test.FakePlayer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

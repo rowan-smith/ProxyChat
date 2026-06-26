@@ -1,6 +1,10 @@
 package dev.rono.proxychat.common.util;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public final class ToggleUtils {
     private final Set<UUID> chatIgnored = new HashSet<>();

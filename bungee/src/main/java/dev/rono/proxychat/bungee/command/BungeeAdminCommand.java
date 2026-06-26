@@ -1,21 +1,22 @@
 package dev.rono.proxychat.bungee.command;
 
-import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
-import dev.rono.proxychat.bungee.platform.BungeeCommandSource;
-import dev.rono.proxychat.common.ProxyChatCore;
-import dev.rono.proxychat.common.command.ProxyChatAdminHelp;
-import dev.rono.proxychat.common.message.MessageFormatter;
+import java.util.HashSet;
+import java.util.Set;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
-import java.util.HashSet;
-import java.util.Set;
+import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
+import dev.rono.proxychat.bungee.platform.BungeeCommandSource;
+import dev.rono.proxychat.common.ProxyChatCore;
+import dev.rono.proxychat.common.command.ProxyChatAdminHelp;
+import dev.rono.proxychat.common.message.MessageFormatter;
 
 public final class BungeeAdminCommand extends Command implements TabExecutor {
-    private final String SPIGOT_URL = "https://www.spigotmc.org/resources/73583/";
+    private static final String SPIGOT_URL = "https://www.spigotmc.org/resources/73583/";
 
     private final ProxyChatCore core;
 
@@ -42,7 +43,10 @@ public final class BungeeAdminCommand extends Command implements TabExecutor {
                 String prefix = core.getConfig().getConfig().getString("prefix");
                 String message = core.getConfig().getConfig().getString("reload-message");
 
-                core.getPlatform().sendMessage(new BungeeCommandSource(sender), MessageFormatter.legacy(prefix + message));
+                core.getPlatform().sendMessage(
+                        new BungeeCommandSource(sender),
+                        MessageFormatter.legacy(prefix + message)
+                );
             }
 
             return;

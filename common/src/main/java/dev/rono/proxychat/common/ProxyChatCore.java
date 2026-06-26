@@ -1,13 +1,5 @@
 package dev.rono.proxychat.common;
 
-import dev.rono.proxychat.common.channel.ChatChannel;
-import dev.rono.proxychat.common.channel.ChatChannelService;
-import dev.rono.proxychat.common.config.ProxyChatConfig;
-import dev.rono.proxychat.common.config.ProxyChatYaml;
-import dev.rono.proxychat.common.platform.ProxyChatBootstrap;
-import dev.rono.proxychat.common.platform.ProxyChatPlatform;
-import dev.rono.proxychat.common.platform.SignedChatHandler;
-
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import dev.rono.proxychat.common.channel.ChatChannel;
+import dev.rono.proxychat.common.channel.ChatChannelService;
+import dev.rono.proxychat.common.config.ProxyChatConfig;
+import dev.rono.proxychat.common.config.ProxyChatYaml;
+import dev.rono.proxychat.common.platform.ProxyChatBootstrap;
+import dev.rono.proxychat.common.platform.ProxyChatPlatform;
+import dev.rono.proxychat.common.platform.SignedChatHandler;
 
 public final class ProxyChatCore implements ProxyChatBootstrap {
     private final Logger logger;
@@ -25,7 +25,12 @@ public final class ProxyChatCore implements ProxyChatBootstrap {
     private final ChatChannelService channelService = new ChatChannelService(this);
     private final List<ChatChannel> channels = new ArrayList<>();
 
-    public ProxyChatCore(Logger logger, ProxyChatPlatform platform, SignedChatHandler signedChatHandler, Path dataDirectory) {
+    public ProxyChatCore(
+            Logger logger,
+            ProxyChatPlatform platform,
+            SignedChatHandler signedChatHandler,
+            Path dataDirectory
+    ) {
         this.logger = logger;
         this.platform = platform;
         this.signedChatHandler = signedChatHandler;

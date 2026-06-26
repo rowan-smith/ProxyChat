@@ -1,12 +1,8 @@
 package dev.rono.proxychat.bungee.listener;
 
-import dev.rono.proxychat.common.test.FakePlatform;
-import dev.rono.proxychat.common.test.FakePlayer;
-import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
-import dev.rono.proxychat.common.test.TestEnvironment;
-import net.md_5.bungee.api.connection.PendingConnection;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.ChatEvent;
+import java.nio.file.Path;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -14,11 +10,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.nio.file.Path;
-import java.util.UUID;
+import net.md_5.bungee.api.connection.PendingConnection;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.ChatEvent;
+
+import dev.rono.proxychat.common.test.FakePlatform;
+import dev.rono.proxychat.common.test.FakePlayer;
+import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
+import dev.rono.proxychat.common.test.TestEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)

@@ -1,14 +1,5 @@
 package dev.rono.proxychat.bungee.platform;
 
-import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
-import dev.rono.proxychat.common.platform.ProxyPlayer;
-import dev.rono.proxychat.common.platform.SignedChatHandler;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -17,6 +8,17 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+
+import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
+import dev.rono.proxychat.common.platform.ProxyPlayer;
+import dev.rono.proxychat.common.platform.SignedChatHandler;
+
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
 /**
  * Waterfall-specific signed chat support. Cancelling {@code ChatEvent} on 1.19.3+ is not
@@ -49,24 +51,27 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
             Class<?> acknowledgementClass = Class.forName("net.md_5.bungee.protocol.packet.ClientChatAcknowledgement");
             acknowledgementConstructor = acknowledgementClass.getConstructor(int.class);
             definedPacketClass = Class.forName("net.md_5.bungee.protocol.DefinedPacket");
-            Field protocolField = Class.forName("net.md_5.bungee.protocol.ProtocolConstants").getField("MINECRAFT_1_19_3");
+            Field protocolField = Class.forName("net.md_5.bungee.protocol.ProtocolConstants")
+                    .getField("MINECRAFT_1_19_3");
             minimumProtocolVersion = protocolField.getInt(null);
             supported = true;
-            logger.info("Waterfall detected. Plain @prefix and toggle chat are disabled for 1.19.3+ clients (required for Paper backends). Use /channel or /<prefix><message> instead. Set signed-chat-interception: always to force plain-chat intercept (not recommended on Paper).");
+            logger.info(
+                    "Waterfall detected. Plain @prefix and toggle chat are disabled for 1.19.3+ clients "
+                            + "(required for Paper backends). Use /channel or /<prefix><message> instead. "
+                            + "Set signed-chat-interception: always to force plain-chat intercept "
+                            + "(not recommended on Paper).");
 
         } catch (ReflectiveOperationException exception) {
             supported = false;
-            logger.info("Running on vanilla BungeeCord: /channel commands work, but @prefix and toggle chat are disabled for 1.19.3+ clients. Use Waterfall (drop-in replacement) for full signed-chat support.");
+            logger.info(
+                    "Running on vanilla BungeeCord: /channel commands work, but @prefix and toggle chat are disabled "
+                            + "for 1.19.3+ clients. Use Waterfall (drop-in replacement) for full signed-chat support.");
         }
     }
 
     @Override
     public boolean canInterceptChat(ProxyPlayer player) {
-        if (player.getProtocolVersion() < minimumProtocolVersion) {
-            return true;
-        }
-
-        return false;
+        return player.getProtocolVersion() < minimumProtocolVersion;
     }
 
     @Override
@@ -102,8 +107,11 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
         if (offset == null) {
             if (!warnedAboutPaperBackends) {
                 warnedAboutPaperBackends = true;
-                logger.warning("Could not acknowledge cancelled chat for " + handle.getName()
-                        + ". Toggle and @prefix may kick players on 1.19.3+ (especially Paper backends). Use /channel commands or signed-chat-interception: never.");
+                logger.warning(
+                        "Could not acknowledge cancelled chat for " + handle.getName()
+                                + ". Toggle and @prefix may kick players on 1.19.3+ (especially Paper backends). "
+                                + "Use /channel commands or signed-chat-interception: never."
+                );
             }
 
             return;
@@ -127,7 +135,11 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
                 return;
             }
 
-            channel.pipeline().addBefore(BOSS_HANDLER, HANDLER_NAME, new SignedChatCaptureHandler(player.getUniqueId()));
+            channel.pipeline().addBefore(
+                    BOSS_HANDLER,
+                    HANDLER_NAME,
+                    new SignedChatCaptureHandler(player.getUniqueId())
+            );
 
         } catch (Exception exception) {
             logger.log(Level.FINE, "Failed to install signed chat capture handler", exception);

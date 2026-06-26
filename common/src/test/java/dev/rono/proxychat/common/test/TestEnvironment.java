@@ -1,16 +1,20 @@
 package dev.rono.proxychat.common.test;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.logging.Logger;
+
+import lombok.experimental.UtilityClass;
+
 import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.common.channel.ChatChannel;
 import dev.rono.proxychat.common.config.ProxyChatYaml;
 import dev.rono.proxychat.common.config.migration.ConfigFixtures;
 import dev.rono.proxychat.common.platform.SignedChatHandler;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.logging.Logger;
+@UtilityClass
+public class TestEnvironment {
 
-public final class TestEnvironment {
     public static TestHarness create(Path dataDirectory, FakePlatform platform) throws Exception {
         ConfigFixtures.copyLatestHarness(dataDirectory);
 

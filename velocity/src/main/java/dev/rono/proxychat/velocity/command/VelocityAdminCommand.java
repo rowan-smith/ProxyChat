@@ -1,16 +1,18 @@
 package dev.rono.proxychat.velocity.command;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+
 import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.common.command.ProxyChatAdminHelp;
 import dev.rono.proxychat.common.message.MessageFormatter;
 import dev.rono.proxychat.velocity.platform.VelocityCommandSource;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public final class VelocityAdminCommand implements SimpleCommand {
     private final ProxyChatCore core;
@@ -36,7 +38,10 @@ public final class VelocityAdminCommand implements SimpleCommand {
                 core.reload();
                 String prefix = core.getConfig().getConfig().getString("prefix");
                 String message = core.getConfig().getConfig().getString("reload-message");
-                core.getPlatform().sendMessage(new VelocityCommandSource(source), MessageFormatter.legacy(prefix + message));
+                core.getPlatform().sendMessage(
+                        new VelocityCommandSource(source),
+                        MessageFormatter.legacy(prefix + message)
+                );
             }
 
             return;

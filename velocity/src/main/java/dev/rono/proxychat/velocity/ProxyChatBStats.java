@@ -2,7 +2,10 @@ package dev.rono.proxychat.velocity;
 
 import org.bstats.velocity.Metrics;
 
-public final class ProxyChatBStats {
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
+public class ProxyChatBStats {
 
     /**
      * bStats plugin ID for the Velocity build.
