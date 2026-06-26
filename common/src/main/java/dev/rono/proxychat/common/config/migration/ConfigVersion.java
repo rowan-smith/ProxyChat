@@ -15,7 +15,7 @@ import java.util.Objects;
  *   <li>{@code 2.2+} — signed chat policy, admin help, and later minor additions</li>
  * </ul>
  */
-public final class ConfigVersion implements Comparable<ConfigVersion> {
+public final class ConfigVersion {
     public static final ConfigVersion LATEST = parse("2.2");
 
     private final int major;
@@ -51,7 +51,7 @@ public final class ConfigVersion implements Comparable<ConfigVersion> {
     /**
      * Maps integer {@code version} keys written by the pre-semver migrator (v1.4.5 era).
      */
-    public static ConfigVersion fromLegacyInteger(int legacy) {
+    static ConfigVersion fromLegacyInteger(int legacy) {
         return switch (legacy) {
             case 0 -> of(0, 0);
             case 1 -> of(1, 0);
@@ -112,12 +112,12 @@ public final class ConfigVersion implements Comparable<ConfigVersion> {
         return version;
     }
 
-    public int major() {
-        return major;
-    }
+    int compareTo(ConfigVersion other) {
+        if (major != other.major) {
+            return Integer.compare(major, other.major);
+        }
 
-    public int minor() {
-        return minor;
+        return Integer.compare(minor, other.minor);
     }
 
     @Override
@@ -127,15 +127,6 @@ public final class ConfigVersion implements Comparable<ConfigVersion> {
         }
 
         return major + "." + minor;
-    }
-
-    @Override
-    public int compareTo(ConfigVersion other) {
-        if (major != other.major) {
-            return Integer.compare(major, other.major);
-        }
-
-        return Integer.compare(minor, other.minor);
     }
 
     @Override

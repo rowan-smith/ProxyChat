@@ -1,7 +1,5 @@
 package dev.rono.proxychat.common.platform;
 
-import java.util.UUID;
-
 import net.kyori.adventure.text.Component;
 
 public interface ProxyCommandSource {
@@ -11,15 +9,7 @@ public interface ProxyCommandSource {
 
     boolean isPlayer();
 
-    UUID getUniqueId();
-
-    default ProxyPlayer asPlayer() {
-        if (this instanceof ProxyPlayer proxyPlayer) {
-            return proxyPlayer;
-        }
-
-        return null;
-    }
+    ProxyPlayer asPlayer();
 
     void sendMessage(Component message);
 }

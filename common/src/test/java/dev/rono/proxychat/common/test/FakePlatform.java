@@ -20,7 +20,6 @@ public final class FakePlatform implements ProxyChatPlatform {
     private final List<FakePlayer> players = new ArrayList<>();
     private final List<String> infoLogs = new ArrayList<>();
     private final List<String> warningLogs = new ArrayList<>();
-    private final List<ScheduledCall> scheduledTasks = new ArrayList<>();
     private final Map<String, Boolean> installedPlugins = new HashMap<>();
     @Setter private SignedChatHandler signedChatHandler = new NoOpSignedChatHandler();
 
@@ -39,6 +38,10 @@ public final class FakePlatform implements ProxyChatPlatform {
 
     public List<String> infoLogs() {
         return infoLogs;
+    }
+
+    public List<String> warningLogs() {
+        return warningLogs;
     }
 
     @Override
@@ -72,18 +75,13 @@ public final class FakePlatform implements ProxyChatPlatform {
     public void scheduleDelayedTask(Runnable task, long delayMillis) {
         if (delayMillis <= 0) {
             task.run();
-            return;
         }
-
-        scheduledTasks.add(new ScheduledCall(task, delayMillis));
     }
 
     @Override
     public boolean isPluginPresent(String pluginId) {
         return installedPlugins.getOrDefault(pluginId.toLowerCase(), false);
     }
-
-    public record ScheduledCall(Runnable task, long delayMillis) { }
 
     private static final class NoOpSignedChatHandler implements SignedChatHandler {
         @Override

@@ -20,7 +20,7 @@ class ProxyChatIT {
     @TempDir Path dataDirectory;
 
     @Test
-    void fullGlobalChatWorkflow() throws Exception {
+    void fullGlobalChatWorkflow() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -41,7 +41,7 @@ class ProxyChatIT {
     }
 
     @Test
-    void prefixInterceptAcknowledgementFlow() throws Exception {
+    void prefixInterceptAcknowledgementFlow() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -61,7 +61,7 @@ class ProxyChatIT {
     }
 
     @Test
-    void toggleModePlainChatWorkflow() throws Exception {
+    void toggleModePlainChatWorkflow() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -80,7 +80,7 @@ class ProxyChatIT {
     }
 
     @Test
-    void legacyConfigMigrationAndUse() throws Exception {
+    void legacyConfigMigrationAndUse() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -102,7 +102,7 @@ class ProxyChatIT {
     }
 
     @Test
-    void reloadClearsRuntimeToggleState() throws Exception {
+    void reloadClearsRuntimeToggleState() {
 
         // arrange
         FakePlatform platform = new FakePlatform();

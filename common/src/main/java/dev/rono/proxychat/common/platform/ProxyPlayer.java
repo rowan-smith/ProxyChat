@@ -4,6 +4,10 @@ import java.util.UUID;
 
 public interface ProxyPlayer extends ProxyCommandSource {
     @Override
+    default ProxyPlayer asPlayer() {
+        return this;
+    }
+
     UUID getUniqueId();
 
     String getServerName();

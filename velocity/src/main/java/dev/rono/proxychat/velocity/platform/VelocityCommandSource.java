@@ -1,7 +1,5 @@
 package dev.rono.proxychat.velocity.platform;
 
-import java.util.UUID;
-
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 
@@ -37,15 +35,6 @@ public record VelocityCommandSource(CommandSource handle) implements ProxyComman
         }
 
         return null;
-    }
-
-    @Override
-    public UUID getUniqueId() {
-        if (handle instanceof Player player) {
-            return player.getUniqueId();
-        }
-
-        return new UUID(0, 0);
     }
 
     @Override

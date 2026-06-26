@@ -9,10 +9,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProxyChatMessagesTest {
 
     @Test
-    void fallsBackWhenConfigKeyMissing() throws Exception {
+    void fallsBackWhenConfigKeyMissing() {
 
         // arrange & act
-        ProxyChatYaml config = ProxyChatYaml.fromMap(Map.of("prefix", "&aCustom » "));
+        ProxyChatYaml config = yaml(Map.of("prefix", "&aCustom » "));
 
         // assert
         assertThat(ProxyChatMessages.resolve(config, "toggle-unsupported-message"))
@@ -21,15 +21,23 @@ class ProxyChatMessagesTest {
     }
 
     @Test
-    void prefersConfiguredValue() throws Exception {
+    void prefersConfiguredValue() {
 
         // arrange & act
-        ProxyChatYaml config = ProxyChatYaml.fromMap(
+        ProxyChatYaml config = yaml(
                 Map.of("toggle-unsupported-message", "&cCustom unsupported message")
         );
 
         // assert
         assertThat(ProxyChatMessages.resolve(config, "toggle-unsupported-message"))
                 .isEqualTo("&cCustom unsupported message");
+    }
+
+    private static ProxyChatYaml yaml(Map<String, Object> values) {
+        try {
+            return ProxyChatYaml.fromMap(values);
+        } catch (java.io.IOException exception) {
+            throw new AssertionError(exception);
+        }
     }
 }

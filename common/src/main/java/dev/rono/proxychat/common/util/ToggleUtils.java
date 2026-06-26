@@ -12,8 +12,7 @@ public final class ToggleUtils {
     private final Map<UUID, CooldownState> delays = new HashMap<>();
 
     public boolean toggleIgnore(UUID player) {
-        if (isIgnored(player)) {
-            chatIgnored.remove(player);
+        if (chatIgnored.remove(player)) {
             return false;
         }
 
@@ -23,8 +22,7 @@ public final class ToggleUtils {
     }
 
     public boolean toggleChat(UUID player) {
-        if (isToggled(player)) {
-            chatToggled.remove(player);
+        if (chatToggled.remove(player)) {
             return false;
         }
 
@@ -33,10 +31,14 @@ public final class ToggleUtils {
         return true;
     }
 
-    public void startDelay(UUID player, long delayMillis, Runnable onComplete) {
-        if (!isDelayed(player)) {
-            delays.put(player, new CooldownState(delayMillis, onComplete));
+    public CooldownState startDelay(UUID player, long delayMillis, Runnable onComplete) {
+        CooldownState delay = delays.get(player);
+        if (delay == null) {
+            delay = new CooldownState(delayMillis, onComplete);
+            delays.put(player, delay);
         }
+
+        return delay;
     }
 
     public void clearDelay(UUID player) {

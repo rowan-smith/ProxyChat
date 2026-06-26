@@ -16,7 +16,7 @@ class VelocityChatListenerTest {
     @TempDir Path dataDirectory;
 
     @Test
-    void interceptsWhenPolicyAllows() throws Exception {
+    void interceptsWhenPolicyAllows() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -36,7 +36,7 @@ class VelocityChatListenerTest {
     }
 
     @Test
-    void skipsInterceptionWhenPolicyBlocks() throws Exception {
+    void skipsInterceptionWhenPolicyBlocks() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -57,7 +57,7 @@ class VelocityChatListenerTest {
     }
 
     @Test
-    void velocityPrefixedInterceptDeniesSignedChat() throws Exception {
+    void velocityPrefixedInterceptDeniesSignedChat() {
 
         // arrange
         FakePlatform platform = new FakePlatform();

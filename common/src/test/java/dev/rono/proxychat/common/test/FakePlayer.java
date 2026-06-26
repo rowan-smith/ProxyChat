@@ -16,7 +16,7 @@ public final class FakePlayer implements ProxyPlayer {
 
     private final UUID uniqueId;
     private final String name;
-    private String serverName;
+    private final String serverName;
     private int protocolVersion = 767;
     private final Set<String> permissions = new HashSet<>();
     private final List<String> receivedMessages = new ArrayList<>();
@@ -37,17 +37,8 @@ public final class FakePlayer implements ProxyPlayer {
         return this;
     }
 
-    public FakePlayer onServer(String serverName) {
-        this.serverName = serverName;
-        return this;
-    }
-
     public List<String> receivedMessages() {
         return receivedMessages;
-    }
-
-    public void clearMessages() {
-        receivedMessages.clear();
     }
 
     @Override
@@ -83,10 +74,5 @@ public final class FakePlayer implements ProxyPlayer {
     @Override
     public void sendMessage(Component message) {
         receivedMessages.add(PLAIN.serialize(message));
-    }
-
-    @Override
-    public ProxyPlayer asPlayer() {
-        return this;
     }
 }

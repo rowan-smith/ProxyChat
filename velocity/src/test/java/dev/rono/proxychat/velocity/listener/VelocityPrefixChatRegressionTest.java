@@ -1,5 +1,6 @@
 package dev.rono.proxychat.velocity.listener;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Optional;
@@ -24,7 +25,7 @@ class VelocityPrefixChatRegressionTest {
     @TempDir Path dataDirectory;
 
     @Test
-    void prefixedChatDeniesSignedMessageAndBroadcastsProxyFormattedLine() throws Exception {
+    void prefixedChatDeniesSignedMessageAndBroadcastsProxyFormattedLine() {
 
         // arrange
         FakePlatform platform = signedVelocityPlatform();
@@ -44,7 +45,7 @@ class VelocityPrefixChatRegressionTest {
     }
 
     @Test
-    void prefixedChatDoesNotLeakVanillaInputWhenIntercepted() throws Exception {
+    void prefixedChatDoesNotLeakVanillaInputWhenIntercepted() {
 
         // arrange
         FakePlatform platform = signedVelocityPlatform();
@@ -61,7 +62,7 @@ class VelocityPrefixChatRegressionTest {
     }
 
     @Test
-    void prefixedChatWithLeadingWhitespaceIsIntercepted() throws Exception {
+    void prefixedChatWithLeadingWhitespaceIsIntercepted() {
 
         // arrange
         FakePlatform platform = signedVelocityPlatform();
@@ -77,7 +78,7 @@ class VelocityPrefixChatRegressionTest {
     }
 
     @Test
-    void prefixedChatWithoutPermissionPassesThrough() throws Exception {
+    void prefixedChatWithoutPermissionPassesThrough() {
 
         // arrange
         FakePlatform platform = signedVelocityPlatform();
@@ -93,7 +94,7 @@ class VelocityPrefixChatRegressionTest {
     }
 
     @Test
-    void cooldownBlocksSecondPrefixedMessageWithoutBroadcastingIt() throws Exception {
+    void cooldownBlocksSecondPrefixedMessageWithoutBroadcastingIt() {
 
         // arrange
         FakePlatform platform = signedVelocityPlatform();
@@ -113,7 +114,7 @@ class VelocityPrefixChatRegressionTest {
     }
 
     @Test
-    void normalChatStillPassesThrough() throws Exception {
+    void normalChatStillPassesThrough() {
 
         // arrange
         FakePlatform platform = signedVelocityPlatform();
@@ -129,7 +130,7 @@ class VelocityPrefixChatRegressionTest {
     }
 
     @Test
-    void toggledPlainChatStillDeniesSignedMessage() throws Exception {
+    void toggledPlainChatStillDeniesSignedMessage() {
 
         // arrange
         FakePlatform platform = signedVelocityPlatform();
@@ -146,7 +147,7 @@ class VelocityPrefixChatRegressionTest {
     }
 
     @Test
-    void withoutSignedVelocityPrefixedChatPassesThrough() throws Exception {
+    void withoutSignedVelocityPrefixedChatPassesThrough() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -167,7 +168,7 @@ class VelocityPrefixChatRegressionTest {
     }
 
     @Test
-    void proxyPrefixCommandIsNotRegisteredWhenSignedVelocityIsPresent() throws Exception {
+    void proxyPrefixCommandIsNotRegisteredWhenSignedVelocityIsPresent() {
 
         // arrange
         FakePlatform platform = signedVelocityPlatform();
@@ -181,7 +182,7 @@ class VelocityPrefixChatRegressionTest {
     }
 
     @Test
-    void proxyPrefixCommandIsRegisteredWithoutSignedVelocity() throws Exception {
+    void proxyPrefixCommandIsRegisteredWithoutSignedVelocity() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -200,17 +201,15 @@ class VelocityPrefixChatRegressionTest {
         FakePlatform platform = signedVelocityPlatform();
 
         // assert
-        assertThat(SignedChatPolicy.shouldRegisterProxyPrefixCommand(configWithMode("never"), platform)).isTrue();
-    }
-
-    private static ProxyChatYaml configWithMode(String mode) {
+        LinkedHashMap<String, Object> root = new LinkedHashMap<>();
+        root.put("signed-chat-interception", "never");
+        ProxyChatYaml config;
         try {
-            LinkedHashMap<String, Object> root = new LinkedHashMap<>();
-            root.put("signed-chat-interception", mode);
-            return ProxyChatYaml.fromMap(root);
-        } catch (Exception exception) {
+            config = ProxyChatYaml.fromMap(root);
+        } catch (IOException exception) {
             throw new AssertionError(exception);
         }
+        assertThat(SignedChatPolicy.shouldRegisterProxyPrefixCommand(config, platform)).isTrue();
     }
 
     private static FakePlatform signedVelocityPlatform() {

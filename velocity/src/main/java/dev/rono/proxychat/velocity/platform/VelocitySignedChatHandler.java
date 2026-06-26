@@ -2,8 +2,6 @@ package dev.rono.proxychat.velocity.platform;
 
 import java.util.function.Supplier;
 
-import org.slf4j.Logger;
-
 import dev.rono.proxychat.common.platform.ProxyChatPlatform;
 import dev.rono.proxychat.common.platform.ProxyPlayer;
 import dev.rono.proxychat.common.platform.SignedChatHandler;
@@ -18,20 +16,18 @@ public final class VelocitySignedChatHandler implements SignedChatHandler {
     private static final String SIGNED_VELOCITY_ID = "signedvelocity";
 
     private final Supplier<ProxyChatPlatform> platform;
-    private final Logger logger;
     private boolean warned;
 
     public VelocitySignedChatHandler(VelocityProxyChatPlugin plugin) {
-        this(() -> plugin.getCore().getPlatform(), plugin.getLogger());
+        this(() -> plugin.getCore().getPlatform());
     }
 
-    VelocitySignedChatHandler(ProxyChatPlatform platform, Logger logger) {
-        this(() -> platform, logger);
+    VelocitySignedChatHandler(ProxyChatPlatform platform) {
+        this(() -> platform);
     }
 
-    private VelocitySignedChatHandler(Supplier<ProxyChatPlatform> platform, Logger logger) {
+    private VelocitySignedChatHandler(Supplier<ProxyChatPlatform> platform) {
         this.platform = platform;
-        this.logger = logger;
     }
 
     @Override
@@ -61,7 +57,7 @@ public final class VelocitySignedChatHandler implements SignedChatHandler {
 
         if (!warned) {
             warned = true;
-            logger.warn(
+            platform.get().logWarning(
                     "Signed chat interception on Velocity requires SignedVelocity on the proxy "
                             + "and all backend servers. Prefix/toggle chat will not intercept messages "
                             + "for 1.19.1+ clients until it is installed."

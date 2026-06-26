@@ -15,23 +15,31 @@ import dev.rono.proxychat.common.platform.SignedChatHandler;
 @UtilityClass
 public class TestEnvironment {
 
-    public static TestHarness create(Path dataDirectory, FakePlatform platform) throws Exception {
-        ConfigFixtures.copyLatestHarness(dataDirectory);
+    public static TestHarness create(Path dataDirectory, FakePlatform platform) {
+        try {
+            ConfigFixtures.copyLatestHarness(dataDirectory);
 
-        SignedChatHandler handler = platform.signedChatHandler();
-        ProxyChatCore core = new ProxyChatCore(Logger.getLogger("ProxyChatTest"), platform, handler, dataDirectory);
-        core.enable(null, null);
-        return new TestHarness(core, platform, dataDirectory);
+            SignedChatHandler handler = platform.signedChatHandler();
+            ProxyChatCore core = new ProxyChatCore(Logger.getLogger("ProxyChatTest"), platform, handler, dataDirectory);
+            core.enable(null, null);
+            return new TestHarness(core, platform, dataDirectory);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Failed to create test harness", exception);
+        }
     }
 
-    public static TestHarness createWithLegacyConfig(Path dataDirectory, FakePlatform platform) throws Exception {
-        ConfigFixtures.copyResource("v1/1-5/config.yml", dataDirectory.resolve("config.yml"));
-        Files.createDirectories(dataDirectory.resolve("chats"));
-        SignedChatHandler handler = platform.signedChatHandler();
-        ProxyChatCore core = new ProxyChatCore(Logger.getLogger("ProxyChatTest"), platform, handler, dataDirectory);
-        core.getConfig().loadDefaults(null, null);
-        core.reload();
-        return new TestHarness(core, platform, dataDirectory);
+    public static TestHarness createWithLegacyConfig(Path dataDirectory, FakePlatform platform) {
+        try {
+            ConfigFixtures.copyResource("v1/1-5/config.yml", dataDirectory.resolve("config.yml"));
+            Files.createDirectories(dataDirectory.resolve("chats"));
+            SignedChatHandler handler = platform.signedChatHandler();
+            ProxyChatCore core = new ProxyChatCore(Logger.getLogger("ProxyChatTest"), platform, handler, dataDirectory);
+            core.getConfig().loadDefaults(null, null);
+            core.reload();
+            return new TestHarness(core, platform, dataDirectory);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Failed to create legacy test harness", exception);
+        }
     }
 
     public record TestHarness(ProxyChatCore core, FakePlatform platform, Path dataDirectory) {

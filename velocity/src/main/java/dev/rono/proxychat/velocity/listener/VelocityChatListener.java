@@ -19,8 +19,17 @@ public final class VelocityChatListener {
 
         VelocityPlayer player = new VelocityPlayer(event.getPlayer());
         if (VelocityChatIntercept.decide(core, player, event.getMessage()) == VelocityChatIntercept.Action.DENY) {
-            event.setResult(PlayerChatEvent.ChatResult.denied());
+            denySignedChat(event);
             core.getSignedChatHandler().acknowledgeCancelledChat(player);
         }
+    }
+
+    /**
+     * Requires SignedVelocity on 1.19.1+ clients; {@link PlayerChatEvent.ChatResult#denied()} is deprecated but
+     * remains the supported proxy-side hook when SignedVelocity synchronizes cancellation with backends.
+     */
+    @SuppressWarnings("deprecation")
+    private static void denySignedChat(PlayerChatEvent event) {
+        event.setResult(PlayerChatEvent.ChatResult.denied());
     }
 }

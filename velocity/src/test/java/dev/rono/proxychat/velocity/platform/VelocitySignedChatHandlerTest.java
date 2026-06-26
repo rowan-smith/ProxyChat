@@ -1,8 +1,6 @@
 package dev.rono.proxychat.velocity.platform;
 
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import dev.rono.proxychat.common.test.FakePlatform;
 import dev.rono.proxychat.common.test.FakePlayer;
@@ -10,13 +8,11 @@ import dev.rono.proxychat.common.test.FakePlayer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class VelocitySignedChatHandlerTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(VelocitySignedChatHandlerTest.class);
-
     @Test
     void allowsInterceptOnLegacyProtocol() {
 
         // arrange
-        VelocitySignedChatHandler handler = new VelocitySignedChatHandler(new FakePlatform(), LOGGER);
+        VelocitySignedChatHandler handler = new VelocitySignedChatHandler(new FakePlatform());
 
         // act
         FakePlayer player = new FakePlayer("Alice", "lobby").withProtocolVersion(759);
@@ -30,7 +26,7 @@ class VelocitySignedChatHandlerTest {
 
         // arrange
         FakePlatform platform = new FakePlatform();
-        VelocitySignedChatHandler handler = new VelocitySignedChatHandler(platform, LOGGER);
+        VelocitySignedChatHandler handler = new VelocitySignedChatHandler(platform);
         FakePlayer player = new FakePlayer("Alice", "lobby").withProtocolVersion(767);
 
         // act
@@ -40,6 +36,7 @@ class VelocitySignedChatHandlerTest {
 
         // assert
         assertThat(withoutSignedVelocity).isFalse();
+        assertThat(platform.warningLogs()).hasSize(1);
         assertThat(withSignedVelocity).isTrue();
     }
 }

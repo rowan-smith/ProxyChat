@@ -32,7 +32,7 @@ class BungeeChatListenerTest {
     Path dataDirectory;
 
     @Test
-    void cancelsAndAcknowledgesInterceptedChat() throws Exception {
+    void cancelsAndAcknowledgesInterceptedChat() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -42,7 +42,7 @@ class BungeeChatListenerTest {
         platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
 
         // act
-        ProxiedPlayer handle = mockPlayer("Alice", "lobby", "proxychat.global");
+        ProxiedPlayer handle = mockAlice();
         ChatEvent event = mock(ChatEvent.class);
         when(event.isCancelled()).thenReturn(false);
         when(event.isCommand()).thenReturn(false);
@@ -56,7 +56,7 @@ class BungeeChatListenerTest {
     }
 
     @Test
-    void ignoresChatWhenPolicyBlocksInterception() throws Exception {
+    void ignoresChatWhenPolicyBlocksInterception() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -65,7 +65,7 @@ class BungeeChatListenerTest {
         TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
 
         // act
-        ProxiedPlayer handle = mockPlayer("Alice", "lobby", "proxychat.global");
+        ProxiedPlayer handle = mockAlice();
         ChatEvent event = mock(ChatEvent.class);
         when(event.isCancelled()).thenReturn(false);
         when(event.isCommand()).thenReturn(false);
@@ -93,16 +93,16 @@ class BungeeChatListenerTest {
         // assert
     }
 
-    private static ProxiedPlayer mockPlayer(String name, String server, String permission) {
+    private static ProxiedPlayer mockAlice() {
         ProxiedPlayer handle = mock(ProxiedPlayer.class);
-        UUID id = UUID.nameUUIDFromBytes(name.getBytes());
-        when(handle.getName()).thenReturn(name);
+        UUID id = UUID.nameUUIDFromBytes("Alice".getBytes());
+        when(handle.getName()).thenReturn("Alice");
         when(handle.getUniqueId()).thenReturn(id);
-        when(handle.hasPermission(permission)).thenReturn(true);
+        when(handle.hasPermission("proxychat.global")).thenReturn(true);
 
         net.md_5.bungee.api.connection.Server connection = mock(net.md_5.bungee.api.connection.Server.class);
         net.md_5.bungee.api.config.ServerInfo info = mock(net.md_5.bungee.api.config.ServerInfo.class);
-        when(info.getName()).thenReturn(server);
+        when(info.getName()).thenReturn("lobby");
         when(connection.getInfo()).thenReturn(info);
         when(handle.getServer()).thenReturn(connection);
 

@@ -15,7 +15,7 @@ class ProxyChatCoreTest {
     @TempDir Path dataDirectory;
 
     @Test
-    void enableLoadsConfiguredChannels() throws Exception {
+    void enableLoadsConfiguredChannels() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -32,7 +32,7 @@ class ProxyChatCoreTest {
     }
 
     @Test
-    void reloadRefreshesChannels() throws Exception {
+    void reloadRefreshesChannels() {
 
         // arrange
         FakePlatform platform = new FakePlatform();

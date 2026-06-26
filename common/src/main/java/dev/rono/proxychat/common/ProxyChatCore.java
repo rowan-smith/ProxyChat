@@ -4,9 +4,12 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import lombok.Getter;
 
 import dev.rono.proxychat.common.channel.ChatChannel;
 import dev.rono.proxychat.common.channel.ChatChannelService;
@@ -22,6 +25,7 @@ public final class ProxyChatCore implements ProxyChatBootstrap {
     private final SignedChatHandler signedChatHandler;
     private final Path dataDirectory;
     private final ProxyChatConfig configManager;
+    @Getter
     private final ChatChannelService channelService = new ChatChannelService(this);
     private final List<ChatChannel> channels = new ArrayList<>();
 
@@ -54,7 +58,6 @@ public final class ProxyChatCore implements ProxyChatBootstrap {
         }
     }
 
-    @Override
     public void reload() {
         try {
             configManager.reload();
@@ -86,22 +89,12 @@ public final class ProxyChatCore implements ProxyChatBootstrap {
     }
 
     @Override
-    public Path getDataDirectory() {
-        return dataDirectory;
-    }
-
-    @Override
     public ProxyChatConfig getConfig() {
         return configManager;
     }
 
     @Override
     public List<ChatChannel> getChannels() {
-        return channels;
-    }
-
-    @Override
-    public ChatChannelService getChannelService() {
-        return channelService;
+        return Collections.unmodifiableList(channels);
     }
 }

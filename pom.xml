@@ -66,6 +66,12 @@
                 <groupId>dev.dejvokep</groupId>
                 <artifactId>boosted-yaml</artifactId>
                 <version>${boosted-yaml.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.jetbrains</groupId>
+                        <artifactId>annotations</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -118,8 +124,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.13.0</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <release>${java.version}</release>
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>org.projectlombok</groupId>
@@ -138,6 +143,50 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>3.5.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.6.0</version>
+                    <configuration>
+                        <createDependencyReducedPom>false</createDependencyReducedPom>
+                        <filters>
+                            <filter>
+                                <artifact>*:*</artifact>
+                                <excludes>
+                                    <exclude>META-INF/MANIFEST.MF</exclude>
+                                    <exclude>META-INF/*.SF</exclude>
+                                    <exclude>META-INF/*.DSA</exclude>
+                                    <exclude>META-INF/*.RSA</exclude>
+                                    <exclude>META-INF/versions/**</exclude>
+                                </excludes>
+                            </filter>
+                            <filter>
+                                <artifact>dev.rono:proxychat-common</artifact>
+                                <excludes>
+                                    <exclude>config.yml</exclude>
+                                    <exclude>global.yml</exclude>
+                                </excludes>
+                            </filter>
+                            <filter>
+                                <artifact>dev.dejvokep:boosted-yaml</artifact>
+                                <excludes>
+                                    <exclude>org/intellij/lang/annotations/**</exclude>
+                                    <exclude>org/jetbrains/annotations/**</exclude>
+                                </excludes>
+                            </filter>
+                        </filters>
+                        <relocations>
+                            <relocation>
+                                <pattern>dev.dejvokep.boostedyaml</pattern>
+                                <shadedPattern>dev.rono.proxychat.lib.yaml</shadedPattern>
+                            </relocation>
+                            <relocation>
+                                <pattern>org.bstats</pattern>
+                                <shadedPattern>dev.rono.proxychat.lib.bstats</shadedPattern>
+                            </relocation>
+                        </relocations>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

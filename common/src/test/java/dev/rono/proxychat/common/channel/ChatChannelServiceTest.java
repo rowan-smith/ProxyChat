@@ -25,7 +25,7 @@ class ChatChannelServiceTest {
     private ChatChannelService service;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         platform = new FakePlatform();
         platform.setSignedChatHandler(new RecordingSignedChatHandler());
         harness = TestEnvironment.create(dataDirectory, platform);
@@ -273,7 +273,7 @@ class ChatChannelServiceTest {
     }
 
     @Test
-    void hidesToggleWhenSignedChatInterceptionUnavailable() throws Exception {
+    void hidesToggleWhenSignedChatInterceptionUnavailable() {
 
         // arrange
         FakePlatform blockedPlatform = new FakePlatform();
@@ -298,7 +298,7 @@ class ChatChannelServiceTest {
     }
 
     @Test
-    void hidesToggleWhenSignedChatInterceptionDisabledInConfig() throws Exception {
+    void hidesToggleWhenSignedChatInterceptionDisabledInConfig() {
 
         // arrange
         harness.config().section().set("signed-chat-interception", "never");

@@ -10,8 +10,6 @@ import dev.rono.proxychat.common.platform.SignedChatHandler;
 public final class RecordingSignedChatHandler implements SignedChatHandler {
 
     private boolean canIntercept = true;
-    private final List<UUID> joined = new ArrayList<>();
-    private final List<UUID> quit = new ArrayList<>();
     private final List<UUID> acknowledged = new ArrayList<>();
 
     public RecordingSignedChatHandler canIntercept(boolean value) {
@@ -25,12 +23,10 @@ public final class RecordingSignedChatHandler implements SignedChatHandler {
 
     @Override
     public void onPlayerJoin(ProxyPlayer player) {
-        joined.add(player.getUniqueId());
     }
 
     @Override
     public void onPlayerQuit(ProxyPlayer player) {
-        quit.add(player.getUniqueId());
     }
 
     @Override

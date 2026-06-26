@@ -22,7 +22,7 @@ class ProxyChatAdminHelpTest {
     private FakePlatform platform;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         platform = new FakePlatform();
         harness = TestEnvironment.create(dataDirectory, platform);
     }
@@ -65,7 +65,7 @@ class ProxyChatAdminHelpTest {
     }
 
     @Test
-    void omitsToggleFromHelpWhenSignedChatInterceptionUnavailable() throws Exception {
+    void omitsToggleFromHelpWhenSignedChatInterceptionUnavailable() {
 
         // arrange
         FakePlatform blockedPlatform = new FakePlatform();
@@ -88,7 +88,7 @@ class ProxyChatAdminHelpTest {
     }
 
     @Test
-    void showsPlainPrefixLineWhenSignedChatInterceptionIsAvailable() throws Exception {
+    void showsPlainPrefixLineWhenSignedChatInterceptionIsAvailable() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -107,7 +107,7 @@ class ProxyChatAdminHelpTest {
     }
 
     @Test
-    void showsProxyPrefixCommandWhenSignedChatInterceptionIsUnavailable() throws Exception {
+    void showsProxyPrefixCommandWhenSignedChatInterceptionIsUnavailable() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -142,7 +142,7 @@ class ProxyChatAdminHelpTest {
     }
 
     @Test
-    void omitsSubcommandsForChannelsWithoutToggleOrIgnore() throws Exception {
+    void omitsSubcommandsForChannelsWithoutToggleOrIgnore() {
 
         // arrange
         FakePlatform platform = new FakePlatform();

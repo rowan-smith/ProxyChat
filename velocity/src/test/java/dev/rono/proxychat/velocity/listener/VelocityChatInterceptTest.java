@@ -17,7 +17,7 @@ class VelocityChatInterceptTest {
     @TempDir Path dataDirectory;
 
     @Test
-    void deniesPrefixedPlainChatWhenSignedVelocityIsPresent() throws Exception {
+    void deniesPrefixedPlainChatWhenSignedVelocityIsPresent() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -42,7 +42,7 @@ class VelocityChatInterceptTest {
     }
 
     @Test
-    void deniesTogglePlainChatWhenSignedVelocityIsPresent() throws Exception {
+    void deniesTogglePlainChatWhenSignedVelocityIsPresent() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -60,7 +60,7 @@ class VelocityChatInterceptTest {
     }
 
     @Test
-    void passesThroughNormalChat() throws Exception {
+    void passesThroughNormalChat() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -77,7 +77,7 @@ class VelocityChatInterceptTest {
     }
 
     @Test
-    void deniesPrefixedPlainChatOnCooldown() throws Exception {
+    void deniesPrefixedPlainChatOnCooldown() {
 
         // arrange
         FakePlatform platform = new FakePlatform();
@@ -96,7 +96,7 @@ class VelocityChatInterceptTest {
     }
 
     @Test
-    void passesThroughWhenSignedVelocityIsMissing() throws Exception {
+    void passesThroughWhenSignedVelocityIsMissing() {
 
         // arrange
         FakePlatform platform = new FakePlatform();

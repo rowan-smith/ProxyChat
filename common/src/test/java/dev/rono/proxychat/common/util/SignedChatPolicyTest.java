@@ -1,5 +1,6 @@
 package dev.rono.proxychat.common.util;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ class SignedChatPolicyTest {
     private final RecordingSignedChatHandler handler = new RecordingSignedChatHandler().canIntercept(false);
 
     @Test
-    void autoModeDelegatesToHandler() throws Exception {
+    void autoModeDelegatesToHandler() {
 
         // arrange
         ProxyChatYaml config = configWithMode("auto");
@@ -32,10 +33,10 @@ class SignedChatPolicyTest {
     }
 
     @Test
-    void treatsMissingModeAsAuto() throws Exception {
+    void treatsMissingModeAsAuto() {
 
         // arrange
-        ProxyChatYaml config = ProxyChatYaml.fromMap(new LinkedHashMap<>());
+        ProxyChatYaml config = configFromMap(new LinkedHashMap<>());
 
         // act
         handler.canIntercept(true);
@@ -45,7 +46,7 @@ class SignedChatPolicyTest {
     }
 
     @Test
-    void neverModeSkipsHandler() throws Exception {
+    void neverModeSkipsHandler() {
 
         // arrange
         ProxyChatYaml config = configWithMode("never");
@@ -58,7 +59,7 @@ class SignedChatPolicyTest {
     }
 
     @Test
-    void alwaysModeIgnoresHandler() throws Exception {
+    void alwaysModeIgnoresHandler() {
 
         // arrange
         ProxyChatYaml config = configWithMode("always");
@@ -71,7 +72,7 @@ class SignedChatPolicyTest {
     }
 
     @Test
-    void acceptsSynonyms() throws Exception {
+    void acceptsSynonyms() {
 
         // arrange & act
         handler.canIntercept(true);
@@ -97,7 +98,7 @@ class SignedChatPolicyTest {
     }
 
     @Test
-    void registersProxyPrefixCommandWithoutSignedVelocity() throws Exception {
+    void registersProxyPrefixCommandWithoutSignedVelocity() {
 
         // arrange & act
         FakePlatform platform = new FakePlatform();
@@ -120,12 +121,15 @@ class SignedChatPolicyTest {
     }
 
     private static ProxyChatYaml configWithMode(String mode) {
-        try {
-            LinkedHashMap<String, Object> root = new LinkedHashMap<>();
-            root.put("signed-chat-interception", mode);
+        LinkedHashMap<String, Object> root = new LinkedHashMap<>();
+        root.put("signed-chat-interception", mode);
+        return configFromMap(root);
+    }
 
+    private static ProxyChatYaml configFromMap(LinkedHashMap<String, Object> root) {
+        try {
             return ProxyChatYaml.fromMap(root);
-        } catch (Exception exception) {
+        } catch (IOException exception) {
             throw new AssertionError(exception);
         }
     }

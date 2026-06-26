@@ -10,7 +10,6 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.command.CommandExecuteEvent;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
-import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -31,7 +30,6 @@ import dev.rono.proxychat.velocity.platform.VelocitySignedChatHandler;
 
 @Plugin(id = "proxychat", name = "ProxyChat", version = "2.0.0", authors = {"Rono"})
 public final class VelocityProxyChatPlugin {
-    @Getter private static VelocityProxyChatPlugin instance;
     @Getter private final ProxyServer server;
     @Getter private final Logger logger;
     @Getter private ProxyChatCore core;
@@ -54,8 +52,6 @@ public final class VelocityProxyChatPlugin {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
-        instance = this;
-
         VelocityPlatform platform = new VelocityPlatform(this);
 
         core = new ProxyChatCore(
@@ -90,9 +86,6 @@ public final class VelocityProxyChatPlugin {
 
         ProxyChatBStats.register(this, metricsFactory);
     }
-
-    @Subscribe
-    public void onProxyShutdown(ProxyShutdownEvent event) {}
 
     public void registerCommands() {
         for (ChatChannel channel : core.getChannels()) {

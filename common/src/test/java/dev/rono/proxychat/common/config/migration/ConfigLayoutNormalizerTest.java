@@ -1,6 +1,8 @@
 package dev.rono.proxychat.common.config.migration;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,9 +25,7 @@ class ConfigLayoutNormalizerTest {
     void bundledDefaultsUseBlankLinesBetweenSections() throws Exception {
 
         // arrange
-        byte[] defaults = ConfigLayoutNormalizerTest.class.getClassLoader()
-                .getResourceAsStream("config.yml")
-                .readAllBytes();
+        byte[] defaults = readDefaultConfigBytes();
         YamlDocument document = YamlDocument.create(new ByteArrayInputStream(defaults));
 
         // act
@@ -42,10 +42,7 @@ class ConfigLayoutNormalizerTest {
         // arrange
         ProxyChatYamlDocuments.configureDefaults(null, null);
         Files.createDirectories(dataDirectory.resolve("chats"));
-        Files.copy(
-                ConfigLayoutNormalizerTest.class.getClassLoader().getResourceAsStream("v2/2-1/config.yml"),
-                dataDirectory.resolve("config.yml")
-        );
+        copyResource("v2/2-1/config.yml", dataDirectory.resolve("config.yml"));
         ProxyChatYamlDocuments.loadMainConfig(dataDirectory, Logger.getLogger("test"));
         String saved = Files.readString(dataDirectory.resolve("config.yml"));
         YamlDocument savedDocument = YamlDocument.create(
@@ -71,10 +68,7 @@ class ConfigLayoutNormalizerTest {
         // arrange
         ProxyChatYamlDocuments.configureDefaults(null, null);
         Files.createDirectories(dataDirectory.resolve("chats"));
-        Files.copy(
-                ConfigLayoutNormalizerTest.class.getClassLoader().getResourceAsStream("v2/2-2/config.yml"),
-                dataDirectory.resolve("config.yml")
-        );
+        copyResource("v2/2-2/config.yml", dataDirectory.resolve("config.yml"));
         String compacted = Files.readString(dataDirectory.resolve("config.yml")).replace("\n\n#", "\n#");
         Files.writeString(dataDirectory.resolve("config.yml"), compacted);
         ProxyChatYamlDocuments.loadMainConfig(dataDirectory, Logger.getLogger("test"));
@@ -98,9 +92,7 @@ class ConfigLayoutNormalizerTest {
                 signed-chat-interception: auto
                 """;
         YamlDocument document = YamlDocument.create(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-        byte[] defaults = ConfigLayoutNormalizerTest.class.getClassLoader()
-                .getResourceAsStream("config.yml")
-                .readAllBytes();
+        byte[] defaults = readDefaultConfigBytes();
 
         // act
         YamlDocument merged = ConfigLayoutNormalizer.applyLayout(document, defaults);
@@ -115,5 +107,19 @@ class ConfigLayoutNormalizerTest {
         assertThat(dumped).contains("version: 2.1");
         assertThat(dumped.lines().filter(line -> line.trim().equals("#")).findAny()).isEmpty();
         assertThat(dumped).contains("\n\n# Shown when running /proxychat or /pc with no arguments");
+    }
+
+    private static byte[] readDefaultConfigBytes() throws IOException {
+        try (InputStream stream = ConfigLayoutNormalizerTest.class.getClassLoader().getResourceAsStream("config.yml")) {
+            assertThat(stream).isNotNull();
+            return stream.readAllBytes();
+        }
+    }
+
+    private static void copyResource(String resourceName, Path target) throws IOException {
+        try (InputStream stream = ConfigLayoutNormalizerTest.class.getClassLoader().getResourceAsStream(resourceName)) {
+            assertThat(stream).isNotNull();
+            Files.copy(stream, target);
+        }
     }
 }
