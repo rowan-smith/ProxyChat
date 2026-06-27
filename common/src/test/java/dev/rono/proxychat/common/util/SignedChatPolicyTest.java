@@ -20,12 +20,12 @@ class SignedChatPolicyTest {
     void autoModeDelegatesToHandler() {
 
         // arrange
-        ProxyChatYaml config = configWithMode("auto");
+        var config = configWithMode("auto");
 
         // act
-        boolean interceptBeforeEnable = SignedChatPolicy.shouldInterceptChat(config, handler, player);
+        var interceptBeforeEnable = SignedChatPolicy.shouldInterceptChat(config, handler, player);
         handler.canIntercept(true);
-        boolean interceptAfterEnable = SignedChatPolicy.shouldInterceptChat(config, handler, player);
+        var interceptAfterEnable = SignedChatPolicy.shouldInterceptChat(config, handler, player);
 
         // assert
         assertThat(interceptBeforeEnable).isFalse();
@@ -36,7 +36,7 @@ class SignedChatPolicyTest {
     void treatsMissingModeAsAuto() {
 
         // arrange
-        ProxyChatYaml config = configFromMap(new LinkedHashMap<>());
+        var config = configFromMap(new LinkedHashMap<>());
 
         // act
         handler.canIntercept(true);
@@ -49,7 +49,7 @@ class SignedChatPolicyTest {
     void neverModeSkipsHandler() {
 
         // arrange
-        ProxyChatYaml config = configWithMode("never");
+        var config = configWithMode("never");
 
         // act
         handler.canIntercept(true);
@@ -62,7 +62,7 @@ class SignedChatPolicyTest {
     void alwaysModeIgnoresHandler() {
 
         // arrange
-        ProxyChatYaml config = configWithMode("always");
+        var config = configWithMode("always");
 
         // act
         handler.canIntercept(false);
@@ -88,7 +88,7 @@ class SignedChatPolicyTest {
     void skipsProxyPrefixCommandWhenSignedVelocityHandlesPlainPrefix() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
 
         // act
         platform.installPlugin("signedvelocity");
@@ -101,7 +101,7 @@ class SignedChatPolicyTest {
     void registersProxyPrefixCommandWithoutSignedVelocity() {
 
         // arrange & act
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
 
         // assert
         assertThat(SignedChatPolicy.shouldRegisterProxyPrefixCommand(configWithMode("auto"), platform)).isTrue();
@@ -111,7 +111,7 @@ class SignedChatPolicyTest {
     void registersProxyPrefixCommandWhenInterceptionDisabled() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
 
         // act
         platform.installPlugin("signedvelocity");
@@ -121,7 +121,7 @@ class SignedChatPolicyTest {
     }
 
     private static ProxyChatYaml configWithMode(String mode) {
-        LinkedHashMap<String, Object> root = new LinkedHashMap<>();
+        var root = new LinkedHashMap<String, Object>();
         root.put("signed-chat-interception", mode);
         return configFromMap(root);
     }

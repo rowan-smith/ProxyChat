@@ -14,7 +14,7 @@ import dev.dejvokep.boostedyaml.YamlDocument;
 public class ConfigLayoutNormalizer {
 
     public static YamlDocument applyLayout(YamlDocument user, byte[] defaultsBytes) throws IOException {
-        YamlDocument template = YamlDocument.create(new ByteArrayInputStream(defaultsBytes));
+        var template = YamlDocument.create(new ByteArrayInputStream(defaultsBytes));
         for (String key : user.getRoutesAsStrings(false)) {
             template.set(key, user.get(key));
         }
@@ -23,7 +23,7 @@ public class ConfigLayoutNormalizer {
     }
 
     public static boolean layoutMatches(YamlDocument user, byte[] defaultsBytes) throws IOException {
-        YamlDocument merged = applyLayout(user, defaultsBytes);
+        var merged = applyLayout(user, defaultsBytes);
         return polishDump(merged.dump()).equals(polishDump(user.dump()));
     }
 

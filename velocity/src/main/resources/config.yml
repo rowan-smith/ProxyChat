@@ -41,4 +41,17 @@ help-channels-header: "&7Chat channels:"
 # always - always intercept (can kick players on vanilla BungeeCord 1.19.3+)
 signed-chat-interception: auto
 
-version: "2.2"
+# Shown when a player tries to chat on a blacklisted backend server.
+blacklist-message: "&cYou cannot use %chat-name% on this server."
+
+# Maximum chat message length (0 disables the limit).
+max-message-length: 256
+message-too-long-message: "&cYour message exceeds the maximum length of %max-length% characters."
+
+# Remember toggle/ignore preferences across reconnects (reload still clears runtime state).
+persist-player-preferences: false
+
+# Message format for config strings: legacy (& codes) or minimessage.
+message-format: legacy
+
+version: "2.3"

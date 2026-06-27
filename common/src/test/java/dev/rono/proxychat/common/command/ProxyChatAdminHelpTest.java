@@ -1,7 +1,6 @@
 package dev.rono.proxychat.common.command;
 
 import java.nio.file.Path;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,10 +30,10 @@ class ProxyChatAdminHelpTest {
     void listsAdminAndChannelCommandsForPlayers() {
 
         // arrange
-        FakePlayer player = platform.addPlayer(new FakePlayer("Alice", "lobby")
+        var player = platform.addPlayer(new FakePlayer("Alice", "lobby")
                 .withPermission("proxychat.global")
                 .withPermission("proxychat.reload"));
-        List<String> messages = player.receivedMessages();
+        var messages = player.receivedMessages();
 
         // act
         ProxyChatAdminHelp.send(harness.core(), player);
@@ -44,8 +43,7 @@ class ProxyChatAdminHelpTest {
         assertThat(messages).anyMatch(message -> message.contains("version"));
         assertThat(messages).anyMatch(message -> message.contains("Chat channels:"));
         assertThat(messages).anyMatch(message -> message.contains("> Global"));
-        assertThat(messages).anyMatch(message ->
-                message.contains("- /g") && message.contains("toggle") && message.contains("ignore"));
+        assertThat(messages).anyMatch(message -> message.contains("- /g") && message.contains("toggle") && message.contains("ignore"));
         assertThat(messages).anyMatch(message -> message.contains("- /global"));
         assertThat(messages).noneMatch(message -> message.contains("/local"));
     }
@@ -54,7 +52,7 @@ class ProxyChatAdminHelpTest {
     void hidesReloadWithoutPermission() {
 
         // arrange
-        FakePlayer player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
 
         // act
         ProxyChatAdminHelp.send(harness.core(), player);
@@ -68,19 +66,19 @@ class ProxyChatAdminHelpTest {
     void omitsToggleFromHelpWhenSignedChatInterceptionUnavailable() {
 
         // arrange
-        FakePlatform blockedPlatform = new FakePlatform();
+        var blockedPlatform = new FakePlatform();
         blockedPlatform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(false));
-        TestEnvironment.TestHarness blockedHarness = TestEnvironment.create(
+        var blockedHarness = TestEnvironment.create(
                 dataDirectory.resolve("blocked-help"),
                 blockedPlatform
         );
-        FakePlayer player = blockedPlatform.addPlayer(
+        var player = blockedPlatform.addPlayer(
                 new FakePlayer("Alice", "lobby").withPermission("proxychat.global")
         );
         ProxyChatAdminHelp.send(blockedHarness.core(), player);
 
         // act
-        List<String> messages = player.receivedMessages();
+        var messages = player.receivedMessages();
 
         // assert
         assertThat(messages).anyMatch(message -> message.contains("- /global") && message.contains("ignore"));
@@ -91,12 +89,12 @@ class ProxyChatAdminHelpTest {
     void showsPlainPrefixLineWhenSignedChatInterceptionIsAvailable() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
         platform.installPlugin("signedvelocity");
         platform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(true));
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory.resolve("signed-help"), platform);
-        FakePlayer player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
-        List<String> messages = player.receivedMessages();
+        var harness = TestEnvironment.create(dataDirectory.resolve("signed-help"), platform);
+        var player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var messages = player.receivedMessages();
 
         // act
         ProxyChatAdminHelp.send(harness.core(), player);
@@ -110,10 +108,10 @@ class ProxyChatAdminHelpTest {
     void showsProxyPrefixCommandWhenSignedChatInterceptionIsUnavailable() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
         platform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(false));
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory.resolve("unsigned-help"), platform);
-        FakePlayer player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var harness = TestEnvironment.create(dataDirectory.resolve("unsigned-help"), platform);
+        var player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
 
         // act
         ProxyChatAdminHelp.send(harness.core(), player);
@@ -128,8 +126,8 @@ class ProxyChatAdminHelpTest {
     void listsAllPermittedChannelsForConsole() {
 
         // arrange
-        FakeConsole console = new FakeConsole().withPermission("proxychat.global").withPermission("proxychat.local");
-        List<String> messages = console.receivedMessages();
+        var console = new FakeConsole().withPermission("proxychat.global").withPermission("proxychat.local");
+        var messages = console.receivedMessages();
 
         // act
         ProxyChatAdminHelp.send(harness.core(), console);
@@ -145,10 +143,10 @@ class ProxyChatAdminHelpTest {
     void omitsSubcommandsForChannelsWithoutToggleOrIgnore() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory.resolve("staff-help"), platform);
-        FakePlayer player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.staff"));
-        List<String> messages = player.receivedMessages();
+        var platform = new FakePlatform();
+        var harness = TestEnvironment.create(dataDirectory.resolve("staff-help"), platform);
+        var player = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.staff"));
+        var messages = player.receivedMessages();
 
         // act
         ProxyChatAdminHelp.send(harness.core(), player);

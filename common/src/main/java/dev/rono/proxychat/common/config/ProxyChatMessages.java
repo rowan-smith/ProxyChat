@@ -13,11 +13,7 @@ public class ProxyChatMessages {
     public static final Map<String, String> DEFAULTS = Map.ofEntries(
             Map.entry("toggle-enable-message", "&aYou have toggled &2on &a%chat-name%"),
             Map.entry("toggle-disable-message", "&aYou have toggled &4off &a%chat-name%"),
-            Map.entry(
-                    "toggle-unsupported-message",
-                    "&cToggle chat is unavailable on this proxy for your client version. "
-                            + "Use /%command-name% <message> instead."
-            ),
+            Map.entry("toggle-unsupported-message", "&cToggle chat is unavailable on this proxy for your client version. Use /%command-name% <message> instead."),
             Map.entry("ignore-enable-message", "&cYou have ignored %chat-name%!"),
             Map.entry("ignore-disable-message", "&aYou have un-ignored %chat-name%!"),
             Map.entry("chat-disabled-message", "&cYou cannot send a message while %chat-name% is ignored!"),
@@ -30,11 +26,13 @@ public class ProxyChatMessages {
             Map.entry("help-header", "&7ProxyChat commands:"),
             Map.entry("help-reload", "&7/proxychat reload &8- Reload configuration and channels"),
             Map.entry("help-version", "&7/proxychat version &8- Plugin information"),
-            Map.entry("help-channels-header", "&7Chat Channels:")
+            Map.entry("help-channels-header", "&7Chat Channels:"),
+            Map.entry("blacklist-message", "&cYou cannot use %chat-name% on this server."),
+            Map.entry("message-too-long-message", "&cYour message exceeds the maximum length of %max-length% characters.")
     );
 
     public static String resolve(ProxyChatYaml config, String key) {
-        String value = config.getString(key);
+        var value = config.getString(key);
         if (value != null && !value.isEmpty()) {
             return value;
         }

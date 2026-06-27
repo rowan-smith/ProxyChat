@@ -4,11 +4,10 @@ import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
 import dev.rono.proxychat.common.platform.ProxyCommandSource;
 import dev.rono.proxychat.common.platform.ProxyPlayer;
 
-public record BungeeCommandSource(CommandSender handle) implements ProxyCommandSource {
+public record BungeeCommandSource(CommandSender handle, BungeePlatform platform) implements ProxyCommandSource {
     @Override
     public String getName() {
         return handle.getName();
@@ -27,7 +26,7 @@ public record BungeeCommandSource(CommandSender handle) implements ProxyCommandS
     @Override
     public ProxyPlayer asPlayer() {
         if (handle instanceof ProxiedPlayer player) {
-            return new BungeePlayer(player);
+            return platform.toPlayer(player);
         }
 
         return null;
@@ -35,6 +34,6 @@ public record BungeeCommandSource(CommandSender handle) implements ProxyCommandS
 
     @Override
     public void sendMessage(Component message) {
-        BungeeProxyChatPlugin.getInstance().getAdventure().sender(handle).sendMessage(message);
+        platform.adventure().sender(handle).sendMessage(message);
     }
 }

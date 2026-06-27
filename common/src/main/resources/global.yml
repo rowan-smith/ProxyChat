@@ -49,3 +49,6 @@ local: false
 # blacklist this chat on specific servers
 blacklist:
   - server1
+
+# Higher priority channels are checked first for @prefix and toggle intercept.
+priority: 0

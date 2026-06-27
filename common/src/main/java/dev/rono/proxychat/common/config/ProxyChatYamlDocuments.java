@@ -38,23 +38,27 @@ public class ProxyChatYamlDocuments {
     ) throws IOException {
         if (configDefaults != null) {
             bundledConfigDefaults = configDefaults.readAllBytes();
+        } else if (bundledConfigDefaults == null) {
+            bundledConfigDefaults = readResource(CONFIG_DEFAULT_RESOURCE);
         }
 
         if (channelDefaults != null) {
             bundledChannelDefaults = channelDefaults.readAllBytes();
+        } else if (bundledChannelDefaults == null) {
+            bundledChannelDefaults = readResource(CHANNEL_DEFAULT_RESOURCE);
         }
     }
 
     public static YamlDocument loadMainConfig(Path dataDirectory, Logger logger) throws IOException {
         ensureDefaultsLoaded();
 
-        Path configPath = dataDirectory.resolve("config.yml");
+        var configPath = dataDirectory.resolve("config.yml");
         if (!Files.exists(configPath) || Files.size(configPath) == 0) {
-            Files.createDirectories(configPath.getParent());
+            Files.createDirectories(requireParent(configPath));
             Files.write(configPath, bundledConfigDefaults);
         }
 
-        YamlDocument document = YamlDocument.create(
+        var document = YamlDocument.create(
                 new ByteArrayInputStream(Files.readAllBytes(configPath)),
                 configDefaultsStream(),
                 mainConfigSettings(dataDirectory, logger)
@@ -78,25 +82,35 @@ public class ProxyChatYamlDocuments {
         ensureDefaultsLoaded();
 
         if (!Files.exists(channelFile) || Files.size(channelFile) == 0) {
-            Files.createDirectories(channelFile.getParent());
+            Files.createDirectories(requireParent(channelFile));
             Files.write(channelFile, bundledChannelDefaults);
         }
 
-        YamlDocument document = YamlDocument.create(
+        var document = YamlDocument.create(
                 new ByteArrayInputStream(Files.readAllBytes(channelFile)),
                 channelDefaultsStream(),
                 channelSettings()
         );
 
         document.update();
+        ProxyChatConfigMigrations.ensureChannelKeys(document);
         writeDocument(channelFile, document);
 
         return document;
     }
 
     private static void writeDocument(Path path, YamlDocument document) throws IOException {
-        Files.createDirectories(path.getParent());
+        Files.createDirectories(requireParent(path));
         Files.writeString(path, ConfigLayoutNormalizer.dumpPolished(document), StandardCharsets.UTF_8);
+    }
+
+    private static Path requireParent(Path path) throws IOException {
+        var parent = path.getParent();
+        if (parent == null) {
+            throw new IOException("Path has no parent directory: " + path);
+        }
+
+        return parent;
     }
 
     private static Settings[] mainConfigSettings(Path dataDirectory, Logger logger) {
@@ -125,6 +139,7 @@ public class ProxyChatYamlDocuments {
                         })
                         .addCustomLogic("2.1", ProxyChatConfigMigrations::migrateV2ToV2_1)
                         .addCustomLogic("2.2", ProxyChatConfigMigrations::migrateV2_1ToV2_2)
+                        .addCustomLogic("2.3", ProxyChatConfigMigrations::migrateV2_2ToV2_3)
                         .build()
         };
     }
@@ -141,13 +156,7 @@ public class ProxyChatYamlDocuments {
     }
 
     private static void ensureDefaultsLoaded() throws IOException {
-        if (bundledConfigDefaults == null) {
-            bundledConfigDefaults = readResource(CONFIG_DEFAULT_RESOURCE);
-        }
-
-        if (bundledChannelDefaults == null) {
-            bundledChannelDefaults = readResource(CHANNEL_DEFAULT_RESOURCE);
-        }
+        configureDefaults(null, null);
     }
 
     private static byte[] readResource(String resourceName) throws IOException {

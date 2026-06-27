@@ -1,8 +1,6 @@
 package dev.rono.proxychat.bungee.platform;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,14 +9,13 @@ import java.util.logging.Logger;
 
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+
 import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
 import dev.rono.proxychat.common.platform.ProxyPlayer;
 import dev.rono.proxychat.common.platform.SignedChatHandler;
-
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 
 /**
  * Waterfall-specific signed chat support. Cancelling {@code ChatEvent} on 1.19.3+ is not
@@ -48,10 +45,10 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
 
     private void init() {
         try {
-            Class<?> acknowledgementClass = Class.forName("net.md_5.bungee.protocol.packet.ClientChatAcknowledgement");
+            var acknowledgementClass = Class.forName("net.md_5.bungee.protocol.packet.ClientChatAcknowledgement");
             acknowledgementConstructor = acknowledgementClass.getConstructor(int.class);
             definedPacketClass = Class.forName("net.md_5.bungee.protocol.DefinedPacket");
-            Field protocolField = Class.forName("net.md_5.bungee.protocol.ProtocolConstants")
+            var protocolField = Class.forName("net.md_5.bungee.protocol.ProtocolConstants")
                     .getField("MINECRAFT_1_19_3");
             minimumProtocolVersion = protocolField.getInt(null);
             supported = true;
@@ -98,12 +95,12 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
             return;
         }
 
-        ProxiedPlayer handle = bungeePlayer.handle();
+        var handle = bungeePlayer.handle();
         if (handle.getServer() == null || handle.getPendingConnection().getVersion() < minimumProtocolVersion) {
             return;
         }
 
-        Integer offset = pendingOffsets.remove(player.getUniqueId());
+        var offset = pendingOffsets.remove(player.getUniqueId());
         if (offset == null) {
             if (!warnedAboutPaperBackends) {
                 warnedAboutPaperBackends = true;
@@ -118,9 +115,9 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
         }
 
         try {
-            Object packet = acknowledgementConstructor.newInstance(offset);
-            Object unsafe = handle.getServer().unsafe();
-            Method sendPacket = unsafe.getClass().getMethod("sendPacket", definedPacketClass);
+            var packet = acknowledgementConstructor.newInstance(offset);
+            var unsafe = handle.getServer().unsafe();
+            var sendPacket = unsafe.getClass().getMethod("sendPacket", definedPacketClass);
             sendPacket.invoke(unsafe, packet);
 
         } catch (ReflectiveOperationException exception) {
@@ -130,7 +127,7 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
 
     private void injectPacketCapture(ProxiedPlayer player) {
         try {
-            Channel channel = getPlayerChannel(player);
+            var channel = getPlayerChannel(player);
             if (channel == null || channel.pipeline().get(HANDLER_NAME) != null) {
                 return;
             }
@@ -148,12 +145,12 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
 
     private void removePacketCapture(ProxiedPlayer player) {
         try {
-            Channel channel = getPlayerChannel(player);
+            var channel = getPlayerChannel(player);
             if (channel == null) {
                 return;
             }
 
-            ChannelHandler handler = channel.pipeline().get(HANDLER_NAME);
+            var handler = channel.pipeline().get(HANDLER_NAME);
             if (handler != null) {
                 channel.pipeline().remove(handler);
             }
@@ -164,31 +161,31 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
     }
 
     private Channel getPlayerChannel(ProxiedPlayer player) throws ReflectiveOperationException {
-        Field channelField = player.getClass().getDeclaredField("ch");
+        var channelField = player.getClass().getDeclaredField("ch");
         channelField.setAccessible(true);
-        Object channelWrapper = channelField.get(player);
-        Method getHandle = channelWrapper.getClass().getMethod("getHandle");
+        var channelWrapper = channelField.get(player);
+        var getHandle = channelWrapper.getClass().getMethod("getHandle");
         return (Channel) getHandle.invoke(channelWrapper);
     }
 
     private void captureClientChatOffset(Object message, UUID playerId) {
         try {
-            Object packet = unwrapPacket(message);
+            var packet = unwrapPacket(message);
             if (packet == null) {
                 return;
             }
 
-            Class<?> clientChatClass = Class.forName("net.md_5.bungee.protocol.packet.ClientChat");
+            var clientChatClass = Class.forName("net.md_5.bungee.protocol.packet.ClientChat");
             if (!clientChatClass.isInstance(packet)) {
                 return;
             }
 
-            Object seenMessages = clientChatClass.getMethod("getSeenMessages").invoke(packet);
+            var seenMessages = clientChatClass.getMethod("getSeenMessages").invoke(packet);
             if (seenMessages == null) {
                 return;
             }
 
-            int offset = (Integer) seenMessages.getClass().getMethod("getOffset").invoke(seenMessages);
+            var offset = (Integer) seenMessages.getClass().getMethod("getOffset").invoke(seenMessages);
             pendingOffsets.put(playerId, offset);
 
         } catch (ReflectiveOperationException exception) {
@@ -197,12 +194,12 @@ public final class WaterfallSignedChatHandler implements SignedChatHandler {
     }
 
     private Object unwrapPacket(Object message) throws ReflectiveOperationException {
-        Class<?> packetWrapperClass = Class.forName("net.md_5.bungee.protocol.PacketWrapper");
+        var packetWrapperClass = Class.forName("net.md_5.bungee.protocol.PacketWrapper");
         if (packetWrapperClass.isInstance(message)) {
             return packetWrapperClass.getField("packet").get(message);
         }
 
-        Class<?> definedPacketClass = Class.forName("net.md_5.bungee.protocol.DefinedPacket");
+        var definedPacketClass = Class.forName("net.md_5.bungee.protocol.DefinedPacket");
         if (definedPacketClass.isInstance(message)) {
             return message;
         }

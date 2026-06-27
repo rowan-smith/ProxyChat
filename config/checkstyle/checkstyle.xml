@@ -11,11 +11,6 @@
         <property name="eachLine" value="true"/>
     </module>
 
-    <module name="LineLength">
-        <property name="max" value="120"/>
-        <property name="ignorePattern" value="^package |^import |https?://"/>
-    </module>
-
     <module name="SuppressionFilter">
         <property name="file" value="${config_loc}/suppressions.xml"/>
         <property name="optional" value="false"/>
@@ -31,10 +26,6 @@
     <module name="RegexpMultiline">
         <property name="format" value="(?s)private\s+\w+\(\)\s*\{\s*\}"/>
         <property name="message" value="Do not add empty private constructors; annotate static helper types with @UtilityClass instead."/>
-    </module>
-
-    <module name="NewlineAtEndOfFile">
-        <property name="lineSeparator" value="lf"/>
     </module>
 
     <module name="RegexpMultiline">
@@ -70,7 +61,7 @@
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
         <module name="ImportOrder">
-            <property name="groups" value="/^java\./,javax,org,com,net,lombok,dev"/>
+            <property name="groups" value="/^java\./,javax,org,com,net,io,lombok,dev"/>
             <property name="ordered" value="true"/>
             <property name="separated" value="true"/>
             <property name="option" value="bottom"/>
@@ -187,6 +178,29 @@
         <module name="UnnecessarySemicolonInEnumeration"/>
         <module name="UnnecessarySemicolonInTryWithResources"/>
         <module name="UpperEll"/>
+
+        <!-- Require var for local variables with an initializer (except catch parameters). -->
+        <module name="MatchXpath">
+            <property name="query" value="//VARIABLE_DEF[
+                (ancestor::METHOD_DEF or ancestor::LAMBDA)
+                and ASSIGN
+                and not(./TYPE/IDENT[@text='var'])
+                and not(ancestor::LITERAL_CATCH)
+            ]"/>
+            <message key="matchxpath.match" value="Use 'var' for local variables with an initializer."/>
+        </module>
+
+        <!-- Prefer imports over fully qualified type names in source code. -->
+        <module name="MatchXpath">
+            <property name="query" value="//TYPE[.//DOT/IDENT[@text='java' or @text='javax' or @text='net' or @text='com' or @text='dev' or @text='org' or @text='io' or @text='lombok']]"/>
+            <message key="matchxpath.match"
+                     value="Use a short type name with an import instead of a fully qualified class name."/>
+        </module>
+        <module name="MatchXpath">
+            <property name="query" value="//CLASS_LITERAL[./DOT/IDENT[@text='java' or @text='javax' or @text='net' or @text='com' or @text='dev' or @text='org' or @text='io' or @text='lombok']]"/>
+            <message key="matchxpath.match"
+                     value="Use a short type name with an import instead of a fully qualified class literal."/>
+        </module>
 
         <!-- Class design -->
         <module name="FinalClass"/>

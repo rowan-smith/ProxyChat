@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @UtilityClass
 public class ConfigFixtures {
-    public static final ConfigVersion LATEST = ConfigVersion.of(2, 2);
+    public static final ConfigVersion LATEST = ConfigVersion.of(2, 3);
     public static final String LATEST_CONFIG = "v2/2-2/config.yml";
     public static final String LATEST_CHATS_DIR = "v2/2-2/chats";
 
@@ -50,7 +50,7 @@ public class ConfigFixtures {
 
     public static void copyLatestHarness(Path dataDirectory) throws IOException {
         copyResource(LATEST_CONFIG, dataDirectory.resolve("config.yml"));
-        Path chatsDir = dataDirectory.resolve("chats");
+        var chatsDir = dataDirectory.resolve("chats");
         Files.createDirectories(chatsDir);
         copyResource(LATEST_CHATS_DIR + "/global.yml", chatsDir.resolve("global.yml"));
         copyResource(LATEST_CHATS_DIR + "/local.yml", chatsDir.resolve("local.yml"));

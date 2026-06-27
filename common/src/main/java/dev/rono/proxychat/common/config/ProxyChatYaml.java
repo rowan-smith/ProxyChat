@@ -26,12 +26,12 @@ public final class ProxyChatYaml {
     }
 
     public static ProxyChatYaml fromMap(Map<String, Object> values) throws IOException {
-        StringBuilder yaml = new StringBuilder();
+        var yaml = new StringBuilder();
         for (Map.Entry<String, Object> entry : values.entrySet()) {
             yaml.append(entry.getKey()).append(": ").append(formatYamlValue(entry.getValue())).append('\n');
         }
 
-        YamlDocument document = YamlDocument.create(
+        var document = YamlDocument.create(
                 new ByteArrayInputStream(yaml.toString().getBytes(StandardCharsets.UTF_8))
         );
         return wrap(document);
@@ -58,12 +58,12 @@ public final class ProxyChatYaml {
     }
 
     public boolean getBoolean(String route) {
-        Boolean value = section.getBoolean(route);
+        var value = section.getBoolean(route);
         return value != null && value;
     }
 
     public int getInt(String route) {
-        Integer value = section.getInt(route);
+        var value = section.getInt(route);
         return value != null ? value : 0;
     }
 
@@ -72,7 +72,7 @@ public final class ProxyChatYaml {
     }
 
     public List<String> getStringList(String route) {
-        List<String> values = section.getStringList(route);
+        var values = section.getStringList(route);
         return values != null ? values : Collections.emptyList();
     }
 }

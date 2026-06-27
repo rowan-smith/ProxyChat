@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import dev.rono.proxychat.common.channel.ChatChannel;
 import dev.rono.proxychat.common.test.FakePlatform;
 import dev.rono.proxychat.common.test.FakePlayer;
 import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
@@ -23,12 +22,12 @@ class ProxyChatIT {
     void fullGlobalChatWorkflow() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
-        RecordingSignedChatHandler handler = new RecordingSignedChatHandler();
+        var platform = new FakePlatform();
+        var handler = new RecordingSignedChatHandler();
         platform.setSignedChatHandler(handler);
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
-        FakePlayer alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
-        FakePlayer bob = platform.addPlayer(new FakePlayer("Bob", "survival").withPermission("proxychat.global"));
+        var harness = TestEnvironment.create(dataDirectory, platform);
+        var alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var bob = platform.addPlayer(new FakePlayer("Bob", "survival").withPermission("proxychat.global"));
 
         // act
         harness.core().getChannelService().execute(harness.globalChannel(), alice, new String[]{"Hi", "Bob"});
@@ -44,15 +43,15 @@ class ProxyChatIT {
     void prefixInterceptAcknowledgementFlow() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
-        RecordingSignedChatHandler handler = new RecordingSignedChatHandler().canIntercept(true);
+        var platform = new FakePlatform();
+        var handler = new RecordingSignedChatHandler().canIntercept(true);
         platform.setSignedChatHandler(handler);
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
-        FakePlayer alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var harness = TestEnvironment.create(dataDirectory, platform);
+        var alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
         platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
 
         // act
-        boolean intercepted = harness.core().getChannelService().tryInterceptChat(alice, "@hello there");
+        var intercepted = harness.core().getChannelService().tryInterceptChat(alice, "@hello there");
         handler.acknowledgeCancelledChat(alice);
 
         // assert
@@ -64,12 +63,12 @@ class ProxyChatIT {
     void toggleModePlainChatWorkflow() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
         platform.setSignedChatHandler(new RecordingSignedChatHandler());
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
-        ChatChannel global = harness.globalChannel();
-        FakePlayer alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
-        FakePlayer bob = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
+        var harness = TestEnvironment.create(dataDirectory, platform);
+        var global = harness.globalChannel();
+        var alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var bob = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
 
         // act
         harness.core().getChannelService().execute(global, alice, new String[]{"toggle"});
@@ -83,14 +82,14 @@ class ProxyChatIT {
     void legacyConfigMigrationAndUse() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
         platform.setSignedChatHandler(new RecordingSignedChatHandler());
-        TestEnvironment.TestHarness harness = TestEnvironment.createWithLegacyConfig(dataDirectory, platform);
-        FakePlayer alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
-        FakePlayer bob = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
+        var harness = TestEnvironment.createWithLegacyConfig(dataDirectory, platform);
+        var alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var bob = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
 
         // act
-        ChatChannel global = harness.core().getChannels().stream()
+        var global = harness.core().getChannels().stream()
                 .filter(channel -> channel.getCommandName().equals("global"))
                 .findFirst()
                 .orElseThrow();
@@ -105,15 +104,15 @@ class ProxyChatIT {
     void reloadClearsRuntimeToggleState() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
         platform.setSignedChatHandler(new RecordingSignedChatHandler());
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
-        FakePlayer alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var harness = TestEnvironment.create(dataDirectory, platform);
+        var alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
         harness.globalChannel().getToggleUtils().toggleChat(alice.getUniqueId());
 
         // act
         harness.core().reload();
-        ChatChannel reloaded = harness.core().getChannels().stream()
+        var reloaded = harness.core().getChannels().stream()
                 .filter(channel -> channel.getCommandName().equals("global"))
                 .findFirst()
                 .orElseThrow();

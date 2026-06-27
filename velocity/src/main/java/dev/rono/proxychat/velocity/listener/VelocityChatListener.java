@@ -17,7 +17,7 @@ public final class VelocityChatListener {
             return;
         }
 
-        VelocityPlayer player = new VelocityPlayer(event.getPlayer());
+        var player = new VelocityPlayer(event.getPlayer());
         if (VelocityChatIntercept.decide(core, player, event.getMessage()) == VelocityChatIntercept.Action.DENY) {
             denySignedChat(event);
             core.getSignedChatHandler().acknowledgeCancelledChat(player);

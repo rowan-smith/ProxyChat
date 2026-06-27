@@ -56,12 +56,12 @@ public final class VelocityPlatform implements ProxyChatPlatform {
 
     @Override
     public void logInfo(String message) {
-        plugin.getLogger().info(message);
+        plugin.getSlf4jLogger().info(message);
     }
 
     @Override
     public void logWarning(String message) {
-        plugin.getLogger().warn(message);
+        plugin.getSlf4jLogger().warn(message);
     }
 
     @Override

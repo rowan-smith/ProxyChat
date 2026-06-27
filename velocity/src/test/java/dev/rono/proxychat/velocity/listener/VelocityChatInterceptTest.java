@@ -20,16 +20,16 @@ class VelocityChatInterceptTest {
     void deniesPrefixedPlainChatWhenSignedVelocityIsPresent() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
         platform.installPlugin("signedvelocity");
         platform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(true));
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
-        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
-        FakePlayer sameServer = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
+        var harness = TestEnvironment.create(dataDirectory, platform);
+        var sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var sameServer = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
         platform.addPlayer(new FakePlayer("Carol", "survival").withPermission("proxychat.global"));
 
         // act
-        VelocityChatIntercept.Action action = VelocityChatIntercept.decide(harness.core(), sender, "@hello");
+        var action = VelocityChatIntercept.decide(harness.core(), sender, "@hello");
 
         // assert
         assertThat(action).isEqualTo(VelocityChatIntercept.Action.DENY);
@@ -45,15 +45,15 @@ class VelocityChatInterceptTest {
     void deniesTogglePlainChatWhenSignedVelocityIsPresent() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
         platform.installPlugin("signedvelocity");
         platform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(true));
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
-        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var harness = TestEnvironment.create(dataDirectory, platform);
+        var sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
         harness.globalChannel().getToggleUtils().toggleChat(sender.getUniqueId());
 
         // act
-        VelocityChatIntercept.Action action = VelocityChatIntercept.decide(harness.core(), sender, "toggle chat");
+        var action = VelocityChatIntercept.decide(harness.core(), sender, "toggle chat");
 
         // assert
         assertThat(action).isEqualTo(VelocityChatIntercept.Action.DENY);
@@ -63,14 +63,14 @@ class VelocityChatInterceptTest {
     void passesThroughNormalChat() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
         platform.installPlugin("signedvelocity");
         platform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(true));
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
-        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var harness = TestEnvironment.create(dataDirectory, platform);
+        var sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
 
         // act
-        VelocityChatIntercept.Action action = VelocityChatIntercept.decide(harness.core(), sender, "hello");
+        var action = VelocityChatIntercept.decide(harness.core(), sender, "hello");
 
         // assert
         assertThat(action).isEqualTo(VelocityChatIntercept.Action.PASS);
@@ -80,12 +80,12 @@ class VelocityChatInterceptTest {
     void deniesPrefixedPlainChatOnCooldown() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
         platform.installPlugin("signedvelocity");
         platform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(true));
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
-        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
-        VelocityChatIntercept.Action action = VelocityChatIntercept.decide(harness.core(), sender, "@second");
+        var harness = TestEnvironment.create(dataDirectory, platform);
+        var sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var action = VelocityChatIntercept.decide(harness.core(), sender, "@second");
 
         // act
         VelocityChatIntercept.decide(harness.core(), sender, "@first");
@@ -99,12 +99,12 @@ class VelocityChatInterceptTest {
     void passesThroughWhenSignedVelocityIsMissing() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
         platform.setSignedChatHandler(new RecordingSignedChatHandler().canIntercept(false));
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
+        var harness = TestEnvironment.create(dataDirectory, platform);
 
         // act
-        FakePlayer sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var sender = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
 
         // assert
         assertThat(SignedChatPolicy.shouldInterceptChat(

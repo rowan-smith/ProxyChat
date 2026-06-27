@@ -1,7 +1,6 @@
 package dev.rono.proxychat.common.config.migration;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import lombok.experimental.UtilityClass;
 
@@ -25,17 +24,17 @@ public class ConfigVersionPattern {
     }
 
     private static String[] buildVersionIds() {
-        List<String> ids = new ArrayList<>();
+        var ids = new ArrayList<>();
         ids.add("0");
         ids.add("1");
 
-        for (int minor = 1; minor <= 5; minor++) {
+        for (var minor = 1; minor <= 5; minor++) {
             ids.add("1." + minor);
         }
 
         ids.add("2");
 
-        for (int minor = 1; minor <= 99; minor++) {
+        for (var minor = 1; minor <= 99; minor++) {
             ids.add("2." + minor);
         }
 

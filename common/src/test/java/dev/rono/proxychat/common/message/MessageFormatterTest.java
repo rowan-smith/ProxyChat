@@ -13,7 +13,7 @@ class MessageFormatterTest {
     void deserializesLegacyAmpersandColors() {
 
         // arrange & act
-        String rendered = PLAIN.serialize(MessageFormatter.legacy("&aHello &cWorld"));
+        var rendered = PLAIN.serialize(MessageFormatter.legacy("&aHello &cWorld"));
 
         // assert
         assertThat(rendered).isEqualTo("Hello World");
@@ -37,7 +37,7 @@ class MessageFormatterTest {
     void serializesLegacyTextWithSectionSigns() {
 
         // arrange & act
-        String serialized = MessageFormatter.legacySectionSerialized("&8[&9G&8] &9Alice");
+        var serialized = MessageFormatter.legacySectionSerialized("&8[&9G&8] &9Alice");
 
         // assert
         assertThat(serialized).doesNotContain("&");

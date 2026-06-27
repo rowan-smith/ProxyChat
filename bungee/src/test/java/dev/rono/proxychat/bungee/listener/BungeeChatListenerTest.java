@@ -10,10 +10,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.ChatEvent;
 
+import dev.rono.proxychat.bungee.platform.BungeePlatform;
+import dev.rono.proxychat.bungee.platform.BungeePlayer;
+import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.common.test.FakePlatform;
 import dev.rono.proxychat.common.test.FakePlayer;
 import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
@@ -35,20 +40,22 @@ class BungeeChatListenerTest {
     void cancelsAndAcknowledgesInterceptedChat() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
-        RecordingSignedChatHandler handler = new RecordingSignedChatHandler().canIntercept(true);
+        var platform = new FakePlatform();
+        var handler = new RecordingSignedChatHandler().canIntercept(true);
         platform.setSignedChatHandler(handler);
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
+        var harness = TestEnvironment.create(dataDirectory, platform);
         platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
 
         // act
-        ProxiedPlayer handle = mockAlice();
-        ChatEvent event = mock(ChatEvent.class);
+        var handle = mockAlice();
+        var event = mock(ChatEvent.class);
         when(event.isCancelled()).thenReturn(false);
         when(event.isCommand()).thenReturn(false);
         when(event.getSender()).thenReturn(handle);
         when(event.getMessage()).thenReturn("@intercepted message");
-        new BungeeChatListener(harness.core()).onChat(event);
+        var bungeePlatform = mock(BungeePlatform.class);
+        when(bungeePlatform.toPlayer(handle)).thenAnswer(invocation -> new BungeePlayer(invocation.getArgument(0), bungeePlatform));
+        new BungeeChatListener(harness.core(), bungeePlatform).onChat(event);
         verify(event).setCancelled(true);
 
         // assert
@@ -59,19 +66,21 @@ class BungeeChatListenerTest {
     void ignoresChatWhenPolicyBlocksInterception() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
-        RecordingSignedChatHandler handler = new RecordingSignedChatHandler().canIntercept(false);
+        var platform = new FakePlatform();
+        var handler = new RecordingSignedChatHandler().canIntercept(false);
         platform.setSignedChatHandler(handler);
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
+        var harness = TestEnvironment.create(dataDirectory, platform);
 
         // act
-        ProxiedPlayer handle = mockAlice();
-        ChatEvent event = mock(ChatEvent.class);
+        var handle = mockAlice();
+        var event = mock(ChatEvent.class);
         when(event.isCancelled()).thenReturn(false);
         when(event.isCommand()).thenReturn(false);
         when(event.getSender()).thenReturn(handle);
         when(event.getMessage()).thenReturn("@should-not-intercept");
-        new BungeeChatListener(harness.core()).onChat(event);
+        var bungeePlatform = mock(BungeePlatform.class);
+        when(bungeePlatform.toPlayer(handle)).thenAnswer(invocation -> new BungeePlayer(invocation.getArgument(0), bungeePlatform));
+        new BungeeChatListener(harness.core(), bungeePlatform).onChat(event);
 
         // assert
         assertThat(handler.acknowledgedPlayers()).isEmpty();
@@ -81,11 +90,12 @@ class BungeeChatListenerTest {
     void ignoresCancelledAndCommandEvents() {
 
         // arrange & act
-        BungeeChatListener listener = new BungeeChatListener(mock(dev.rono.proxychat.common.ProxyChatCore.class));
-        ChatEvent cancelled = mock(ChatEvent.class);
+        var bungeePlatform = mock(BungeePlatform.class);
+        var listener = new BungeeChatListener(mock(ProxyChatCore.class), bungeePlatform);
+        var cancelled = mock(ChatEvent.class);
         when(cancelled.isCancelled()).thenReturn(true);
         listener.onChat(cancelled);
-        ChatEvent command = mock(ChatEvent.class);
+        var command = mock(ChatEvent.class);
         when(command.isCancelled()).thenReturn(false);
         when(command.isCommand()).thenReturn(true);
         listener.onChat(command);
@@ -94,19 +104,19 @@ class BungeeChatListenerTest {
     }
 
     private static ProxiedPlayer mockAlice() {
-        ProxiedPlayer handle = mock(ProxiedPlayer.class);
-        UUID id = UUID.nameUUIDFromBytes("Alice".getBytes());
+        var handle = mock(ProxiedPlayer.class);
+        var id = UUID.nameUUIDFromBytes("Alice".getBytes());
         when(handle.getName()).thenReturn("Alice");
         when(handle.getUniqueId()).thenReturn(id);
         when(handle.hasPermission("proxychat.global")).thenReturn(true);
 
-        net.md_5.bungee.api.connection.Server connection = mock(net.md_5.bungee.api.connection.Server.class);
-        net.md_5.bungee.api.config.ServerInfo info = mock(net.md_5.bungee.api.config.ServerInfo.class);
+        var connection = mock(Server.class);
+        var info = mock(ServerInfo.class);
         when(info.getName()).thenReturn("lobby");
         when(connection.getInfo()).thenReturn(info);
         when(handle.getServer()).thenReturn(connection);
 
-        PendingConnection pending = mock(PendingConnection.class);
+        var pending = mock(PendingConnection.class);
         when(handle.getPendingConnection()).thenReturn(pending);
         when(pending.getVersion()).thenReturn(767);
 

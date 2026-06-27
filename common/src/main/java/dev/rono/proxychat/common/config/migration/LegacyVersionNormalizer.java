@@ -15,12 +15,12 @@ public class LegacyVersionNormalizer {
             ProxyChatConfigMigrations.migrateV0ToV1(document);
         }
 
-        ConfigVersion resolved = resolve(document);
+        var resolved = resolve(document);
         document.set(ConfigVersionPattern.VERSION_ROUTE, resolved.toString());
     }
 
     private static ConfigVersion resolve(Section document) {
-        String storedVersion = document.contains(ConfigVersionPattern.VERSION_ROUTE)
+        var storedVersion = document.contains(ConfigVersionPattern.VERSION_ROUTE)
                         ? document.getString(ConfigVersionPattern.VERSION_ROUTE)
                         : null;
 
@@ -50,7 +50,7 @@ public class LegacyVersionNormalizer {
 
     private static boolean isBungeeChatEra(Section document, String storedVersion) {
         if (!document.contains("global-layout")) {
-            String toggleMessage = document.getString("toggle-enable-message");
+            var toggleMessage = document.getString("toggle-enable-message");
             if (toggleMessage == null || !toggleMessage.contains("%chat%")) {
                 return false;
             }

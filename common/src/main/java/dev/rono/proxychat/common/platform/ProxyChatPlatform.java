@@ -18,4 +18,11 @@ public interface ProxyChatPlatform {
     void scheduleDelayedTask(Runnable task, long delayMillis);
 
     boolean isPluginPresent(String pluginId);
+
+    /**
+     * Allows platform integrations (for example PlaceholderAPI bridges) to expand unknown placeholders.
+     */
+    default String replaceExternalPlaceholders(ProxyPlayer player, String template) {
+        return template;
+    }
 }

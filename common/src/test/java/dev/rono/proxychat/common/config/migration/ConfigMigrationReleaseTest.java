@@ -29,7 +29,7 @@ class ConfigMigrationReleaseTest {
         ConfigFixtures.copyResource(releaseConfig, dataDirectory.resolve("config.yml"));
         Files.createDirectories(dataDirectory.resolve("chats"));
 
-        ProxyChatYaml config = ProxyChatYaml.wrap(
+        var config = ProxyChatYaml.wrap(
                 ProxyChatYamlDocuments.loadMainConfig(dataDirectory, Logger.getLogger("test"))
         );
 
@@ -37,6 +37,8 @@ class ConfigMigrationReleaseTest {
         assertThat(config.getString("signed-chat-interception")).isEqualTo("auto");
         assertThat(config.getString("toggle-unsupported-message")).isNotBlank();
         assertThat(config.getString("help-header")).isNotBlank();
+        assertThat(config.getString("blacklist-message")).isNotBlank();
+        assertThat(config.getInt("max-message-length")).isGreaterThan(0);
         assertThat(config.contains("chats")).isFalse();
         assertThat(config.contains("reload")).isFalse();
     }
@@ -49,7 +51,7 @@ class ConfigMigrationReleaseTest {
         ProxyChatYamlDocuments.loadMainConfig(dataDirectory, Logger.getLogger("test"));
 
         // act
-        String saved = Files.readString(dataDirectory.resolve("config.yml"));
+        var saved = Files.readString(dataDirectory.resolve("config.yml"));
 
         // assert
         assertThat(saved).contains("# Prefix used in front of all messages");

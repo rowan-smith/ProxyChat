@@ -12,10 +12,10 @@ class VelocitySignedChatHandlerTest {
     void allowsInterceptOnLegacyProtocol() {
 
         // arrange
-        VelocitySignedChatHandler handler = new VelocitySignedChatHandler(new FakePlatform());
+        var handler = new VelocitySignedChatHandler(new FakePlatform());
 
         // act
-        FakePlayer player = new FakePlayer("Alice", "lobby").withProtocolVersion(759);
+        var player = new FakePlayer("Alice", "lobby").withProtocolVersion(759);
 
         // assert
         assertThat(handler.canInterceptChat(player)).isTrue();
@@ -25,14 +25,14 @@ class VelocitySignedChatHandlerTest {
     void requiresSignedVelocityOnModernProtocol() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
-        VelocitySignedChatHandler handler = new VelocitySignedChatHandler(platform);
-        FakePlayer player = new FakePlayer("Alice", "lobby").withProtocolVersion(767);
+        var platform = new FakePlatform();
+        var handler = new VelocitySignedChatHandler(platform);
+        var player = new FakePlayer("Alice", "lobby").withProtocolVersion(767);
 
         // act
-        boolean withoutSignedVelocity = handler.canInterceptChat(player);
+        var withoutSignedVelocity = handler.canInterceptChat(player);
         platform.installPlugin("signedvelocity");
-        boolean withSignedVelocity = handler.canInterceptChat(player);
+        var withSignedVelocity = handler.canInterceptChat(player);
 
         // assert
         assertThat(withoutSignedVelocity).isFalse();

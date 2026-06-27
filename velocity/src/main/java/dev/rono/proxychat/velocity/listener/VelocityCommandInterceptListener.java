@@ -22,7 +22,7 @@ public final class VelocityCommandInterceptListener {
             return;
         }
 
-        VelocityPlayer proxyPlayer = new VelocityPlayer(player);
+        var proxyPlayer = new VelocityPlayer(player);
         if (!SignedChatPolicy.shouldInterceptChat(
                 core.getConfig().getConfig(),
                 core.getSignedChatHandler(),

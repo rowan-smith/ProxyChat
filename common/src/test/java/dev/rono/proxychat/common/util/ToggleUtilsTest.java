@@ -13,7 +13,7 @@ class ToggleUtilsTest {
     void togglesChatOnAndOff() {
 
         // arrange & act
-        ToggleUtils utils = new ToggleUtils();
+        var utils = new ToggleUtils();
 
         // assert
         assertThat(utils.toggleChat(playerId)).isTrue();
@@ -26,7 +26,7 @@ class ToggleUtilsTest {
     void togglesIgnoreOnAndOff() {
 
         // arrange & act
-        ToggleUtils utils = new ToggleUtils();
+        var utils = new ToggleUtils();
 
         // assert
         assertThat(utils.toggleIgnore(playerId)).isTrue();
@@ -39,16 +39,16 @@ class ToggleUtilsTest {
     void tracksCommandDelay() {
 
         // arrange
-        ToggleUtils utils = new ToggleUtils();
-        boolean[] cleared = {false};
+        var utils = new ToggleUtils();
+        var cleared = new boolean[]{false};
 
         // act
         utils.startDelay(playerId, 250, () -> {
             utils.clearDelay(playerId);
             cleared[0] = true;
         });
-        boolean delayedBeforeRun = utils.isDelayed(playerId);
-        CooldownState delay = utils.getDelay(playerId);
+        var delayedBeforeRun = utils.isDelayed(playerId);
+        var delay = utils.getDelay(playerId);
         delay.run();
 
         // assert
@@ -62,11 +62,11 @@ class ToggleUtilsTest {
     void doesNotReplaceExistingDelay() {
 
         // arrange
-        ToggleUtils utils = new ToggleUtils();
+        var utils = new ToggleUtils();
 
         // act
         utils.startDelay(playerId, 100, () -> utils.clearDelay(playerId));
-        CooldownState first = utils.getDelay(playerId);
+        var first = utils.getDelay(playerId);
         utils.startDelay(playerId, 500, () -> utils.clearDelay(playerId));
 
         // assert

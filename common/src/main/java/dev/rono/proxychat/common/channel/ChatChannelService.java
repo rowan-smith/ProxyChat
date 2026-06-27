@@ -5,18 +5,19 @@ import java.util.Optional;
 import java.util.Set;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import dev.rono.proxychat.common.config.ProxyChatMessages;
 import dev.rono.proxychat.common.config.ProxyChatYaml;
 import dev.rono.proxychat.common.message.MessageFormatter;
 import dev.rono.proxychat.common.platform.ProxyChatBootstrap;
-import dev.rono.proxychat.common.platform.ProxyChatPlatform;
 import dev.rono.proxychat.common.platform.ProxyCommandSource;
 import dev.rono.proxychat.common.platform.ProxyPlayer;
-import dev.rono.proxychat.common.util.CooldownState;
 import dev.rono.proxychat.common.util.SignedChatPolicy;
 
 public final class ChatChannelService {
+    private static final PlainTextComponentSerializer PLAIN = PlainTextComponentSerializer.plainText();
+
     private final ProxyChatBootstrap bootstrap;
 
     public ChatChannelService(ProxyChatBootstrap bootstrap) {
@@ -24,13 +25,13 @@ public final class ChatChannelService {
     }
 
     public void execute(ChatChannel channel, ProxyCommandSource sender, String[] args) {
-        ProxyChatPlatform platform = bootstrap.getPlatform();
-        ProxyChatYaml config = bootstrap.getConfig().getConfig();
+        var platform = bootstrap.getPlatform();
+        var config = bootstrap.getConfig().getConfig();
 
         if (!sender.isPlayer()) {
             if (channel.isConsoleChatAllowed()) {
-                String message = applyPlaceholders(channel.getConsoleFormat(), sender, channel, args, config);
-                broadcast(channel, MessageFormatter.legacy(message), null);
+                var message = applyPlaceholders(channel.getConsoleFormat(), sender, channel, args, config);
+                broadcast(channel, formatConfiguredMessage(config, message), null);
 
             } else {
                 platform.sendMessage(
@@ -42,12 +43,13 @@ public final class ChatChannelService {
             return;
         }
 
-        ProxyPlayer player = sender.asPlayer();
+        var player = sender.asPlayer();
         if (player == null) {
             return;
         }
 
-        if (channel.getServerBlacklist().contains(player.getServerName())) {
+        if (isBlacklisted(channel, player)) {
+            sendBlacklistMessage(player, channel, config, args);
             return;
         }
 
@@ -63,9 +65,11 @@ public final class ChatChannelService {
             }
 
             if (channel.getToggleUtils().toggleChat(player.getUniqueId())) {
+                bootstrap.onToggleChanged(player, channel, true);
                 player.sendMessage(formattedConfigMessage(config, "toggle-enable-message", player, channel, args));
 
             } else {
+                bootstrap.onToggleChanged(player, channel, false);
                 player.sendMessage(formattedConfigMessage(config, "toggle-disable-message", player, channel, args));
             }
 
@@ -74,9 +78,11 @@ public final class ChatChannelService {
 
         if (channel.isIgnorable() && args[0].equalsIgnoreCase("ignore")) {
             if (channel.getToggleUtils().toggleIgnore(player.getUniqueId())) {
+                bootstrap.onIgnoreChanged(player, channel, true);
                 player.sendMessage(formattedConfigMessage(config, "ignore-enable-message", player, channel, args));
 
             } else {
+                bootstrap.onIgnoreChanged(player, channel, false);
                 player.sendMessage(formattedConfigMessage(config, "ignore-disable-message", player, channel, args));
             }
 
@@ -88,7 +94,7 @@ public final class ChatChannelService {
             return;
         }
 
-        Optional<Component> outgoing = preparePlayerChat(channel, player, args, config);
+        var outgoing = preparePlayerChat(channel, player, args, config);
         if (outgoing.isEmpty()) {
             return;
         }
@@ -102,8 +108,8 @@ public final class ChatChannelService {
     }
 
     public Set<String> tabComplete(ChatChannel channel, ProxyPlayer player, String[] args) {
-        Set<String> suggestions = new HashSet<>();
-        if (channel.getServerBlacklist().contains(player.getServerName())) {
+        var suggestions = new HashSet<String>();
+        if (isBlacklisted(channel, player)) {
             return suggestions;
         }
 
@@ -133,45 +139,41 @@ public final class ChatChannelService {
      * message so Paper does not wrap it as {@code <player> ...}.
      */
     public Optional<VelocityPrefixInterceptResult> tryVelocityPrefixedIntercept(ProxyPlayer player, String input) {
-        String normalized = normalizeIncoming(input);
-        if (normalized.isEmpty()) {
+        var match = matchPrefixedChannel(player, normalizeIncoming(input));
+        if (match.isEmpty()) {
             return Optional.empty();
         }
 
-        ProxyChatYaml config = bootstrap.getConfig().getConfig();
-
-        for (ChatChannel channel : bootstrap.getChannels()) {
-            Optional<String> prefix = commandPrefix(normalized, channel);
-            if (prefix.isEmpty() || !hasChannelPermission(player, channel)) {
-                continue;
-            }
-
-            String body = normalized.substring(prefix.get().length()).stripLeading();
-            String[] args = body.isEmpty() ? new String[0] : body.split(" ");
-            if (args.length < 1) {
-                player.sendMessage(formatMessage(config, channel.getInvalidArgs(), player, channel, args, false));
-                return Optional.of(new VelocityPrefixInterceptResult.Blocked());
-            }
-
-            Optional<Component> outgoing = preparePlayerChat(channel, player, args, config);
-            if (outgoing.isEmpty()) {
-                return Optional.of(new VelocityPrefixInterceptResult.Blocked());
-            }
-
-            if (channel.isLocal()) {
-                broadcast(channel, outgoing.get(), player);
-            } else {
-                broadcast(channel, outgoing.get(), null);
-            }
-
-            return Optional.of(new VelocityPrefixInterceptResult.Delivered());
+        var prefixMatch = match.get();
+        var config = bootstrap.getConfig().getConfig();
+        if (prefixMatch.args().length < 1) {
+            player.sendMessage(formatMessage(
+                    config,
+                    prefixMatch.channel().getInvalidArgs(),
+                    player,
+                    prefixMatch.channel(),
+                    prefixMatch.args(),
+                    false
+            ));
+            return Optional.of(new VelocityPrefixInterceptResult.Blocked());
         }
 
-        return Optional.empty();
+        var outgoing = preparePlayerChat(prefixMatch.channel(), player, prefixMatch.args(), config);
+        if (outgoing.isEmpty()) {
+            return Optional.of(new VelocityPrefixInterceptResult.Blocked());
+        }
+
+        if (prefixMatch.channel().isLocal()) {
+            broadcast(prefixMatch.channel(), outgoing.get(), player);
+        } else {
+            broadcast(prefixMatch.channel(), outgoing.get(), null);
+        }
+
+        return Optional.of(new VelocityPrefixInterceptResult.Delivered());
     }
 
     public boolean tryInterceptToggleOnly(ProxyPlayer player, String message) {
-        String normalized = normalizeIncoming(message);
+        var normalized = normalizeIncoming(message);
         for (ChatChannel channel : bootstrap.getChannels()) {
             if (channel.getToggleUtils().isToggled(player.getUniqueId()) && hasChannelPermission(player, channel)) {
                 execute(channel, player, normalized.isEmpty() ? new String[0] : normalized.split(" "));
@@ -187,25 +189,36 @@ public final class ChatChannelService {
      * Intercepts chat or proxy command input that begins with a configured channel prefix.
      */
     public boolean tryInterceptPrefixedInput(ProxyPlayer player, String input) {
-        String normalized = normalizeIncoming(input);
-        if (normalized.isEmpty()) {
+        var match = matchPrefixedChannel(player, normalizeIncoming(input));
+        if (match.isEmpty()) {
             return false;
         }
 
+        var prefixMatch = match.get();
+        execute(prefixMatch.channel(), player, prefixMatch.args());
+        return true;
+    }
+
+    private Optional<PrefixMatch> matchPrefixedChannel(ProxyPlayer player, String normalized) {
+        if (normalized.isEmpty()) {
+            return Optional.empty();
+        }
+
         for (ChatChannel channel : bootstrap.getChannels()) {
-            Optional<String> prefix = commandPrefix(normalized, channel);
+            var prefix = commandPrefix(normalized, channel);
             if (prefix.isEmpty() || !hasChannelPermission(player, channel)) {
                 continue;
             }
 
-            String body = normalized.substring(prefix.get().length()).stripLeading();
-            execute(channel, player, body.isEmpty() ? new String[0] : body.split(" "));
-
-            return true;
+            var body = normalized.substring(prefix.get().length()).stripLeading();
+            var args = body.isEmpty() ? new String[0] : body.split(" ");
+            return Optional.of(new PrefixMatch(channel, args));
         }
 
-        return false;
+        return Optional.empty();
     }
+
+    private record PrefixMatch(ChatChannel channel, String[] args) { }
 
     private static String normalizeIncoming(String input) {
         return input == null ? "" : input.stripLeading();
@@ -216,7 +229,7 @@ public final class ChatChannelService {
             return Optional.empty();
         }
 
-        String prefix = channel.getCommandPrefix();
+        var prefix = channel.getCommandPrefix();
         if (prefix == null || prefix.isEmpty() || !message.startsWith(prefix)) {
             return Optional.empty();
         }
@@ -225,7 +238,7 @@ public final class ChatChannelService {
     }
 
     static boolean hasChannelPermission(ProxyPlayer player, ChatChannel channel) {
-        String permission = channel.getPermission();
+        var permission = channel.getPermission();
         return permission == null || permission.isEmpty() || player.hasPermission(permission);
     }
 
@@ -238,35 +251,38 @@ public final class ChatChannelService {
         );
     }
 
+    private static boolean isBlacklisted(ChatChannel channel, ProxyPlayer player) {
+        return channel.getServerBlacklist().contains(player.getServerName());
+    }
+
+    private void sendBlacklistMessage(ProxyPlayer player, ChatChannel channel, ProxyChatYaml config, String[] args) {
+        player.sendMessage(formattedConfigMessage(config, "blacklist-message", player, channel, args));
+    }
+
     private void broadcast(ChatChannel channel, Component message, ProxyPlayer localScope) {
-        ProxyChatPlatform platform = bootstrap.getPlatform();
-        Iterable<? extends ProxyPlayer> recipients = localScope == null
+        var platform = bootstrap.getPlatform();
+        var recipients = localScope == null
                 ? platform.getOnlinePlayers()
                 : platform.getPlayersOnServer(localScope);
 
         for (ProxyPlayer recipient : recipients) {
-            String permission = channel.getPermission();
-            boolean permitted = permission == null || permission.isEmpty() || recipient.hasPermission(permission);
+            var permission = channel.getPermission();
+            var permitted = permission == null || permission.isEmpty() || recipient.hasPermission(permission);
             if (permitted && !channel.getToggleUtils().isIgnored(recipient.getUniqueId())) {
                 recipient.sendMessage(message);
             }
         }
 
         if (channel.isLogChatToConsole()) {
-            String plain = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
-                    .plainText()
-                    .serialize(message);
-            platform.logInfo(plain);
+            platform.logInfo(PLAIN.serialize(message));
         }
     }
 
     private Optional<Component> preparePlayerChat(
-            ChatChannel channel,
-            ProxyPlayer player,
-            String[] args,
-            ProxyChatYaml config
+            ChatChannel channel, ProxyPlayer player, String[] args, ProxyChatYaml config
     ) {
-        if (channel.getServerBlacklist().contains(player.getServerName())) {
+        if (isBlacklisted(channel, player)) {
+            sendBlacklistMessage(player, channel, config, args);
             return Optional.empty();
         }
 
@@ -280,8 +296,27 @@ public final class ChatChannelService {
             return Optional.empty();
         }
 
+        var joinedArgs = String.join(" ", args);
+        if (!player.hasPermission(channel.getUseColorInChatPermission())) {
+            joinedArgs = MessageFormatter.stripLegacyColors(joinedArgs);
+        }
+
+        var maxLength = config.getInt("max-message-length");
+        if (maxLength > 0 && joinedArgs.length() > maxLength) {
+            player.sendMessage(formatMessage(
+                    config,
+                    ProxyChatMessages.resolve(config, "message-too-long-message")
+                            .replace("%max-length%", String.valueOf(maxLength)),
+                    player,
+                    channel,
+                    args,
+                    false
+            ));
+            return Optional.empty();
+        }
+
         if (!player.hasPermission(channel.getCommandDelayOverridePermission())) {
-            CooldownState delay = channel.getToggleUtils().startDelay(
+            var delay = channel.getToggleUtils().startDelay(
                     player.getUniqueId(),
                     channel.getCommandDelay(),
                     () -> channel.getToggleUtils().clearDelay(player.getUniqueId())
@@ -289,51 +324,44 @@ public final class ChatChannelService {
             bootstrap.getPlatform().scheduleDelayedTask(delay, channel.getCommandDelay());
         }
 
-        Component component = formatMessage(config, channel.getFormat(), player, channel, args, true);
+        var component = formatMessage(config, channel.getFormat(), player, channel, args, true);
 
         return Optional.of(component);
     }
 
     private Component formattedConfigMessage(
-            ProxyChatYaml config,
-            String key,
-            ProxyCommandSource source,
-            ChatChannel channel,
-            String[] args
+            ProxyChatYaml config, String key, ProxyCommandSource source, ChatChannel channel, String[] args
     ) {
         return formatMessage(config, ProxyChatMessages.resolve(config, key), source, channel, args, false);
     }
 
     private Component formatMessage(
-            ProxyChatYaml config,
-            String template,
-            ProxyCommandSource source,
-            ChatChannel channel,
-            String[] args,
+            ProxyChatYaml config, String template, ProxyCommandSource source, ChatChannel channel, String[] args,
             boolean ignorePrefix
     ) {
         if (template == null || template.isEmpty()) {
             return Component.empty();
         }
 
-        String message = applyPlaceholders(template, source, channel, args, config);
+        var message = applyPlaceholders(template, source, channel, args, config);
         if (!ignorePrefix) {
             message = ProxyChatMessages.resolve(config, "prefix") + message;
         }
 
-        return MessageFormatter.legacy(message);
+        return formatConfiguredMessage(config, message);
+    }
+
+    private Component formatConfiguredMessage(ProxyChatYaml config, String message) {
+        var format = config.getString("message-format");
+        return MessageFormatter.format(message, MessageFormatter.parseFormat(format));
     }
 
     private String applyPlaceholders(
-            String template,
-            ProxyCommandSource source,
-            ChatChannel channel,
-            String[] args,
-            ProxyChatYaml config
+            String template, ProxyCommandSource source, ChatChannel channel, String[] args, ProxyChatYaml config
     ) {
-        ProxyPlayer player = source.asPlayer();
-        String prefix = nullToEmpty(ProxyChatMessages.resolve(config, "prefix"));
-        String message = template
+        var player = source.asPlayer();
+        var prefix = nullToEmpty(ProxyChatMessages.resolve(config, "prefix"));
+        var message = template
                 .replace("%player%", nullToEmpty(source.getName()))
                 .replace("%prefix%", prefix)
                 .replace("%command-name%", nullToEmpty(channel.getCommandName()))
@@ -344,18 +372,23 @@ public final class ChatChannelService {
         if (player != null) {
             message = message.replace("%server%", player.getServerName());
 
-            CooldownState delay = channel.getToggleUtils().getDelay(player.getUniqueId());
+            var delay = channel.getToggleUtils().getDelay(player.getUniqueId());
             if (delay != null) {
                 message = message.replace("%chat-cooldown%", delay.getRemainingSeconds());
             }
         }
 
-        String joinedArgs = String.join(" ", args);
+        var joinedArgs = String.join(" ", args);
         if (player != null && !player.hasPermission(channel.getUseColorInChatPermission())) {
             joinedArgs = MessageFormatter.stripLegacyColors(joinedArgs);
         }
 
-        return message.replace("%message%", joinedArgs);
+        message = message.replace("%message%", joinedArgs);
+        if (player != null) {
+            message = bootstrap.getPlatform().replaceExternalPlaceholders(player, message);
+        }
+
+        return message;
     }
 
     private static String nullToEmpty(String value) {

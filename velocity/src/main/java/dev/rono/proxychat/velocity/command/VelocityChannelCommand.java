@@ -3,7 +3,6 @@ package dev.rono.proxychat.velocity.command;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 
@@ -23,8 +22,8 @@ public final class VelocityChannelCommand implements SimpleCommand {
 
     @Override
     public void execute(Invocation invocation) {
-        CommandSource source = invocation.source();
-        String[] args = invocation.arguments();
+        var source = invocation.source();
+        var args = invocation.arguments();
 
         if (source instanceof Player player) {
             core.getChannelService().execute(channel, new VelocityPlayer(player), args);
@@ -47,7 +46,7 @@ public final class VelocityChannelCommand implements SimpleCommand {
 
     @Override
     public boolean hasPermission(Invocation invocation) {
-        String permission = channel.getPermission();
+        var permission = channel.getPermission();
         return permission == null || permission.isEmpty() || invocation.source().hasPermission(permission);
     }
 }

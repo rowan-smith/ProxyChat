@@ -3,10 +3,8 @@ package dev.rono.proxychat.velocity.command;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 
 import dev.rono.proxychat.common.ProxyChatCore;
@@ -16,15 +14,17 @@ import dev.rono.proxychat.velocity.platform.VelocityCommandSource;
 
 public final class VelocityAdminCommand implements SimpleCommand {
     private final ProxyChatCore core;
+    private final Runnable reloadCommands;
 
-    public VelocityAdminCommand(ProxyChatCore core) {
+    public VelocityAdminCommand(ProxyChatCore core, Runnable reloadCommands) {
         this.core = core;
+        this.reloadCommands = reloadCommands;
     }
 
     @Override
     public void execute(Invocation invocation) {
-        CommandSource source = invocation.source();
-        String[] args = invocation.arguments();
+        var source = invocation.source();
+        var args = invocation.arguments();
 
         if (args.length < 1) {
             ProxyChatAdminHelp.send(core, new VelocityCommandSource(source));
@@ -32,12 +32,21 @@ public final class VelocityAdminCommand implements SimpleCommand {
         }
 
         if (args[0].equalsIgnoreCase("reload")) {
-            String permission = core.getConfig().getConfig().getString("reload-permission");
+            var permission = core.getConfig().getConfig().getString("reload-permission");
 
             if (source.hasPermission(permission)) {
-                core.reload();
-                String prefix = core.getConfig().getConfig().getString("prefix");
-                String message = core.getConfig().getConfig().getString("reload-message");
+                if (!core.reload()) {
+                    core.getPlatform().sendMessage(
+                            new VelocityCommandSource(source),
+                            MessageFormatter.legacy("&cProxyChat reload failed. Check the console for details.")
+                    );
+                    return;
+                }
+
+                reloadCommands.run();
+
+                var prefix = core.getConfig().getConfig().getString("prefix");
+                var message = core.getConfig().getConfig().getString("reload-message");
                 core.getPlatform().sendMessage(
                         new VelocityCommandSource(source),
                         MessageFormatter.legacy(prefix + message)
@@ -48,16 +57,16 @@ public final class VelocityAdminCommand implements SimpleCommand {
         }
 
         if (args[0].equalsIgnoreCase("version")) {
-            Component link = MessageFormatter.legacy("&1https://www.spigotmc.org/resources/73583/")
+            var link = MessageFormatter.legacy("&1https://www.spigotmc.org/resources/73583/")
                     .clickEvent(ClickEvent.openUrl("https://www.spigotmc.org/resources/73583/"));
-            Component message = MessageFormatter.legacy("&1Made by Rono @ ").append(link);
+            var message = MessageFormatter.legacy("&1Made by Rono @ ").append(link);
             core.getPlatform().sendMessage(new VelocityCommandSource(source), message);
         }
     }
 
     @Override
     public List<String> suggest(Invocation invocation) {
-        List<String> suggestions = new ArrayList<>();
+        var suggestions = new ArrayList<String>();
 
         if (invocation.source().hasPermission(core.getConfig().getConfig().getString("reload-permission"))) {
             suggestions.add("reload");

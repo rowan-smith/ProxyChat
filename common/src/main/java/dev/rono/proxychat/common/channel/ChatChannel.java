@@ -27,6 +27,7 @@ public final class ChatChannel {
     private final boolean consoleChatAllowed;
     private final boolean logChatToConsole;
     private final List<String> serverBlacklist;
+    private final int priority;
     private final ToggleUtils toggleUtils = new ToggleUtils();
 
     public ChatChannel(ProxyChatYaml config) {
@@ -49,5 +50,6 @@ public final class ChatChannel {
         this.consoleChatAllowed = config.getBoolean("console-chat-allowed");
         this.logChatToConsole = config.getBoolean("log-chat-to-console");
         this.serverBlacklist = config.getStringList("blacklist");
+        this.priority = config.getInt("priority");
     }
 }

@@ -18,12 +18,12 @@ class ProxyChatCoreTest {
     void enableLoadsConfiguredChannels() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
-        RecordingSignedChatHandler handler = new RecordingSignedChatHandler();
+        var platform = new FakePlatform();
+        var handler = new RecordingSignedChatHandler();
         platform.setSignedChatHandler(handler);
 
         // act
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
+        var harness = TestEnvironment.create(dataDirectory, platform);
 
         // assert
         assertThat(harness.core().getChannels()).hasSize(3);
@@ -35,9 +35,9 @@ class ProxyChatCoreTest {
     void reloadRefreshesChannels() {
 
         // arrange
-        FakePlatform platform = new FakePlatform();
+        var platform = new FakePlatform();
         platform.setSignedChatHandler(new RecordingSignedChatHandler());
-        TestEnvironment.TestHarness harness = TestEnvironment.create(dataDirectory, platform);
+        var harness = TestEnvironment.create(dataDirectory, platform);
 
         // act
         harness.core().reload();

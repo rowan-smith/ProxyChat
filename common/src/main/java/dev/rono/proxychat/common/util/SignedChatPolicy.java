@@ -15,7 +15,7 @@ public class SignedChatPolicy {
      * signed-chat-interception config value: auto (default), always, never
      */
     public static boolean shouldInterceptChat(ProxyChatYaml config, SignedChatHandler handler, ProxyPlayer player) {
-        String mode = config.getString("signed-chat-interception");
+        var mode = config.getString("signed-chat-interception");
         if (mode == null || mode.isEmpty() || mode.equalsIgnoreCase("auto")) {
             return handler.canInterceptChat(player);
         }
@@ -57,7 +57,7 @@ public class SignedChatPolicy {
     }
 
     private static boolean isInterceptionDisabled(ProxyChatYaml config) {
-        String mode = config.getString("signed-chat-interception");
+        var mode = config.getString("signed-chat-interception");
         return mode != null && (mode.equalsIgnoreCase("never")
                 || mode.equalsIgnoreCase("false")
                 || mode.equalsIgnoreCase("disabled"));

@@ -25,7 +25,56 @@ Requires **Java 17+** on the proxy.
 * Tab completion for `toggle` and `ignore`
 * Placeholder replacement in messages
 * Legacy `chats:` section in `config.yml` auto-migrates to `chats/*.yml`
-* **Adventure** components for outbound messages (`&` colour codes)
+* **Adventure** components for outbound messages (`&` colour codes or MiniMessage)
+* Channel priority, duplicate-config validation, blacklist feedback, and message length limits
+* Optional toggle/ignore persistence across reconnects
+
+## Global config (`config.yml`)
+
+| Key                          | Default          | Description                                               |
+|------------------------------|------------------|-----------------------------------------------------------|
+| `prefix`                     | `&2ProxyChat » ` | Prepended to most plugin messages                         |
+| `signed-chat-interception`   | `auto`           | `auto`, `never`, or `always`                              |
+| `blacklist-message`          | (see file)       | Sent when a player uses a channel on a blacklisted server |
+| `max-message-length`         | `256`            | Max chat body length (`0` disables)                       |
+| `message-too-long-message`   | (see file)       | Sent when a message exceeds the limit                     |
+| `persist-player-preferences` | `false`          | Remember toggle/ignore across reconnects                  |
+| `message-format`             | `legacy`         | `legacy` (`&` codes) or `minimessage`                     |
+
+## Channel config (`chats/*.yml`)
+
+Each file defines one channel. Important keys:
+
+| Key                        | Description                                      |
+|----------------------------|--------------------------------------------------|
+| `command-name`             | Primary command (required, must be unique)       |
+| `command-alias`            | Optional alias (must be unique)                  |
+| `command-prefix`           | Prefix for `@message` style chat                 |
+| `use-command-prefix`       | Enable prefix intercept                          |
+| `priority`                 | Higher values win when multiple channels match   |
+| `permission`               | Permission to use the channel                    |
+| `format`                   | Outbound chat format                             |
+| `local`                    | Restrict delivery to the sender's backend server |
+| `blacklist`                | Backend servers where the channel is blocked     |
+| `toggleable` / `ignorable` | Enable `/channel toggle` and `/channel ignore`   |
+| `command-delay`            | Cooldown in milliseconds                         |
+
+
+## Development
+
+```
+ProxyChat/
+├── common/     Shared chat logic, config, formatting, tests
+├── bungee/     Waterfall/BungeeCord adapter
+├── velocity/   Velocity adapter
+└── config/     Checkstyle and SpotBugs rules
+```
+
+Run the full suite:
+
+```bash
+mvn clean verify
+```
 
 ## Signed Chat Feature Matrix
 
@@ -46,22 +95,6 @@ ProxyChat intercepts plain chat on the proxy and rebroadcasts formatted **unsign
 Velocity denies cancelled signed chat unless SignedVelocity is present. Install it on the proxy and all backends for prefix/toggle on 1.19.1+.
 
 Plain `@prefix` chat on Velocity uses `ChatResult.message()` (SignedVelocity MODIFY) on the sender's server and proxy-broadcasts to other servers only, so Paper does not show the message twice. `/@prefix` and `/channel` commands still use full proxy broadcast.
-
-## Project layout
-
-```
-ProxyChat/
-├── common/     Shared chat logic, config, Adventure formatting
-├── bungee/     Waterfall/BungeeCord adapter
-├── velocity/   Velocity adapter
-└── pom.xml     Parent POM (proxychat-parent)
-```
-
-## Build & test
-
-```bash
-mvn clean verify
-```
 
 ## Commands
 
@@ -93,6 +126,7 @@ Global Chat
 %chat-name%
 %message%
 %chat-cooldown%
+%max-length%
 ```
 
 ## Issues

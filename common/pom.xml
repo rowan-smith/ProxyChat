@@ -27,6 +27,10 @@
             <artifactId>adventure-text-serializer-plain</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+        </dependency>
+        <dependency>
             <groupId>dev.dejvokep</groupId>
             <artifactId>boosted-yaml</artifactId>
         </dependency>

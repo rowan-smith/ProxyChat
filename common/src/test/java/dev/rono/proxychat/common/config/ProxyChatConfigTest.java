@@ -24,13 +24,13 @@ class ProxyChatConfigTest {
         Files.createDirectories(dataDirectory.resolve("chats"));
 
         // act
-        ProxyChatConfig config = new ProxyChatConfig(Logger.getLogger("test"), dataDirectory);
+        var config = new ProxyChatConfig(Logger.getLogger("test"), dataDirectory);
         config.loadDefaults(null, null);
 
         // assert
-        Path globalFile = dataDirectory.resolve("chats").resolve("global.yml");
+        var globalFile = dataDirectory.resolve("chats").resolve("global.yml");
         assertThat(globalFile).exists();
-        YamlDocument globalDocument = YamlDocument.create(new ByteArrayInputStream(Files.readAllBytes(globalFile)));
+        var globalDocument = YamlDocument.create(new ByteArrayInputStream(Files.readAllBytes(globalFile)));
         assertThat(globalDocument.getString("command-name")).isEqualTo("global");
         assertThat(config.getConfig().contains("chats")).isFalse();
     }
@@ -40,13 +40,13 @@ class ProxyChatConfigTest {
 
         // arrange
         ConfigFixtures.copyResource(ConfigFixtures.LATEST_CONFIG, dataDirectory.resolve("config.yml"));
-        Path chatsDir = dataDirectory.resolve("chats");
+        var chatsDir = dataDirectory.resolve("chats");
         Files.createDirectories(chatsDir);
         ConfigFixtures.copyResource(ConfigFixtures.LATEST_CHATS_DIR + "/global.yml", chatsDir.resolve("global.yml"));
         ConfigFixtures.copyResource(ConfigFixtures.LATEST_CHATS_DIR + "/local.yml", chatsDir.resolve("local.yml"));
 
         // act
-        ProxyChatConfig config = new ProxyChatConfig(Logger.getLogger("test"), dataDirectory);
+        var config = new ProxyChatConfig(Logger.getLogger("test"), dataDirectory);
         config.reload();
 
         // assert

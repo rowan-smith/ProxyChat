@@ -12,11 +12,12 @@ import java.util.Objects;
  *   <li>{@code 1.1}–{@code 1.5} — ProxyChat v1.x releases (inline {@code chats:})</li>
  *   <li>{@code 2} — ProxyChat v2.0 config schema (per-channel {@code chats/*.yml} files)</li>
  *   <li>{@code 2.1} — channel {@code local} / {@code blacklist} defaults</li>
- *   <li>{@code 2.2+} — signed chat policy, admin help, and later minor additions</li>
+   *   <li>{@code 2.2} — signed chat policy, admin help, and later minor additions</li>
+   *   <li>{@code 2.3} — blacklist feedback, message limits, player preference persistence, channel priority</li>
  * </ul>
  */
 public final class ConfigVersion {
-    public static final ConfigVersion LATEST = parse("2.2");
+    public static final ConfigVersion LATEST = parse("2.3");
 
     private final int major;
     private final int minor;
@@ -35,7 +36,7 @@ public final class ConfigVersion {
             return of(0, 0);
         }
 
-        String normalized = raw.trim().replace("\"", "").replace("'", "");
+        var normalized = raw.trim().replace("\"", "").replace("'", "");
         if (!normalized.contains(".")) {
             try {
                 return of(Integer.parseInt(normalized), 0);
@@ -44,7 +45,7 @@ public final class ConfigVersion {
             }
         }
 
-        String[] parts = normalized.split("\\.", 2);
+        var parts = normalized.split("\\.", 2);
         return of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
     }
 
@@ -70,10 +71,10 @@ public final class ConfigVersion {
             return of(0, 0);
         }
 
-        String normalized = raw.trim().replace("\"", "").replace("'", "");
+        var normalized = raw.trim().replace("\"", "").replace("'", "");
         if (!normalized.contains(".")) {
             try {
-                int legacy = Integer.parseInt(normalized);
+                var legacy = Integer.parseInt(normalized);
                 if (legacy == 2 && !hasSignedChatInterception) {
                     return of(1, 1);
                 }

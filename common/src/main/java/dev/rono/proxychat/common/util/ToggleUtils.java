@@ -32,7 +32,7 @@ public final class ToggleUtils {
     }
 
     public CooldownState startDelay(UUID player, long delayMillis, Runnable onComplete) {
-        CooldownState delay = delays.get(player);
+        var delay = delays.get(player);
         if (delay == null) {
             delay = new CooldownState(delayMillis, onComplete);
             delays.put(player, delay);
@@ -59,5 +59,27 @@ public final class ToggleUtils {
 
     public CooldownState getDelay(UUID player) {
         return delays.get(player);
+    }
+
+    public void setToggled(UUID player, boolean toggled) {
+        if (toggled) {
+            chatToggled.add(player);
+        } else {
+            chatToggled.remove(player);
+        }
+    }
+
+    public void setIgnored(UUID player, boolean ignored) {
+        if (ignored) {
+            chatIgnored.add(player);
+        } else {
+            chatIgnored.remove(player);
+        }
+    }
+
+    public void clearPlayer(UUID player) {
+        chatIgnored.remove(player);
+        chatToggled.remove(player);
+        delays.remove(player);
     }
 }

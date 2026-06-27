@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Test;
@@ -25,11 +24,11 @@ class ConfigLayoutNormalizerTest {
     void bundledDefaultsUseBlankLinesBetweenSections() throws Exception {
 
         // arrange
-        byte[] defaults = readDefaultConfigBytes();
-        YamlDocument document = YamlDocument.create(new ByteArrayInputStream(defaults));
+        var defaults = readDefaultConfigBytes();
+        var document = YamlDocument.create(new ByteArrayInputStream(defaults));
 
         // act
-        String dump = document.dump();
+        var dump = document.dump();
 
         // assert
         assertThat(dump).contains("\n\n# Prefix used in front of all messages");
@@ -44,13 +43,13 @@ class ConfigLayoutNormalizerTest {
         Files.createDirectories(dataDirectory.resolve("chats"));
         copyResource("v2/2-1/config.yml", dataDirectory.resolve("config.yml"));
         ProxyChatYamlDocuments.loadMainConfig(dataDirectory, Logger.getLogger("test"));
-        String saved = Files.readString(dataDirectory.resolve("config.yml"));
-        YamlDocument savedDocument = YamlDocument.create(
+        var saved = Files.readString(dataDirectory.resolve("config.yml"));
+        var savedDocument = YamlDocument.create(
                 new ByteArrayInputStream(saved.getBytes(StandardCharsets.UTF_8))
         );
 
         // act
-        List<String> keyOrder = new ArrayList<>(savedDocument.getRoutesAsStrings(false));
+        var keyOrder = new ArrayList<>(savedDocument.getRoutesAsStrings(false));
 
         // assert
         assertThat(keyOrder.indexOf("signed-chat-interception")).isLessThan(keyOrder.indexOf("version"));
@@ -69,12 +68,12 @@ class ConfigLayoutNormalizerTest {
         ProxyChatYamlDocuments.configureDefaults(null, null);
         Files.createDirectories(dataDirectory.resolve("chats"));
         copyResource("v2/2-2/config.yml", dataDirectory.resolve("config.yml"));
-        String compacted = Files.readString(dataDirectory.resolve("config.yml")).replace("\n\n#", "\n#");
+        var compacted = Files.readString(dataDirectory.resolve("config.yml")).replace("\n\n#", "\n#");
         Files.writeString(dataDirectory.resolve("config.yml"), compacted);
         ProxyChatYamlDocuments.loadMainConfig(dataDirectory, Logger.getLogger("test"));
 
         // act
-        String saved = Files.readString(dataDirectory.resolve("config.yml"));
+        var saved = Files.readString(dataDirectory.resolve("config.yml"));
 
         // assert
         assertThat(saved).contains("\n\n# This is what is shown when you toggle a command.");
@@ -85,19 +84,19 @@ class ConfigLayoutNormalizerTest {
     void rebuildsMisplacedKeysBeforeVersion() throws Exception {
 
         // arrange
-        String yaml = """
+        var yaml = """
                 reload-message: ok
                 version: 2.1
                 help-header: test
                 signed-chat-interception: auto
                 """;
-        YamlDocument document = YamlDocument.create(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-        byte[] defaults = readDefaultConfigBytes();
+        var document = YamlDocument.create(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+        var defaults = readDefaultConfigBytes();
 
         // act
-        YamlDocument merged = ConfigLayoutNormalizer.applyLayout(document, defaults);
-        List<String> keyOrder = new ArrayList<>(merged.getRoutesAsStrings(false));
-        String dumped = ConfigLayoutNormalizer.polishDump(merged.dump());
+        var merged = ConfigLayoutNormalizer.applyLayout(document, defaults);
+        var keyOrder = new ArrayList<>(merged.getRoutesAsStrings(false));
+        var dumped = ConfigLayoutNormalizer.polishDump(merged.dump());
 
         // assert
         assertThat(keyOrder.indexOf("help-header")).isLessThan(keyOrder.indexOf("version"));

@@ -13,4 +13,12 @@ public interface ProxyChatBootstrap {
     ProxyChatConfig getConfig();
 
     List<ChatChannel> getChannels();
+
+    default boolean isPlayerPreferencesPersisted() {
+        return false;
+    }
+
+    default void onToggleChanged(ProxyPlayer player, ChatChannel channel, boolean toggled) { }
+
+    default void onIgnoreChanged(ProxyPlayer player, ChatChannel channel, boolean ignored) { }
 }

@@ -5,16 +5,17 @@ import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-import dev.rono.proxychat.bungee.platform.BungeePlayer;
+import dev.rono.proxychat.bungee.platform.BungeePlatform;
 import dev.rono.proxychat.common.ProxyChatCore;
-import dev.rono.proxychat.common.platform.ProxyPlayer;
 import dev.rono.proxychat.common.util.SignedChatPolicy;
 
 public final class BungeeChatListener implements Listener {
     private final ProxyChatCore core;
+    private final BungeePlatform platform;
 
-    public BungeeChatListener(ProxyChatCore core) {
+    public BungeeChatListener(ProxyChatCore core, BungeePlatform platform) {
         this.core = core;
+        this.platform = platform;
     }
 
     @EventHandler
@@ -23,7 +24,7 @@ public final class BungeeChatListener implements Listener {
             return;
         }
 
-        ProxyPlayer player = new BungeePlayer(handle);
+        var player = platform.toPlayer(handle);
         if (!SignedChatPolicy.shouldInterceptChat(core.getConfig().getConfig(), core.getSignedChatHandler(), player)) {
             return;
         }

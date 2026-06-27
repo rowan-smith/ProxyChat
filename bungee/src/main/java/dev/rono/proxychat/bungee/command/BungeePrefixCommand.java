@@ -1,15 +1,13 @@
 package dev.rono.proxychat.bungee.command;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
-import dev.rono.proxychat.bungee.platform.BungeeCommandSource;
-import dev.rono.proxychat.bungee.platform.BungeePlayer;
+import dev.rono.proxychat.bungee.platform.BungeePlatform;
 import dev.rono.proxychat.common.ProxyChatCore;
 import dev.rono.proxychat.common.channel.ChatChannel;
 
@@ -18,31 +16,33 @@ import dev.rono.proxychat.common.channel.ChatChannel;
  */
 public final class BungeePrefixCommand extends Command implements TabExecutor {
     private final ProxyChatCore core;
+    private final BungeePlatform platform;
     private final ChatChannel channel;
 
-    public BungeePrefixCommand(ProxyChatCore core, ChatChannel channel) {
+    public BungeePrefixCommand(ProxyChatCore core, BungeePlatform platform, ChatChannel channel) {
         super(channel.getCommandPrefix(), channel.getPermission());
 
         this.core = core;
+        this.platform = platform;
         this.channel = channel;
     }
 
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (sender instanceof ProxiedPlayer player) {
-            core.getChannelService().execute(channel, new BungeePlayer(player), args);
+            core.getChannelService().execute(channel, platform.toPlayer(player), args);
 
         } else {
-            core.getChannelService().execute(channel, new BungeeCommandSource(sender), args);
+            core.getChannelService().execute(channel, platform.toSource(sender), args);
         }
     }
 
     @Override
     public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
-        Set<String> suggestions = new HashSet<>();
+        var suggestions = new HashSet<String>();
 
         if (sender instanceof ProxiedPlayer player) {
-            suggestions.addAll(core.getChannelService().tabComplete(channel, new BungeePlayer(player), args));
+            suggestions.addAll(core.getChannelService().tabComplete(channel, platform.toPlayer(player), args));
         }
 
         return suggestions;

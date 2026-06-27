@@ -1,11 +1,14 @@
 package dev.rono.proxychat.velocity;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bstats.velocity.Metrics;
 import org.slf4j.Logger;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.command.CommandExecuteEvent;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
@@ -28,31 +31,33 @@ import dev.rono.proxychat.velocity.listener.VelocityConnectionListener;
 import dev.rono.proxychat.velocity.platform.VelocityPlatform;
 import dev.rono.proxychat.velocity.platform.VelocitySignedChatHandler;
 
-@Plugin(id = "proxychat", name = "ProxyChat", version = "2.0.0", authors = {"Rono"})
+@Plugin(id = "proxychat", name = "ProxyChat", authors = {"Rono"})
 public final class VelocityProxyChatPlugin {
     @Getter private final ProxyServer server;
-    @Getter private final Logger logger;
+    @Getter private final Logger slf4jLogger;
     @Getter private ProxyChatCore core;
 
     private final Path dataDirectory;
     private final Metrics.Factory metricsFactory;
+    private final List<CommandMeta> registeredCommands = new ArrayList<>();
+    private CommandMeta adminCommandMeta;
 
     @Inject
     public VelocityProxyChatPlugin(
             ProxyServer server,
-            Logger logger,
+            Logger slf4jLogger,
             @DataDirectory Path dataDirectory,
             Metrics.Factory metricsFactory
     ) {
         this.server = server;
-        this.logger = logger;
+        this.slf4jLogger = slf4jLogger;
         this.dataDirectory = dataDirectory;
         this.metricsFactory = metricsFactory;
     }
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
-        VelocityPlatform platform = new VelocityPlatform(this);
+        var platform = new VelocityPlatform(this);
 
         core = new ProxyChatCore(
                 java.util.logging.Logger.getLogger("ProxyChat"),
@@ -60,16 +65,19 @@ public final class VelocityProxyChatPlugin {
                 new VelocitySignedChatHandler(this),
                 dataDirectory
         );
-        core.enable(
+        if (!core.enable(
                 getClass().getClassLoader().getResourceAsStream("config.yml"),
                 getClass().getClassLoader().getResourceAsStream("global.yml")
-        );
+        )) {
+            slf4jLogger.error("ProxyChat failed to enable. Check the console for configuration errors.");
+            return;
+        }
 
         registerCommands();
 
-        short interceptPriority = Short.MAX_VALUE;
-        VelocityChatListener chatListener = new VelocityChatListener(core);
-        VelocityCommandInterceptListener commandInterceptListener = new VelocityCommandInterceptListener(core);
+        var interceptPriority = Short.MAX_VALUE;
+        var chatListener = new VelocityChatListener(core);
+        var commandInterceptListener = new VelocityCommandInterceptListener(core);
         server.getEventManager().register(
                 this,
                 PlayerChatEvent.class,
@@ -82,36 +90,37 @@ public final class VelocityProxyChatPlugin {
                 interceptPriority,
                 commandInterceptListener::onCommandExecute
         );
-        server.getEventManager().register(this, new VelocityConnectionListener(core));
+        server.getEventManager().register(this, new VelocityConnectionListener(core, platform));
 
         ProxyChatBStats.register(this, metricsFactory);
     }
 
     public void registerCommands() {
+        unregisterCommands();
+
         for (ChatChannel channel : core.getChannels()) {
-            server.getCommandManager()
-                    .register(
-                            server.getCommandManager()
-                                    .metaBuilder(channel.getCommandName())
-                                    .aliases(channel.getCommandAlias())
-                                    .plugin(this)
-                                    .build(),
-                            new VelocityChannelCommand(core, channel)
-                    );
+            var meta = server.getCommandManager()
+                    .metaBuilder(channel.getCommandName())
+                    .aliases(channel.getCommandAlias())
+                    .plugin(this)
+                    .build();
+            server.getCommandManager().register(meta, new VelocityChannelCommand(core, channel));
+            registeredCommands.add(meta);
 
             registerPrefixCommand(channel);
         }
 
-        server.getCommandManager().register(
-                server.getCommandManager()
-                        .metaBuilder("proxychat")
-                        .aliases("pc")
-                        .plugin(this)
-                        .build(),
-                new VelocityAdminCommand(core)
-        );
+        if (adminCommandMeta == null) {
+            adminCommandMeta = server.getCommandManager()
+                    .metaBuilder("proxychat")
+                    .aliases("pc")
+                    .plugin(this)
+                    .build();
+            server.getCommandManager().register(
+                    adminCommandMeta, new VelocityAdminCommand(core, this::registerCommands));
+        }
 
-        logger.info("{} channel commands loaded.", core.getChannels().size());
+        slf4jLogger.info("{} channel commands loaded.", core.getChannels().size());
     }
 
     private void registerPrefixCommand(ChatChannel channel) {
@@ -119,7 +128,7 @@ public final class VelocityProxyChatPlugin {
             return;
         }
 
-        String prefix = channel.getCommandPrefix();
+        var prefix = channel.getCommandPrefix();
         if (prefix == null || prefix.isEmpty()) {
             return;
         }
@@ -128,12 +137,19 @@ public final class VelocityProxyChatPlugin {
             return;
         }
 
-        server.getCommandManager().register(
-                server.getCommandManager()
-                        .metaBuilder(prefix)
-                        .plugin(this)
-                        .build(),
-                new VelocityPrefixCommand(core, channel)
-        );
+        var meta = server.getCommandManager()
+                .metaBuilder(prefix)
+                .plugin(this)
+                .build();
+        server.getCommandManager().register(meta, new VelocityPrefixCommand(core, channel));
+        registeredCommands.add(meta);
+    }
+
+    public void unregisterCommands() {
+        for (CommandMeta meta : registeredCommands) {
+            server.getCommandManager().unregister(meta);
+        }
+
+        registeredCommands.clear();
     }
 }

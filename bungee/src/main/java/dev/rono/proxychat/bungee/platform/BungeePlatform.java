@@ -1,9 +1,13 @@
 package dev.rono.proxychat.bungee.platform;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.kyori.adventure.text.Component;
+import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
@@ -24,23 +28,23 @@ public final class BungeePlatform implements ProxyChatPlatform {
         return ProxyServer.getInstance()
                 .getPlayers()
                 .stream()
-                .map(BungeePlayer::new)
+                .map(this::toPlayer)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Collection<? extends ProxyPlayer> getPlayersOnServer(ProxyPlayer player) {
-        ProxiedPlayer bungeePlayer = ProxyServer.getInstance().getPlayer(player.getUniqueId());
+        var bungeePlayer = ProxyServer.getInstance().getPlayer(player.getUniqueId());
 
         if (bungeePlayer == null || bungeePlayer.getServer() == null) {
-            return getOnlinePlayers();
+            return List.of();
         }
 
         return bungeePlayer.getServer()
                 .getInfo()
                 .getPlayers()
                 .stream()
-                .map(BungeePlayer::new)
+                .map(this::toPlayer)
                 .collect(Collectors.toList());
     }
 
@@ -72,12 +76,24 @@ public final class BungeePlatform implements ProxyChatPlatform {
                 plugin,
                 task,
                 delayMillis,
-                java.util.concurrent.TimeUnit.MILLISECONDS
+                TimeUnit.MILLISECONDS
         );
     }
 
     @Override
     public boolean isPluginPresent(String pluginId) {
         return plugin.getProxy().getPluginManager().getPlugin(pluginId) != null;
+    }
+
+    public BungeeAudiences adventure() {
+        return plugin.getAdventure();
+    }
+
+    public BungeePlayer toPlayer(ProxiedPlayer player) {
+        return new BungeePlayer(player, this);
+    }
+
+    public BungeeCommandSource toSource(CommandSender sender) {
+        return new BungeeCommandSource(sender, this);
     }
 }

@@ -5,10 +5,9 @@ import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import dev.rono.proxychat.bungee.BungeeProxyChatPlugin;
 import dev.rono.proxychat.common.platform.ProxyPlayer;
 
-public record BungeePlayer(ProxiedPlayer handle) implements ProxyPlayer {
+public record BungeePlayer(ProxiedPlayer handle, BungeePlatform platform) implements ProxyPlayer {
     @Override
     public String getName() {
         return handle.getName();
@@ -45,6 +44,6 @@ public record BungeePlayer(ProxiedPlayer handle) implements ProxyPlayer {
 
     @Override
     public void sendMessage(Component message) {
-        BungeeProxyChatPlugin.getInstance().getAdventure().player(handle).sendMessage(message);
+        platform.adventure().player(handle).sendMessage(message);
     }
 }

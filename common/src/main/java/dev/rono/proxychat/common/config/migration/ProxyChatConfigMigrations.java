@@ -59,7 +59,7 @@ public class ProxyChatConfigMigrations {
         document.remove("use-global-layout");
         setIfAbsent(document, "console-disabled-message", ProxyChatMessages.DEFAULTS.get("console-disabled-message"));
 
-        String cooldownMessage = document.getString("command-cooldown-message");
+        var cooldownMessage = document.getString("command-cooldown-message");
         if (LEGACY_COOLDOWN_MESSAGE.equals(cooldownMessage)) {
             document.set("command-cooldown-message", ProxyChatMessages.DEFAULTS.get("command-cooldown-message"));
         }
@@ -68,7 +68,7 @@ public class ProxyChatConfigMigrations {
             setIfAbsent(channel, "log-chat-to-console", false);
             setIfAbsent(channel, "console-chat-allowed", false);
             if (!channel.contains("console-format")) {
-                String format = channel.getString("format");
+                var format = channel.getString("format");
                 if (format != null) {
                     channel.set("console-format", format.replace("[%server%] ", "").replace("[%server%]", ""));
                 }
@@ -98,22 +98,22 @@ public class ProxyChatConfigMigrations {
             Path dataDirectory,
             Logger logger
     ) throws IOException {
-        Section chats = document.getSection("chats");
+        var chats = document.getSection("chats");
         if (chats == null) {
             return;
         }
 
-        Path chatsDirectory = dataDirectory.resolve("chats");
+        var chatsDirectory = dataDirectory.resolve("chats");
         Files.createDirectories(chatsDirectory);
 
         for (Object keyObject : chats.getKeys()) {
-            String key = String.valueOf(keyObject);
-            Section channel = chats.getSection(key);
+            var key = String.valueOf(keyObject);
+            var channel = chats.getSection(key);
             if (channel == null) {
                 continue;
             }
 
-            String commandName = channel.getString("command-name");
+            var commandName = channel.getString("command-name");
             if (commandName == null || commandName.isEmpty()) {
                 continue;
             }
@@ -121,13 +121,13 @@ public class ProxyChatConfigMigrations {
             normalizeChannelKeys(channel);
             migrateV2ToV2_1(channel);
 
-            Path target = chatsDirectory.resolve(commandName + ".yml");
+            var target = chatsDirectory.resolve(commandName + ".yml");
             if (Files.exists(target)) {
                 continue;
             }
 
             try {
-                YamlDocument channelDocument = YamlDocument.create(new ByteArrayInputStream(new byte[0]));
+                var channelDocument = YamlDocument.create(new ByteArrayInputStream(new byte[0]));
                 copySection(channel, channelDocument);
                 Files.writeString(target, channelDocument.dump());
                 logger.info("Migrated chats/" + commandName + ".yml");
@@ -163,6 +163,20 @@ public class ProxyChatConfigMigrations {
 
     public static void ensureLatestKeys(Section document) {
         migrateV2_1ToV2_2(document);
+        migrateV2_2ToV2_3(document);
+    }
+
+    /** {@code 2.2} → {@code 2.3}: blacklist feedback, limits, persistence, and channel priority defaults. */
+    public static void migrateV2_2ToV2_3(Section document) {
+        setIfAbsent(document, "blacklist-message", ProxyChatMessages.DEFAULTS.get("blacklist-message"));
+        setIfAbsent(document, "message-too-long-message", ProxyChatMessages.DEFAULTS.get("message-too-long-message"));
+        setIfAbsent(document, "max-message-length", 256);
+        setIfAbsent(document, "persist-player-preferences", false);
+        setIfAbsent(document, "message-format", "legacy");
+    }
+
+    public static void ensureChannelKeys(Section channel) {
+        setIfAbsent(channel, "priority", 0);
     }
 
     public static void migrateV2_1Keys(Section document) {
@@ -186,7 +200,7 @@ public class ProxyChatConfigMigrations {
         channel.remove("chat-prefix");
 
         if (!channel.contains("chat-name")) {
-            String commandName = channel.getString("command-name");
+            var commandName = channel.getString("command-name");
             if (commandName != null && !commandName.isEmpty()) {
                 channel.set("chat-name", titleCase(commandName));
             }
@@ -211,13 +225,13 @@ public class ProxyChatConfigMigrations {
     }
 
     private static void flattenReloadSection(Section document) {
-        Section reload = document.getSection("reload");
+        var reload = document.getSection("reload");
         if (reload == null) {
             return;
         }
 
-        String permission = reload.getString("permission");
-        String reloadMessage = reload.getString("reload-message");
+        var permission = reload.getString("permission");
+        var reloadMessage = reload.getString("reload-message");
 
         if (permission != null && !document.contains("reload-permission")) {
             document.set("reload-permission", permission);
@@ -235,7 +249,7 @@ public class ProxyChatConfigMigrations {
             return;
         }
 
-        String permission = channel.getString("permission");
+        var permission = channel.getString("permission");
         if (permission == null || permission.isEmpty()) {
             return;
         }
@@ -244,14 +258,14 @@ public class ProxyChatConfigMigrations {
     }
 
     private static void forEachChannel(Section document, Consumer<Section> action) {
-        Section chats = document.getSection("chats");
+        var chats = document.getSection("chats");
         if (chats == null) {
             return;
         }
 
         for (Object keyObject : chats.getKeys()) {
-            String key = String.valueOf(keyObject);
-            Section channel = chats.getSection(key);
+            var key = String.valueOf(keyObject);
+            var channel = chats.getSection(key);
             if (channel != null) {
                 action.accept(channel);
             }
@@ -259,8 +273,8 @@ public class ProxyChatConfigMigrations {
     }
 
     private static String titleCase(String commandName) {
-        String[] parts = commandName.split("[-_]");
-        StringBuilder builder = new StringBuilder();
+        var parts = commandName.split("[-_]");
+        var builder = new StringBuilder();
         for (String part : parts) {
             if (part.isEmpty()) {
                 continue;
@@ -281,7 +295,7 @@ public class ProxyChatConfigMigrations {
 
     private static void copySection(Section source, Section target) {
         for (Object keyObject : source.getKeys()) {
-            String key = String.valueOf(keyObject);
+            var key = String.valueOf(keyObject);
             target.set(key, source.get(key));
         }
     }
@@ -292,14 +306,14 @@ public class ProxyChatConfigMigrations {
 
     private static void replaceInAllStrings(Section section, String from, String to) {
         for (Object keyObject : section.getKeys()) {
-            String key = String.valueOf(keyObject);
-            Object value = section.get(key);
+            var key = String.valueOf(keyObject);
+            var value = section.get(key);
             if (value instanceof String string && string.contains(from)) {
                 section.set(key, string.replace(from, to));
                 continue;
             }
 
-            Section nested = section.getSection(key);
+            var nested = section.getSection(key);
             if (nested != null) {
                 replaceInAllStrings(nested, from, to);
             }

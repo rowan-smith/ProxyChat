@@ -13,16 +13,15 @@ import dev.rono.proxychat.common.message.MessageFormatter;
 import dev.rono.proxychat.common.platform.ProxyChatBootstrap;
 import dev.rono.proxychat.common.platform.ProxyChatPlatform;
 import dev.rono.proxychat.common.platform.ProxyCommandSource;
-import dev.rono.proxychat.common.platform.ProxyPlayer;
 import dev.rono.proxychat.common.util.SignedChatPolicy;
 
 @UtilityClass
 public class ProxyChatAdminHelp {
 
     public static void send(ProxyChatBootstrap bootstrap, ProxyCommandSource sender) {
-        ProxyChatYaml config = bootstrap.getConfig().getConfig();
-        ProxyChatPlatform platform = bootstrap.getPlatform();
-        String prefix = ProxyChatMessages.resolve(config, "prefix");
+        var config = bootstrap.getConfig().getConfig();
+        var platform = bootstrap.getPlatform();
+        var prefix = ProxyChatMessages.resolve(config, "prefix");
 
         sendLine(platform, sender, prefix + ProxyChatMessages.resolve(config, "help-header"));
 
@@ -32,7 +31,7 @@ public class ProxyChatAdminHelp {
 
         sendLine(platform, sender, prefix + ProxyChatMessages.resolve(config, "help-version"));
 
-        List<ChatChannel> visibleChannels = bootstrap.getChannels()
+        var visibleChannels = bootstrap.getChannels()
                 .stream()
                 .filter(channel -> canSeeChannel(channel, sender))
                 .toList();
@@ -51,20 +50,15 @@ public class ProxyChatAdminHelp {
     }
 
     private static boolean canSeeChannel(ChatChannel channel, ProxyCommandSource sender) {
-        String permission = channel.getPermission();
+        var permission = channel.getPermission();
         return permission == null || permission.isEmpty() || sender.hasPermission(permission);
     }
 
-    private static List<String> formatChannelHelp(
-            ProxyChatBootstrap bootstrap,
-            ProxyChatYaml config,
-            ChatChannel channel,
-            ProxyCommandSource sender
-    ) {
-        List<String> lines = new ArrayList<>();
+    private static List<String> formatChannelHelp(ProxyChatBootstrap bootstrap, ProxyChatYaml config, ChatChannel channel, ProxyCommandSource sender) {
+        var lines = new ArrayList<String>();
         lines.add(formatChannelHeading(channel));
 
-        String optionBracket = formatSubcommandBracket(bootstrap, config, channel, sender);
+        var optionBracket = formatSubcommandBracket(bootstrap, config, channel, sender);
         appendCommandLine(lines, channel.getCommandAlias(), optionBracket);
         appendCommandLine(lines, channel.getCommandName(), optionBracket);
 
@@ -74,7 +68,7 @@ public class ProxyChatAdminHelp {
     }
 
     private static String formatChannelHeading(ChatChannel channel) {
-        String displayName = channel.getChatName();
+        var displayName = channel.getChatName();
         if (displayName != null && displayName.endsWith(" Chat")) {
             displayName = displayName.substring(0, displayName.length() - " Chat".length());
         }
@@ -87,7 +81,7 @@ public class ProxyChatAdminHelp {
             return;
         }
 
-        String usage = "&7- &f/" + command.toLowerCase(Locale.ROOT);
+        var usage = "&7- &f/" + command.toLowerCase(Locale.ROOT);
         if (!optionBracket.isEmpty()) {
             usage += " &7[" + optionBracket + "]";
         }
@@ -95,14 +89,9 @@ public class ProxyChatAdminHelp {
         lines.add(usage + " &8<message>");
     }
 
-    private static String formatSubcommandBracket(
-            ProxyChatBootstrap bootstrap,
-            ProxyChatYaml config,
-            ChatChannel channel,
-            ProxyCommandSource sender
-    ) {
-        ProxyPlayer player = sender.asPlayer();
-        List<String> subcommands = new ArrayList<>();
+    private static String formatSubcommandBracket(ProxyChatBootstrap bootstrap, ProxyChatYaml config, ChatChannel channel, ProxyCommandSource sender) {
+        var player = sender.asPlayer();
+        var subcommands = new ArrayList<String>();
 
         if (player != null
                 && SignedChatPolicy.isToggleAvailable(config, bootstrap.getSignedChatHandler(), channel, player)) {
@@ -127,7 +116,7 @@ public class ProxyChatAdminHelp {
             ChatChannel channel,
             ProxyCommandSource sender
     ) {
-        ProxyPlayer player = sender.asPlayer();
+        var player = sender.asPlayer();
         if (player == null) {
             return;
         }
@@ -136,7 +125,7 @@ public class ProxyChatAdminHelp {
             return;
         }
 
-        String commandPrefix = channel.getCommandPrefix();
+        var commandPrefix = channel.getCommandPrefix();
         if (commandPrefix == null || commandPrefix.isEmpty()) {
             return;
         }

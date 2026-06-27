@@ -1,6 +1,5 @@
 package dev.rono.proxychat.bungee;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,27 +21,29 @@ import dev.rono.proxychat.common.channel.ChatChannel;
 
 public final class BungeeProxyChatPlugin extends Plugin {
     @Getter
-    private static BungeeProxyChatPlugin instance;
-
-    @Getter
     private ProxyChatCore core;
 
     @Getter
     private BungeeAudiences adventure;
 
+    @Getter
+    private BungeePlatform platform;
+
     private final List<Command> registeredCommands = new ArrayList<>();
+    private boolean adminCommandRegistered;
 
     @Override
     public void onEnable() {
-        instance = this;
-
-        Path dataDirectory = getDataFolder().toPath();
-        BungeePlatform platform = new BungeePlatform(this);
+        var dataDirectory = getDataFolder().toPath();
+        platform = new BungeePlatform(this);
 
         adventure = BungeeAudiences.create(this);
 
         core = new ProxyChatCore(getLogger(), platform, new WaterfallSignedChatHandler(this), dataDirectory);
-        core.enable(getResourceAsStream("config.yml"), getResourceAsStream("global.yml"));
+        if (!core.enable(getResourceAsStream("config.yml"), getResourceAsStream("global.yml"))) {
+            getLogger().severe("ProxyChat failed to enable. Check the console for configuration errors.");
+            return;
+        }
 
         registerListeners();
         registerCommands();
@@ -61,13 +62,17 @@ public final class BungeeProxyChatPlugin extends Plugin {
         unregisterCommands();
 
         for (ChatChannel channel : core.getChannels()) {
-            BungeeChannelCommand command = new BungeeChannelCommand(core, channel);
+            var command = new BungeeChannelCommand(core, platform, channel);
             getProxy().getPluginManager().registerCommand(this, command);
             registeredCommands.add(command);
             registerPrefixCommand(channel);
         }
 
-        getProxy().getPluginManager().registerCommand(this, new BungeeAdminCommand(core));
+        if (!adminCommandRegistered) {
+            getProxy().getPluginManager().registerCommand(this, new BungeeAdminCommand(core, this::registerCommands));
+            adminCommandRegistered = true;
+        }
+
         getLogger().info(registeredCommands.size() + " channel commands loaded.");
     }
 
@@ -76,12 +81,12 @@ public final class BungeeProxyChatPlugin extends Plugin {
             return;
         }
 
-        String prefix = channel.getCommandPrefix();
+        var prefix = channel.getCommandPrefix();
         if (prefix == null || prefix.isEmpty()) {
             return;
         }
 
-        BungeePrefixCommand command = new BungeePrefixCommand(core, channel);
+        var command = new BungeePrefixCommand(core, platform, channel);
         getProxy().getPluginManager().registerCommand(this, command);
         registeredCommands.add(command);
     }
@@ -95,7 +100,7 @@ public final class BungeeProxyChatPlugin extends Plugin {
     }
 
     private void registerListeners() {
-        getProxy().getPluginManager().registerListener(this, new BungeeChatListener(core));
-        getProxy().getPluginManager().registerListener(this, new BungeeSignedChatListener(core));
+        getProxy().getPluginManager().registerListener(this, new BungeeChatListener(core, platform));
+        getProxy().getPluginManager().registerListener(this, new BungeeSignedChatListener(core, platform));
     }
 }

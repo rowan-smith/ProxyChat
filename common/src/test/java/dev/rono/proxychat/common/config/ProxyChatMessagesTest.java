@@ -1,5 +1,6 @@
 package dev.rono.proxychat.common.config;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -12,11 +13,10 @@ class ProxyChatMessagesTest {
     void fallsBackWhenConfigKeyMissing() {
 
         // arrange & act
-        ProxyChatYaml config = yaml(Map.of("prefix", "&aCustom » "));
+        var config = yaml(Map.of("prefix", "&aCustom » "));
 
         // assert
-        assertThat(ProxyChatMessages.resolve(config, "toggle-unsupported-message"))
-                .contains("Toggle chat is unavailable");
+        assertThat(ProxyChatMessages.resolve(config, "toggle-unsupported-message")).contains("Toggle chat is unavailable");
         assertThat(ProxyChatMessages.resolve(config, "prefix")).isEqualTo("&aCustom » ");
     }
 
@@ -24,19 +24,16 @@ class ProxyChatMessagesTest {
     void prefersConfiguredValue() {
 
         // arrange & act
-        ProxyChatYaml config = yaml(
-                Map.of("toggle-unsupported-message", "&cCustom unsupported message")
-        );
+        var config = yaml(Map.of("toggle-unsupported-message", "&cCustom unsupported message"));
 
         // assert
-        assertThat(ProxyChatMessages.resolve(config, "toggle-unsupported-message"))
-                .isEqualTo("&cCustom unsupported message");
+        assertThat(ProxyChatMessages.resolve(config, "toggle-unsupported-message")).isEqualTo("&cCustom unsupported message");
     }
 
     private static ProxyChatYaml yaml(Map<String, Object> values) {
         try {
             return ProxyChatYaml.fromMap(values);
-        } catch (java.io.IOException exception) {
+        } catch (IOException exception) {
             throw new AssertionError(exception);
         }
     }

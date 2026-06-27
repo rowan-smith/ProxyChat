@@ -3,6 +3,8 @@ package dev.rono.proxychat.common.config;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,37 +35,47 @@ public final class ProxyChatConfig {
     }
 
     public List<ProxyChatYaml> loadChannels() {
-        Path chatsDirectory = dataDirectory.resolve("chats");
-        List<ProxyChatYaml> channels = new ArrayList<>();
+        var chatsDirectory = dataDirectory.resolve("chats");
+        var pending = new ArrayList<ChannelConfigValidator.ValidatedChannel>();
 
         if (!chatsDirectory.toFile().exists()) {
-            return channels;
+            return List.of();
         }
 
         var chatFiles = chatsDirectory.toFile().listFiles((dir, name) -> name.endsWith(".yml"));
         if (chatFiles == null) {
-            return channels;
+            return List.of();
         }
 
+        Arrays.sort(chatFiles, Comparator.comparing(file -> file.getName().toLowerCase()));
+
+        var sortOrder = 0;
         for (var chatFile : chatFiles) {
             try {
-                channels.add(ProxyChatYaml.wrap(ProxyChatYamlDocuments.loadChannel(chatFile.toPath())));
+                pending.add(new ChannelConfigValidator.ValidatedChannel(
+                        ProxyChatYaml.wrap(ProxyChatYamlDocuments.loadChannel(chatFile.toPath())),
+                        chatFile.getName(),
+                        sortOrder++
+                ));
 
             } catch (Exception exception) {
                 logger.log(Level.WARNING, "Failed to load " + chatFile.getName(), exception);
             }
         }
 
-        return channels;
+        return ChannelConfigValidator.validateAndOrder(pending, logger)
+                .stream()
+                .map(ChannelConfigValidator.ValidatedChannel::config)
+                .toList();
     }
 
     public void ensureChatsDirectory() throws Exception {
-        Path chatsDirectory = dataDirectory.resolve("chats");
+        var chatsDirectory = dataDirectory.resolve("chats");
         if (!chatsDirectory.toFile().mkdirs() && !chatsDirectory.toFile().exists()) {
             logger.warning("Could not create chats directory.");
         }
 
-        Path globalFile = chatsDirectory.resolve("global.yml");
+        var globalFile = chatsDirectory.resolve("global.yml");
         if (!globalFile.toFile().exists()) {
             ProxyChatYamlDocuments.loadChannel(globalFile);
         }
