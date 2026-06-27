@@ -1,0 +1,18 @@
+chat-name: "Local Chat"
+command-name: "local"
+permission: "proxychat.local"
+command-alias: "L"
+command-prefix: "#"
+use-command-prefix: false
+log-chat-to-console: false
+command-delay: 0
+command-delay-override-permission: "proxychat.local.override"
+invalid-args: "&c/%command-name% <message>"
+format: "&8[Local] &7%player% &8» &7%message%"
+console-format: "&8[Local] &7%player% &8» &7%message%"
+console-chat-allowed: true
+use-color-in-chat-permission: "proxychat.local.color"
+toggleable: false
+ignorable: true
+local: true
+blacklist: []

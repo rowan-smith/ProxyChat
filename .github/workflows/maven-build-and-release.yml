@@ -12,44 +12,57 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout master
-        uses: actions/checkout@v3
-
-      - name: Extract Java Version
-        run: echo "JAVA_VERSION=$(mvn help:evaluate -Dexpression=java.version -q -DforceStdout)" >> $GITHUB_ENV
-
-      - name: Extract Artifact Version
-        run: echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
-
-      - name: Extract Artifact Name
-        run: echo "ARTIFACT_NAME=$(mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout)" >> $GITHUB_ENV
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          java-version: 17
+          cache: maven
 
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
+      - name: Extract artifact version
+        run: echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and test with Maven
+        run: mvn -B verify --file pom.xml
+
+      - name: Verify config migrations across public releases
+        run: mvn -B test -pl common -Dtest=ConfigMigrationReleaseTest
+
+      - name: Prepare release assets
+        run: |
+          BUNGEE_JAR="bungee/target/ProxyChat-Bungee-${RELEASE_VERSION}.jar"
+          VELOCITY_JAR="velocity/target/ProxyChat-Velocity-${RELEASE_VERSION}.jar"
+
+          test -f "$BUNGEE_JAR" || (echo "Missing $BUNGEE_JAR" && exit 1)
+          test -f "$VELOCITY_JAR" || (echo "Missing $VELOCITY_JAR" && exit 1)
+
+          mkdir -p release
+          cp "$BUNGEE_JAR" release/
+          cp "$VELOCITY_JAR" release/
+          (cd release && zip -r "../ProxyChat-${RELEASE_VERSION}.zip" .)
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.RELEASE_VERSION }}
-          release_name: Release v${{ env.RELEASE_VERSION }}
-          draft: false
-          prerelease: false
+          name: ProxyChat v${{ env.RELEASE_VERSION }}
+          generate_release_notes: true
+          body: |
+            ## Downloads
 
-      - name: Upload JAR
-        uses: actions/upload-release-asset@v1
+            | File | Install on |
+            |------|------------|
+            | `ProxyChat-Bungee-${{ env.RELEASE_VERSION }}.jar` | Waterfall / BungeeCord `plugins/` folder |
+            | `ProxyChat-Velocity-${{ env.RELEASE_VERSION }}.jar` | Velocity `plugins/` folder |
+            | `ProxyChat-${{ env.RELEASE_VERSION }}.zip` | Both plugin JARs in one archive |
+
+            Requires **Java 17+** on the proxy. Pick the JAR that matches your proxy software — you do not need both unless you run both proxies.
+          files: |
+            release/ProxyChat-Bungee-${{ env.RELEASE_VERSION }}.jar
+            release/ProxyChat-Velocity-${{ env.RELEASE_VERSION }}.jar
+            ProxyChat-${{ env.RELEASE_VERSION }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/${{ env.ARTIFACT_NAME }}-${{ env.RELEASE_VERSION }}.jar
-          asset_name: ${{ env.ARTIFACT_NAME }}-${{ env.RELEASE_VERSION }}.jar
-          asset_content_type: application/java-archive

@@ -1,0 +1,123 @@
+package dev.rono.proxychat.common;
+
+import java.nio.file.Path;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import dev.rono.proxychat.common.test.FakePlatform;
+import dev.rono.proxychat.common.test.FakePlayer;
+import dev.rono.proxychat.common.test.RecordingSignedChatHandler;
+import dev.rono.proxychat.common.test.TestEnvironment;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * End-to-end flows through {@link ProxyChatCore}, fake platform, and real YAML configs.
+ */
+class ProxyChatIT {
+    @TempDir Path dataDirectory;
+
+    @Test
+    void fullGlobalChatWorkflow() {
+
+        // arrange
+        var platform = new FakePlatform();
+        var handler = new RecordingSignedChatHandler();
+        platform.setSignedChatHandler(handler);
+        var harness = TestEnvironment.create(dataDirectory, platform);
+        var alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var bob = platform.addPlayer(new FakePlayer("Bob", "survival").withPermission("proxychat.global"));
+
+        // act
+        harness.core().getChannelService().execute(harness.globalChannel(), alice, new String[]{"Hi", "Bob"});
+
+        // assert
+        assertThat(bob.receivedMessages()).anyMatch(message ->
+                message.contains("Alice") && message.contains("lobby") && message.contains("Hi Bob")
+        );
+        assertThat(platform.infoLogs()).isNotEmpty();
+    }
+
+    @Test
+    void prefixInterceptAcknowledgementFlow() {
+
+        // arrange
+        var platform = new FakePlatform();
+        var handler = new RecordingSignedChatHandler().canIntercept(true);
+        platform.setSignedChatHandler(handler);
+        var harness = TestEnvironment.create(dataDirectory, platform);
+        var alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
+
+        // act
+        var intercepted = harness.core().getChannelService().tryInterceptChat(alice, "@hello there");
+        handler.acknowledgeCancelledChat(alice);
+
+        // assert
+        assertThat(intercepted).isTrue();
+        assertThat(handler.acknowledgedPlayers()).contains(alice.getUniqueId());
+    }
+
+    @Test
+    void toggleModePlainChatWorkflow() {
+
+        // arrange
+        var platform = new FakePlatform();
+        platform.setSignedChatHandler(new RecordingSignedChatHandler());
+        var harness = TestEnvironment.create(dataDirectory, platform);
+        var global = harness.globalChannel();
+        var alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var bob = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
+
+        // act
+        harness.core().getChannelService().execute(global, alice, new String[]{"toggle"});
+
+        // assert
+        assertThat(harness.core().getChannelService().tryInterceptChat(alice, "plain chat works")).isTrue();
+        assertThat(bob.receivedMessages()).anyMatch(message -> message.contains("plain chat works"));
+    }
+
+    @Test
+    void legacyConfigMigrationAndUse() {
+
+        // arrange
+        var platform = new FakePlatform();
+        platform.setSignedChatHandler(new RecordingSignedChatHandler());
+        var harness = TestEnvironment.createWithLegacyConfig(dataDirectory, platform);
+        var alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        var bob = platform.addPlayer(new FakePlayer("Bob", "lobby").withPermission("proxychat.global"));
+
+        // act
+        var global = harness.core().getChannels().stream()
+                .filter(channel -> channel.getCommandName().equals("global"))
+                .findFirst()
+                .orElseThrow();
+        harness.core().getChannelService().execute(global, alice, new String[]{"migrated"});
+
+        // assert
+        assertThat(harness.dataDirectory().resolve("chats").resolve("global.yml")).exists();
+        assertThat(bob.receivedMessages()).anyMatch(message -> message.contains("migrated"));
+    }
+
+    @Test
+    void reloadClearsRuntimeToggleState() {
+
+        // arrange
+        var platform = new FakePlatform();
+        platform.setSignedChatHandler(new RecordingSignedChatHandler());
+        var harness = TestEnvironment.create(dataDirectory, platform);
+        var alice = platform.addPlayer(new FakePlayer("Alice", "lobby").withPermission("proxychat.global"));
+        harness.globalChannel().getToggleUtils().toggleChat(alice.getUniqueId());
+
+        // act
+        harness.core().reload();
+        var reloaded = harness.core().getChannels().stream()
+                .filter(channel -> channel.getCommandName().equals("global"))
+                .findFirst()
+                .orElseThrow();
+
+        // assert
+        assertThat(reloaded.getToggleUtils().isToggled(alice.getUniqueId())).isFalse();
+    }
+}

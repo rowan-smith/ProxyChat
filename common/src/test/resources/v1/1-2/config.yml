@@ -1,0 +1,105 @@
+############################################################
+# +------------------------------------------------------+ #
+# |                   Bungeecord Chat                    | #
+# +------------------------------------------------------+ #
+############################################################
+
+# Prefix used in front of all messages
+prefix: "&2BungeecordChat » "
+
+# Global override of format inside commands.
+global-layout: "&5[%command-name%] %server% %player% » &d%message%"
+use-global-layout: false
+
+# This is what is shown when you toggle a command.
+toggle-enable-message: "&aYou have toggled &2on &a%chat-name%"
+toggle-disable-message: "&aYou have toggled &4off &a%chat-name%"
+
+# This is what is shown when is ignore messages from a chat.
+ignore-enable-message: "&cYou have ignored %chat-name%!"
+ignore-disable-message: "&aYou have un-ignored %chat-name%!"
+
+# This is what is shown when you try chat in a channel when ignored.
+chat-disabled-message: "&cYou cannot send a message while %chat-name% is ignored!"
+
+# This is what message is shown when you use a command too quickly.
+command-cooldown-message: "&cThis command is on cooldown!"
+
+# Reload information
+reload:
+  command: "bcreload"
+  permission: "bungeecordchat.reload"
+  reload-message: "&aConfiguration reloaded!"
+
+# These are the channels you can create.
+# You can create as many channel as you want.
+chats:
+  1:
+    # This is the name of the chat, used in messages.
+    chat-name: "Staff Chat"
+
+    # This is the name of the command.
+    command-name: "staffchat"
+
+    # You need this permission to use the command above.
+    permission: "bungeecordchat.staff"
+
+    # You can also use this command.
+    command-alias: "SC"
+
+    # This is an alternative to using the command.
+    command-prefix: "!"
+    use-command-prefix: false
+
+    # This is a delay on how quickly you can use the command!
+    # This is in milliseconds, 1 second = 1000 milliseconds
+    comand-delay: 0
+
+    # This overrides the command delay.
+    command-delay-override-permission: "bungeecordchat.staff.override"
+
+    # This shows when you enter command wrong.
+    invalid-args: "&c/%command-name% <message>"
+
+    # This is the format the chat will show in chat.
+    format: "&8[&c%command-alias%&8] [&c%server%&8] &c%player% &8» &7%message%"
+
+    # Add this permission so users can use color codes in messages.
+    use-color-in-chat-permission: "bungeecordchat.staff.color"
+
+    # Toggle the chat so you don't need commands!
+    toggleable: true
+
+    # Ignore the chat so you can't send or receive messages!
+    ignorable: false
+  2:
+    chat-name: "Global Chat"
+    command-name: "global"
+    permission: "bungeecordchat.global"
+    command-alias: "G"
+    command-prefix: "@"
+    command-delay: 5000
+    command-delay-override-permission: "bungeecordchat.global.override"
+    use-command-prefix: true
+    invalid-args: "&c/%command-name% <message> or %command-prefix%<message>"
+    format: "&8[&9%command-alias%&8] [&9%server%&8] &9%player% &8» &7%message%"
+    use-color-in-chat-permission: "bungeecordchat.global.color"
+    toggleable: true
+    ignorable: true
+  3:
+    chat-name: "Shout"
+    command-name: "shout"
+    permission: "bungeecordchat.shout"
+    command-alias: "S"
+    command-prefix: "#"
+    command-delay: 10000
+    command-delay-override-permission: "bungeecordchat.shout.override"
+    use-command-prefix: false
+    invalid-args: "&c/%command-name% <message>"
+    format: "&8[&e%command-alias%&8] [&e%server%&8] &e%player% &8» &7%message%"
+    use-color-in-chat-permission: "bungeecordchat.shout.color"
+    toggleable: false
+    ignorable: false
+
+
+version: 1.2

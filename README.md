@@ -1,143 +1,134 @@
 # ProxyChat
-A chat system for Bungeecord and Waterfall!
 
-### Features
+Cross-server proxy chat for **BungeeCord**, **Waterfall**, and **Velocity**.
 
-* Talk to players on other servers
-* Toggleable chat! So you don't have to keep typing the command!
-* Ignorable chats! So you can concentrate without seeing the chat!
-* Fully customisable messages, commands and permissions!
-* Add new chat's and permissions!
-* Cooldown on messages and permission overrides!
-* Alternative prefix like #message, instead of /<command>
-* Tab completion of toggle and ignore!
-* Color messages with permission override!
-* Toggleable console chat!
-* Log chat to console!
+## Downloads
 
-### Coming Soon!
+| Proxy                  | JAR                        | Install location |
+|------------------------|----------------------------|------------------|
+| Waterfall / BungeeCord | `ProxyChat-Bungee-*.jar`   | `plugins/`       |
+| Velocity               | `ProxyChat-Velocity-*.jar` | `plugins/`       |
 
-* Per server chats!
-* Join and Leave messages!
-* Switch server messages!
+Requires **Java 17+** on the proxy.
 
-### Commands
+## Features
 
-By default, this example is included:
+* Cross-server and local (same-backend) channels
+* Per-channel YAML configs in `plugins/ProxyChat/chats/`
+* Custom commands, aliases, permissions, and message formats
+* Prefix chat (`@message`) and toggle mode (plain chat routes to a channel)
+* Toggle on/off and ignore send/receive per channel
+* Command cooldowns with permission bypass
+* Colour codes in chat (permission-gated)
+* Console chat and console logging (per channel)
+* Server blacklist per channel
+* Tab completion for `toggle` and `ignore`
+* Placeholder replacement in messages
+* Legacy `chats:` section in `config.yml` auto-migrates to `chats/*.yml`
+* **Adventure** components for outbound messages (`&` colour codes or MiniMessage)
+* Channel priority, duplicate-config validation, blacklist feedback, and message length limits
+* Optional toggle/ignore persistence across reconnects
+
+## Global config (`config.yml`)
+
+| Key                          | Default          | Description                                               |
+|------------------------------|------------------|-----------------------------------------------------------|
+| `prefix`                     | `&2ProxyChat » ` | Prepended to most plugin messages                         |
+| `signed-chat-interception`   | `auto`           | `auto`, `never`, or `always`                              |
+| `blacklist-message`          | (see file)       | Sent when a player uses a channel on a blacklisted server |
+| `max-message-length`         | `256`            | Max chat body length (`0` disables)                       |
+| `message-too-long-message`   | (see file)       | Sent when a message exceeds the limit                     |
+| `persist-player-preferences` | `false`          | Remember toggle/ignore across reconnects                  |
+| `message-format`             | `legacy`         | `legacy` (`&` codes) or `minimessage`                     |
+
+## Channel config (`chats/*.yml`)
+
+Each file defines one channel. Important keys:
+
+| Key                        | Description                                      |
+|----------------------------|--------------------------------------------------|
+| `command-name`             | Primary command (required, must be unique)       |
+| `command-alias`            | Optional alias (must be unique)                  |
+| `command-prefix`           | Prefix for `@message` style chat                 |
+| `use-command-prefix`       | Enable prefix intercept                          |
+| `priority`                 | Higher values win when multiple channels match   |
+| `permission`               | Permission to use the channel                    |
+| `format`                   | Outbound chat format                             |
+| `local`                    | Restrict delivery to the sender's backend server |
+| `blacklist`                | Backend servers where the channel is blocked     |
+| `toggleable` / `ignorable` | Enable `/channel toggle` and `/channel ignore`   |
+| `command-delay`            | Cooldown in milliseconds                         |
+
+
+## Development
+
+```
+ProxyChat/
+├── common/     Shared chat logic, config, formatting, tests
+├── bungee/     Waterfall/BungeeCord adapter
+├── velocity/   Velocity adapter
+└── config/     Checkstyle and SpotBugs rules
+```
+
+Run the full suite:
+
+```bash
+mvn clean verify
+```
+
+## Signed Chat Feature Matrix
+
+ProxyChat intercepts plain chat on the proxy and rebroadcasts formatted **unsigned** Adventure messages. This breaks signed chat on 1.19.3+ clients.
+
+| Feature                                    | BungeeCord                     | Waterfall                 | Velocity                  |
+|--------------------------------------------|--------------------------------|---------------------------|---------------------------|
+| Prefix intercept (`@message`)              | 1.19.3+ clients: **No** (auto) | `/<prefix>` command only¹ | Yes, with SignedVelocity² |
+| Toggle mode (plain chat intercept)         | 1.19.3+ clients: **No** (auto) | **No** on 1.19.3+¹        | Yes, with SignedVelocity² |
+| Signed-chat acknowledgement to backend     | No                             | N/A¹                      | Via SignedVelocity²       |
+
+¹ **Waterfall + Paper (typical):** plain `@message` and toggle **cannot** cancel signed chat without kicks. Use `/global hello`, `/g hello`, or `/@ hello` instead. Toggle is unavailable on 1.19.3+ unless you set `signed-chat-interception: always` (not recommended on Paper).
+
+² **[SignedVelocity](https://modrinth.com/plugin/signedvelocity)** must be installed on the **proxy and every backend**. Without it, prefix and toggle interception are skipped for **1.19.1+** clients and a one-time warning is logged.
+
+#### Velocity
+
+Velocity denies cancelled signed chat unless SignedVelocity is present. Install it on the proxy and all backends for prefix/toggle on 1.19.1+.
+
+Plain `@prefix` chat on Velocity uses `ChatResult.message()` (SignedVelocity MODIFY) on the sender's server and proxy-broadcasts to other servers only, so Paper does not show the message twice. `/@prefix` and `/channel` commands still use full proxy broadcast.
+
+## Commands
+
+### Default global channel (from `chats/global.yml`):
+
 ```
 Global Chat
 - Commands: /global & /g
-- Permission: proxychat.global
+- Permission: proxychat.global (or set to '' for no permission)
+- Prefix: @message (when use-command-prefix is true)
+- Toggle: /global toggle
+- Ignore: /global ignore
 ```
 
-### Resources
+### Admin:
 
-#### Placeholders:
+* `/proxychat reload` — reload config and channels (requires `proxychat.reload`)
+* `/proxychat version` — plugin info (aliases: `/pc`)
+
+### Placeholders
 
 ```
-%player% - The player's name.
-%prefix% - The prefix in the config.
-%server% - The server the player is on.
-%command-name% - The name of the chat used.
-%command-alias% - The alias of the chat used.
-%command-prefix% - The prefix of the chat used.
-%chat-name% - The name of the chat used.
-%message% - The message sent.
+%player%
+%prefix%
+%server%
+%command-name%
+%command-alias%
+%command-prefix%
+%chat-name%
+%message%
+%chat-cooldown%
+%max-length%
 ```
 
-#### Configuration (config.yml):
+## Issues
 
-```yaml
-############################################################
-# +------------------------------------------------------+ #
-# |                      Proxy Chat                      | #
-# +------------------------------------------------------+ #
-############################################################
-
-# Prefix used in front of all messages
-prefix: "&2ProxyChat » "
-
-# This is what is shown when you toggle a command.
-toggle-enable-message: "&aYou have toggled &2on &a%chat-name%"
-toggle-disable-message: "&aYou have toggled &4off &a%chat-name%"
-
-# This is what is shown when is ignored messages from a chat.
-ignore-enable-message: "&cYou have ignored %chat-name%!"
-ignore-disable-message: "&aYou have un-ignored %chat-name%!"
-
-# This is what is shown when you try chat in a channel when ignored.
-chat-disabled-message: "&cYou cannot send a message while %chat-name% is ignored!"
-
-# This is what message is shown when you use a command too quickly.
-command-cooldown-message: "&cChat on cooldown for &e%chat-cooldown% &csecond(s)!"
-
-# Message sent to console when disabled.
-console-disabled-message: "&cYou have to be a player to use this command!"
-
-# Reload information
-reload-permission: "proxychat.reload"
-reload-message: "&aConfiguration reloaded!"
-
-version: 2
-```
-
-#### Example Chat (global.yml):
-
-```yaml
-# This is the name of the chat, used in messages.
-chat-name: "Global Chat"
-
-# This is the name of the command.
-command-name: "global"
-
-# You need this permission to use the command above.
-permission: "proxychat.global"
-
-# You can also use this command.
-command-alias: "G"
-
-# This is an alternative to using the command.
-command-prefix: "@"
-use-command-prefix: true
-
-# Log the chat to console, so you see chat in console
-log-chat-to-console: false
-
-# This is a delay on how quickly you can use the command!
-# This is in milliseconds, 1 second = 1000 milliseconds
-command-delay: 5000
-
-# This overrides the command delay.
-command-delay-override-permission: "proxychat.global.override"
-
-# This shows when you enter command wrong.
-invalid-args: "&c/%command-name% <message> or %command-prefix%<message>"
-
-# This is the format the chat will show in chat.
-format: "&8[&9%command-alias%&8] [&9%server%&8] &9%player% &8» &7%message%"
-
-# This is the format when talking from console
-console-format: "&8[&9%command-alias%&8] &9%player% &8» &7%message%"
-console-chat-allowed: false
-
-# Add this permission so users can use color codes in messages.
-use-color-in-chat-permission: "proxychat.global.color"
-
-# Toggle the chat so you don't need commands!
-toggleable: true
-
-# Ignore the chat, so you can't send or receive messages!
-ignorable: true
-
-# Is this a local server chat
-local: false
-
-# blacklist this chat on specific servers
-blacklist:
-  - server1
-```
-
-### Issues
-
-If you have any issues, before giving a bad rating please report them here:
 https://github.com/rowan-smith/ProxyChat/issues
